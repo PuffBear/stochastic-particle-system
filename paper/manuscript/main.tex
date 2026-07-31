@@ -1,3 +1,10 @@
+% AAMAS 2026 submission: convert to acmart class with sigconf option
+% \documentclass[sigconf,anonymous]{acmart}
+% Page limit: 8 pages + unlimited references
+% Remove geometry package; acmart handles margins
+% Add: \acmConference{AAMAS}{2026}
+% CCS concepts required
+% Author keywords required
 \documentclass{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
@@ -41,6 +48,105 @@ treatment remains unexecuted and its claim remains blocked. \textbf{No
 coordination effect, timestep convergence, power, confirmation, learning, or
 MARL result is claimed.}
 \end{abstract}
+
+\section{Related work}
+
+\paragraph{Stochastic particle capture and transport.}
+Particle capture in flowing media spans a rich theoretical and experimental
+literature. Maxey~\cite{maxey1987} characterized inertial-particle settling in
+turbulent flows and identified the mechanisms by which particles cluster
+relative to fluid trajectories. Sommerer and Ott~\cite{sommerer1993} showed
+that passive tracers in chaotic two-dimensional flows develop striking spatial
+structure whose statistics depend sensitively on the Lyapunov exponent,
+establishing the dynamical-systems framework that underlies chaotic-flow
+benchmarks. First-passage theory~\cite{redner2001} supplies the mathematical
+scaffold for capture-time estimands: the expected time to first contact between
+a diffusing target and an absorbing boundary depends on both geometry and drift
+in ways that motivate our matched signal--null framing.
+Wang et al.~\cite{wang2021stationary} demonstrated that a stationary collector
+can exploit chaotic-flow structure to improve capture rates and characterised
+placement and capacity effects. Wang et al.~\cite{wang2025collector} extended
+this to a mobile collector that observes its local particle distribution and
+selects from four motion strategies, reporting scaling laws for capture time.
+Their conclusion explicitly names multiple collectors and coordination as future
+work.
+We do not claim the first mobile particle collector, first locally guided
+capture strategy, or first capture-time analysis. The distinguishing element is
+a matched counterfactual design that pairs each signal episode with a null
+episode sharing initial state, Brownian forcing, and randomness, so that the
+seed-level yield difference is an exact causal estimate of the active
+exploitation effect after subtracting passive advection.
+
+\paragraph{Multi-agent reinforcement learning and coordination.}
+MADDPG~\cite{lowe2017maddpg} established centralized-training
+decentralized-execution actor-critic learning for continuous mixed
+cooperative--competitive environments. QMIX~\cite{rashid2018qmix} introduced
+monotonic value-function factorisation that scales cooperative credit assignment
+to larger teams. MAPPO and IPPO~\cite{yu2022mappo} subsequently showed that
+independent proximal-policy optimization matches or exceeds joint-training
+baselines across several cooperative benchmarks when implemented carefully.
+On the communication side, DIAL~\cite{foerster2016dial} and
+IMAC~\cite{wang2020imac} demonstrated that agents can learn compact,
+bandwidth-constrained message protocols jointly with behavior policies. These
+methods learn communication jointly with action selection; the protocols that
+emerge are difficult to interpret causally as isolated mechanisms. Our
+approach is orthogonal and prior to learning: we ask whether a single fixed,
+hand-coded team-mean velocity summary shifts the capture yield boundary compared
+with four identically capable independent collectors, at the same action budget
+and under matched randomness. This is a mechanism probe that precedes any
+learning experiment. It cannot demonstrate that an optimal multi-agent policy
+exists, but it can rule out or confirm that a specific low-dimensional shared
+statistic provides actionable information beyond independent parallel search.
+We therefore do not claim the first multi-agent coordination result, the first
+communication protocol, or the first cooperative MARL method.
+
+\paragraph{Active particles and collective foraging.}
+The physics of self-propelled particles constitutes a mature subfield of
+active matter~\cite{elgeti2015microswimmers}. Vicsek et al.~\cite{vicsek1995}
+established that simple local alignment rules among self-propelled particles
+produce collective ordered motion through a phase transition, a foundational
+result for multi-agent collective behavior. Berdahl et al.~\cite{berdahl2013}
+provided experimental evidence that animal groups collectively sense complex
+environmental gradients---in particular, that individual agents responding to
+local cues can produce group-level gradient ascent even when no individual can
+detect the gradient---directly motivating the question of whether shared local
+summaries shift a collective exploitation boundary.
+On the algorithmic side, L\"offler et al.~\cite{loeffler2023foraging} trained
+thirty locally observing active colloids with a shared PPO policy to forage for
+randomly appearing food, finding that collective flocking and milling emerge
+without explicit coordination rewards.
+We do not claim the first collective foraging system, first active-matter
+multi-agent benchmark, first local-sensing RL particle task, or first
+communication-enabled collective sensing paper. The role reversal relative
+to L\"offler et al.\ is precise: in that work the particles are controlled agents
+and food is directly perceived; here a small collector team acts while passive
+particles are environment entities and the transport signal must be inferred
+from particle motion histories.
+
+\paragraph{Counterfactual and causal inference in multi-agent systems.}
+COMA~\cite{foerster2018coma} introduced counterfactual baselines into
+multi-agent policy gradients to isolate each agent's marginal contribution by
+comparing actual returns with expected returns under a default action, holding
+other agents' actions fixed. The matched episode design in this work is
+structurally analogous: seed-level outcomes under the shared and independent
+policies are compared on identical stochastic inputs, so the difference is an
+exact counterfactual quantity under the potential-outcomes
+framework~\cite{morgan2015counterfactuals,imbens2015causal}.
+The three defensible novelties that distinguish this work from all cited prior
+art are:
+(i)~a matched counterfactual causal framing for multi-collector particle
+capture that subtracts the passive-advection response, so the estimand
+measures action-contingent exploitation rather than passive transport;
+(ii)~exact piecewise-specular contact geometry with event-keyed tie-breaking,
+so captured-particle identity is deterministic given the matched random inputs
+and does not depend on entity-array ordering; and
+(iii)~a bounded-statistic mechanism probe that precedes any learning
+experiment, testing whether one specific hand-coded shared scalar shifts the
+yield boundary before introducing the confounds of a learned communication
+protocol.
+These properties together make SPS-C03 a mechanism diagnostic rather than a
+coordination-algorithm contribution; the result, whether positive or null, is
+interpretable without reference to a particular learning algorithm.
 
 \section{Research question and novelty boundary}
 
@@ -428,59 +534,159 @@ separately preregistered coupled-noise timestep diagnostic for unique yield;
 only if it passes, freeze and run a bounded shared-versus-independent
 diagnostic before any power, learning, or confirmation experiment.}
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 \small
+
+% --- Stochastic particle capture and transport ---
+
 \bibitem{wang2021stationary}
 Wang et al.
 \newblock Particle capture in a model chaotic flow.
-\newblock \emph{Physical Review E}, 2021.
+\newblock \emph{Physical Review E}, 104:064203, 2021.
 \newblock \url{https://doi.org/10.1103/PhysRevE.104.064203}.
 
 \bibitem{wang2025collector}
 Wang et al.
 \newblock Mobile-collector capture of particles in a chaotic flow.
-\newblock \emph{PLOS ONE}, 2025.
+\newblock \emph{PLOS ONE}, 20(8):e0329766, 2025.
 \newblock \url{https://doi.org/10.1371/journal.pone.0329766}.
+
+\bibitem{maxey1987}
+M. R. Maxey.
+\newblock The gravitational settling of aerosol particles in homogeneous
+turbulence and random flow fields.
+\newblock \emph{Journal of Fluid Mechanics}, 174:441--465, 1987.
+\newblock \url{https://doi.org/10.1017/S0022112087000193}.
+
+\bibitem{sommerer1993}
+J. C. Sommerer and E. Ott.
+\newblock Particles floating on a moving fluid: A dynamically comprehensible
+physical fractal.
+\newblock \emph{Science}, 259(5093):334--337, 1993.
+\newblock \url{https://doi.org/10.1126/science.259.5093.334}.
+
+\bibitem{redner2001}
+S. Redner.
+\newblock \emph{A Guide to First-Passage Processes}.
+\newblock Cambridge University Press, Cambridge, 2001.
+\newblock ISBN 0-521-65248-0.
+
+% --- Multi-agent reinforcement learning and coordination ---
+
+\bibitem{lowe2017maddpg}
+R. Lowe, Y. Wu, A. Tamar, J. Harb, P. Abbeel, and I. Mordatch.
+\newblock Multi-agent actor-critic for mixed cooperative-competitive
+environments.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)},
+2017.
+\newblock \url{https://arxiv.org/abs/1706.02275}.
+
+\bibitem{yu2022mappo}
+C. Yu, A. Velu, E. Vinitsky, J. Gao, Y. Wang, A. Bayen, and Y. Wu.
+\newblock The surprising effectiveness of {PPO} in cooperative multi-agent
+games.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)},
+2022.
+\newblock \url{https://arxiv.org/abs/2103.01955}.
+
+\bibitem{rashid2018qmix}
+T. Rashid, M. Samvelyan, C. Schroeder de Witt, G. Farquhar, J. Foerster, and
+S. Whiteson.
+\newblock {QMIX}: Monotonic value function factorisation for deep multi-agent
+reinforcement learning.
+\newblock In \emph{Proceedings of the 35th International Conference on Machine
+Learning (ICML)}, 2018.
+\newblock \url{https://arxiv.org/abs/1803.11605}.
+
+\bibitem{foerster2016dial}
+J. Foerster, Y. Assael, N. de Freitas, and S. Whiteson.
+\newblock Learning to communicate with deep multi-agent reinforcement learning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)},
+2016.
+\newblock \url{https://proceedings.neurips.cc/paper_files/paper/2016/hash/c7635bfd99248a2cdef8249ef7bfbef4-Abstract.html}.
+
+\bibitem{wang2020imac}
+T. Wang, J. Wang, C. Wu, and C. Zhang.
+\newblock Learning efficient multi-agent communication: An information
+bottleneck approach.
+\newblock In \emph{Proceedings of the 37th International Conference on Machine
+Learning (ICML)}, 2020.
+\newblock \url{https://proceedings.mlr.press/v119/wang20i.html}.
+
+% --- Active particles and collective foraging ---
 
 \bibitem{loeffler2023foraging}
 R. C. L\"offler, E. Panizon, and C. Bechinger.
 \newblock Collective foraging of active particles trained by reinforcement
 learning.
-\newblock \emph{Scientific Reports}, 2023.
+\newblock \emph{Scientific Reports}, 13:17985, 2023.
 \newblock \url{https://doi.org/10.1038/s41598-023-44268-3}.
+
+\bibitem{elgeti2015microswimmers}
+J. Elgeti, R. G. Winkler, and G. Gompper.
+\newblock Physics of microswimmers---single particle motion and collective
+dynamics.
+\newblock \emph{Reports on Progress in Physics}, 78(5):056601, 2015.
+\newblock \url{https://doi.org/10.1088/0034-4885/78/5/056601}.
+
+\bibitem{vicsek1995}
+T. Vicsek, A. Czir\'ok, E. Ben-Jacob, I. Cohen, and O. Shochet.
+\newblock Novel type of phase transition in a system of self-propelled
+particles.
+\newblock \emph{Physical Review Letters}, 75(6):1226--1229, 1995.
+\newblock \url{https://doi.org/10.1103/PhysRevLett.75.1226}.
+
+\bibitem{berdahl2013}
+A. Berdahl, C. J. Torney, C. C. Ioannou, J. J. Faria, and I. D. Couzin.
+\newblock Emergent sensing of complex environments by mobile animal groups.
+\newblock \emph{Science}, 339(6119):574--576, 2013.
+\newblock \url{https://doi.org/10.1126/science.1225883}.
+
+% --- Counterfactual and causal inference in multi-agent systems ---
+
+\bibitem{foerster2018coma}
+J. Foerster, G. Farquhar, T. Afouras, N. Nardelli, and S. Whiteson.
+\newblock Counterfactual multi-agent policy gradients.
+\newblock In \emph{Proceedings of the 32nd AAAI Conference on Artificial
+Intelligence (AAAI)}, 2018.
+\newblock \url{https://arxiv.org/abs/1705.08926}.
+
+\bibitem{morgan2015counterfactuals}
+S. L. Morgan and C. Winship.
+\newblock \emph{Counterfactuals and Causal Inference: Methods and Principles
+for Social Research}, 2nd ed.
+\newblock Cambridge University Press, Cambridge, 2015.
+\newblock \url{https://doi.org/10.1017/CBO9781107587991}.
+
+\bibitem{imbens2015causal}
+G. W. Imbens and D. B. Rubin.
+\newblock \emph{Causal Inference for Statistics, Social, and Biomedical
+Sciences: An Introduction}.
+\newblock Cambridge University Press, Cambridge, 2015.
+\newblock \url{https://doi.org/10.1017/CBO9781139025751}.
+
+% --- Numerical methods ---
 
 \bibitem{hornischer2019cimax}
 H. Hornischer et al.
-\newblock CIMAX: Collective information maximization in robotic swarms using
+\newblock {CIMAX}: Collective information maximization in robotic swarms using
 local communication.
 \newblock arXiv:1903.05444, 2019.
 \newblock \url{https://arxiv.org/abs/1903.05444}.
 
-\bibitem{foerster2016dial}
-J. Foerster et al.
-\newblock Learning to communicate with deep multi-agent reinforcement
-learning.
-\newblock \emph{NeurIPS}, 2016.
-\newblock \url{https://proceedings.neurips.cc/paper_files/paper/2016/hash/c7635bfd99248a2cdef8249ef7bfbef4-Abstract.html}.
-
-\bibitem{wang2020imac}
-T. Wang et al.
-\newblock Learning efficient multi-agent communication: An information
-bottleneck approach.
-\newblock \emph{ICML}, 2020.
-\newblock \url{https://proceedings.mlr.press/v119/wang20i.html}.
-
 \bibitem{gobet2000}
 E. Gobet.
-\newblock Weak approximation of killed diffusion using Euler schemes.
-\newblock \emph{Stochastic Processes and their Applications}, 2000.
+\newblock Weak approximation of killed diffusion using {E}uler schemes.
+\newblock \emph{Stochastic Processes and their Applications}, 87(2):167--197,
+2000.
 \newblock \url{https://doi.org/10.1016/S0304-4149(99)00109-X}.
 
 \bibitem{giles2008}
 M. B. Giles.
-\newblock Multilevel Monte Carlo path simulation.
-\newblock \emph{Operations Research}, 2008.
+\newblock Multilevel {M}onte {C}arlo path simulation.
+\newblock \emph{Operations Research}, 56(3):607--617, 2008.
 \newblock \url{https://doi.org/10.1287/opre.1070.0496}.
+
 \end{thebibliography}
 
 \end{document}
