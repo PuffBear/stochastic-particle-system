@@ -13,3 +13,8 @@ __all__ = [
     "resolve_captures",
     "simulate_matched_pair",
 ]
+"""Physical dynamics used by the particle benchmark."""
+
+from .collectors import advance_collectors, bounded_velocity
+
+__all__ = ["advance_collectors", "bounded_velocity"]
