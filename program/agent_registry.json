@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "program_director": {
+    "responsibility": "continuity, integration, evidence control, scheduling"
+  },
+  "roles": [
+    {
+      "name": "Research Lead",
+      "responsibility": "single falsifiable question, assumptions, claims, kill criteria"
+    },
+    {
+      "name": "Experiment Engineer",
+      "responsibility": "simulator, tests, baselines, runs, analysis, reproducibility"
+    },
+    {
+      "name": "Literature Scout",
+      "responsibility": "nearest work, benchmarks, methods, novelty threats"
+    },
+    {
+      "name": "LaTeX Writer",
+      "responsibility": "evidence-licensed manuscript and supplement"
+    },
+    {
+      "name": "Fresh Reviewer",
+      "responsibility": "immutable fresh AAMAS-style reviews"
+    },
+    {
+      "name": "Reporting Agent",
+      "responsibility": "daily detailed report and plain-language explanation"
+    },
+    {
+      "name": "Expansionist",
+      "responsibility": "deduplicated future research and industry backlogs"
+    }
+  ]
+}
