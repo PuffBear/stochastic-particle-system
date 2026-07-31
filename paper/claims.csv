@@ -1,0 +1,4 @@
+claim_id,claim,status,evidence_ids,falsifier,last_updated
+SPS-C01,"A finite detectability boundary exists for at least one locally informed collector policy under the protocol-frozen matched-pair estimand.",proposed,,"No positive lower-bound crossing occurs below the oracle boundary or the crossing is unstable to protocol-frozen estimator choices.",2026-07-31
+SPS-C02,"Irreversible growing geometry changes post-contact cascade dynamics beyond a fixed-radius volume effect.",proposed,,"A geometry-matched control explains all observed cascade differences.",2026-07-31
+SPS-C03,"Shared local summaries shift the detectability boundary relative to independent local observations.",proposed,,"The paired boundary shift is non-positive or explained by unequal information leakage or policy capacity.",2026-07-31
