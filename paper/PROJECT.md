@@ -97,6 +97,6 @@ Correctness tests and scripted pilots run on Codex cloud. No HPC request is just
 
 ## Current stage
 
-The deterministic simulation primitives, bounded collector dynamics, capture-free deterministic collector lattice, causal local observation contract, minimal end-to-end environment, stationary/random/privileged smoke policies, trajectory schemas, metric definitions, protocol skeleton, 44-test correctness suite, literature ledger, immutable fresh review, and evidence-constrained LaTeX scaffold exist.
+The deterministic primitives, exact piecewise-specular fixed-geometry contact, event-keyed ties, capture-free reset, causal observations, strict matched runner, immutable schema-validated artifacts, frozen scripted controls, calibrated simultaneous estimator, 79-test suite, exploratory seed-level summaries, evidence-constrained LaTeX manuscript, and immutable fresh review now exist.
 
-The environment gate is not complete. Event-keyed tie breaking, a paired-episode wrapper, the frozen `local_flow_v1` research policy, trajectory writing and checksum validation, and the growing attached-disc geometry remain unresolved. No scientific performance result or dataset exists yet.
+SPS-P02 is a 12-seed exploratory calibration only. It has no positive simultaneous lower-bound crossing through `rho=2`; stationary and random controls descriptively match or exceed `local_flow_v1`; and the four-collector rule is exactly four independent replicas. SPS-C01 therefore remains proposed, SPS-E01 is blocked, and no coordination, MARL, or AAMAS claim is available. Growing geometry, coupled-noise timestep convergence, a meaningful full-state interception oracle, a policy-specific passive-flux contrast, and a genuinely multi-agent bounded-sharing mechanism remain unresolved.
