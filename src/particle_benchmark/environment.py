@@ -8,8 +8,13 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .dynamics.capture import CaptureState, resolve_captures
-from .dynamics.collectors import advance_collectors
+from .dynamics.capture import (
+    CaptureState,
+    resolve_captures,
+    resolve_swept_fixed_captures,
+)
+from .dynamics.collectors import advance_collectors, bounded_velocity
+from .dynamics.fields import field_velocity
 from .dynamics.particles import advance_free_particles
 from .initialization import sample_capture_free_initial_state
 from .observations import LocalObservation, build_local_observations
@@ -86,6 +91,8 @@ class ParticleCollectorEnv:
         self._last_visibility: NDArray[np.bool_] | None = None
         self._velocity_valid: NDArray[np.bool_] | None = None
         self.first_contact_step: int | None = None
+        self.scenario_seed: int | None = None
+        self.tie_scheme = "event_keyed_seed_step_particle_v1"
         self._done = False
 
     def reset(
@@ -93,6 +100,7 @@ class ParticleCollectorEnv:
     ) -> tuple[tuple[LocalObservation, ...], dict[str, Any]]:
         """Reset deterministically from ``seed`` with no initial capture."""
         self._streams = make_streams(seed)
+        self.scenario_seed = seed
         initial = sample_capture_free_initial_state(
             self._streams.initialization,
             particle_count=self.config.particle_count,
@@ -134,6 +142,8 @@ class ParticleCollectorEnv:
             "captures": (),
             "captured_total": 0,
             "first_contact_step": None,
+            "scenario_seed": self.scenario_seed,
+            "tie_scheme": self.tie_scheme,
         }
 
     def _require_reset(self) -> None:
@@ -210,9 +220,19 @@ class ParticleCollectorEnv:
         assert self._streams is not None
         assert self._episode_field_kwargs is not None
         assert self._last_visibility is not None
+        assert self.scenario_seed is not None
 
+        prior_collectors = self.collector_positions.copy()
+        collector_velocity = bounded_velocity(
+            actions, max_speed=self.config.collector_max_speed
+        )
+        raw_collector_end = prior_collectors + self.config.dt * collector_velocity
+        arena = np.asarray(self.config.arena_size, dtype=np.float64)
+        collector_reflected = np.any(
+            (raw_collector_end < 0.0) | (raw_collector_end > arena), axis=1
+        )
         self.collector_positions = advance_collectors(
-            self.collector_positions,
+            prior_collectors,
             actions,
             dt=self.config.dt,
             max_speed=self.config.collector_max_speed,
@@ -220,7 +240,26 @@ class ParticleCollectorEnv:
         )
         prior_particles = self.particle_positions.copy()
         free = self.capture_state.owner < 0
+        particle_reflected = np.zeros(self.config.particle_count, dtype=np.bool_)
+        particle_unfolded_end = prior_particles.copy()
         if np.any(free):
+            free_velocity = field_velocity(
+                prior_particles[free],
+                self.config.field_family,
+                self.config.signal_strength,
+                **self._episode_field_kwargs,
+            )
+            raw_particle_end = (
+                prior_particles[free]
+                + self.config.dt * free_velocity
+                + self.config.diffusion_sigma
+                * np.sqrt(self.config.dt)
+                * self._noise[self.step_count, free]
+            )
+            particle_reflected[free] = np.any(
+                (raw_particle_end < 0.0) | (raw_particle_end > arena), axis=1
+            )
+            particle_unfolded_end[free] = raw_particle_end
             self.particle_positions[free] = advance_free_particles(
                 self.particle_positions[free],
                 self._noise[self.step_count, free],
@@ -235,15 +274,53 @@ class ParticleCollectorEnv:
             self.particle_positions - prior_particles
         ) / self.config.dt
 
-        events = resolve_captures(
-            self.particle_positions,
-            self.collector_positions,
-            self.capture_state,
-            geometry=self.config.capture_geometry,
-            collector_radius=self.config.collector_radius,
-            particle_radius=self.config.particle_radius,
-            tie_rng=self._streams.tie_breaking,
-        )
+        if self.config.capture_geometry == "fixed":
+            swept = resolve_swept_fixed_captures(
+                prior_particles,
+                self.particle_positions,
+                prior_collectors,
+                self.collector_positions,
+                self.capture_state,
+                collector_radius=self.config.collector_radius,
+                particle_radius=self.config.particle_radius,
+                event_seed=self.scenario_seed,
+                step_index=self.step_count + 1,
+                particle_reflected=particle_reflected,
+                collector_reflected=collector_reflected,
+                particle_unfolded_end_positions=particle_unfolded_end,
+                collector_unfolded_end_positions=raw_collector_end,
+                arena_size=self.config.arena_size,
+            )
+            events = [
+                (event.particle_id, event.collector_id) for event in swept.events
+            ]
+            contact_times = tuple(event.time_fraction for event in swept.events)
+            tie_provenance = tuple(
+                {
+                    "step_index": decision.step_index,
+                    "particle_id": decision.particle_id,
+                    "candidate_collector_ids": decision.candidate_collector_ids,
+                    "chosen_collector_id": decision.chosen_collector_id,
+                }
+                for decision in swept.tie_decisions
+            )
+            guarded_reflection_pairs = swept.guarded_reflection_pairs
+            contact_model = "fixed_piecewise_specular_reflection_exact_v1"
+        else:
+            # Growing aggregate paths are intentionally still endpoint-only.
+            events = resolve_captures(
+                self.particle_positions,
+                self.collector_positions,
+                self.capture_state,
+                geometry=self.config.capture_geometry,
+                collector_radius=self.config.collector_radius,
+                particle_radius=self.config.particle_radius,
+                tie_rng=self._streams.tie_breaking,
+            )
+            contact_times = tuple(1.0 for _ in events)
+            tie_provenance = ()
+            guarded_reflection_pairs = 0
+            contact_model = "growing_endpoint_only_deferred"
         reward = np.zeros(self.config.collector_count, dtype=np.float64)
         for _, collector_id in events:
             reward[collector_id] += 1.0
@@ -263,5 +340,25 @@ class ParticleCollectorEnv:
             "captures": tuple(events),
             "captured_total": captured_total,
             "first_contact_step": self.first_contact_step,
+            "scenario_seed": self.scenario_seed,
+            "tie_scheme": (
+                self.tie_scheme
+                if self.config.capture_geometry == "fixed"
+                else "stateful_endpoint_growing_deferred"
+            ),
+            "tie_provenance": tie_provenance,
+            "contact_time_fractions": contact_times,
+            "contact_model": contact_model,
+            "guarded_reflection_pairs": guarded_reflection_pairs,
+            "max_particle_chord": float(
+                np.max(np.linalg.norm(self.particle_positions - prior_particles, axis=1))
+            ),
+            "max_collector_chord": float(
+                np.max(np.linalg.norm(self.collector_positions - prior_collectors, axis=1))
+            ),
+            "continuous_contact_limitation": (
+                "exact for piecewise-linear rectangular specular paths within one "
+                "Euler step; nonlinear continuous-time dynamics still require a dt audit"
+            ),
         }
         return self._observations(), reward, terminated, truncated, info
