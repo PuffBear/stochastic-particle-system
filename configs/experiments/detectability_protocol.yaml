@@ -1,0 +1,42 @@
+experiment_id: SPS-E01
+protocol_status: internally_frozen_before_performance_run
+primary_condition:
+  policy: local_flow_v1
+  information: independent_local_plus_teammate_positions
+  field_family: uniform
+  capture_geometry: fixed
+  collector_count: 4
+  particle_count: 256
+  horizon: 400
+  dt: 0.02
+  diffusion_sigma: 0.06
+matched_pair:
+  shared:
+    - initial_particle_state
+    - initial_collector_state
+    - brownian_tensor
+    - field_orientation
+    - policy_rng_provenance
+    - tie_rng_provenance
+  only_difference: field.signal_strength
+primary_metric:
+  event_step_convention: one_based
+  no_capture_value: horizon_plus_one
+  seed_level_difference: (null_first_step - signal_first_step) / horizon
+  interpretation: fraction_of_episode_horizon_saved_before_first_interception
+dimensionless_signal_axis:
+  formula: signal_strength * sqrt(dt) / diffusion_sigma
+  name: per_step_drift_to_brownian_ratio
+sampling_unit: scenario_seed
+boundary:
+  rule: smallest_grid_strength_with_positive_one_sided_95pct_simultaneous_lower_bound
+  report: grid_interval_or_censoring
+  continuous_interpolation_primary: false
+secondary_only:
+  - growing_geometry
+  - shared_team_summary
+  - vortex_field
+  - scaling
+  - ippo
+  - mappo
+performance_run_authorized: false
