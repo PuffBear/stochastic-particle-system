@@ -16,17 +16,19 @@ class ScenarioStreams:
     noise: np.random.Generator
     field: np.random.Generator
     tie_breaking: np.random.Generator
+    policy: np.random.Generator
 
 
 def make_streams(seed: int) -> ScenarioStreams:
-    """Derive four independent streams deterministically from one root seed."""
+    """Derive five independent streams deterministically from one root seed."""
     root = np.random.SeedSequence(seed)
-    init_ss, noise_ss, field_ss, tie_ss = root.spawn(4)
+    init_ss, noise_ss, field_ss, tie_ss, policy_ss = root.spawn(5)
     return ScenarioStreams(
         initialization=np.random.default_rng(init_ss),
         noise=np.random.default_rng(noise_ss),
         field=np.random.default_rng(field_ss),
         tie_breaking=np.random.default_rng(tie_ss),
+        policy=np.random.default_rng(policy_ss),
     )
 
 
@@ -40,4 +42,3 @@ def brownian_tensor(
     return streams.noise.standard_normal(
         size=(horizon, particle_count, 2), dtype=np.float32
     )
-
