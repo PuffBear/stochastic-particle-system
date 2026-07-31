@@ -16,6 +16,11 @@
     "collector_actions",
     "capture_owner",
     "capture_events",
+    "tie_break_scheme",
+    "tie_provenance",
+    "contact_time_fractions",
+    "contact_model",
+    "guarded_reflection_pairs",
     "terminated",
     "truncated"
   ],
@@ -54,6 +59,31 @@
         }
       }
     },
+    "tie_break_scheme": {"const": "event_keyed_seed_step_particle_v1"},
+    "tie_provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step_index", "particle_id", "candidate_collector_ids", "chosen_collector_id"],
+        "properties": {
+          "step_index": {"type": "integer", "minimum": 1},
+          "particle_id": {"type": "integer", "minimum": 0},
+          "candidate_collector_ids": {
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "integer", "minimum": 0}
+          },
+          "chosen_collector_id": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "contact_time_fractions": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0.0}
+    },
+    "contact_model": {"type": "string", "minLength": 1},
+    "guarded_reflection_pairs": {"type": "integer", "minimum": 0},
     "terminated": {"type": "boolean"},
     "truncated": {"type": "boolean"}
   },
