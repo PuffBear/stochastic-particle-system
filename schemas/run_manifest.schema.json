@@ -44,7 +44,19 @@
     "pairing": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["scenario_seed", "conditions", "pre_generated_noise", "shared_initial_state"],
+      "required": [
+        "scenario_seed",
+        "conditions",
+        "pre_generated_noise",
+        "shared_initial_state",
+        "difference_only_signal_strength",
+        "zero_signal_identity_checked",
+        "initial_state_sha256",
+        "brownian_sha256",
+        "field_nuisance_sha256",
+        "policy_randomness_sha256",
+        "tie_key_provenance_sha256"
+      ],
       "properties": {
         "scenario_seed": {"type": "integer", "minimum": 0},
         "conditions": {
@@ -53,7 +65,14 @@
           "items": false
         },
         "pre_generated_noise": {"const": true},
-        "shared_initial_state": {"const": true}
+        "shared_initial_state": {"const": true},
+        "difference_only_signal_strength": {"const": true},
+        "zero_signal_identity_checked": {"type": "boolean"},
+        "initial_state_sha256": {"$ref": "#/$defs/sha256"},
+        "brownian_sha256": {"$ref": "#/$defs/sha256"},
+        "field_nuisance_sha256": {"$ref": "#/$defs/sha256"},
+        "policy_randomness_sha256": {"$ref": "#/$defs/sha256"},
+        "tie_key_provenance_sha256": {"$ref": "#/$defs/sha256"}
       }
     },
     "policy": {
