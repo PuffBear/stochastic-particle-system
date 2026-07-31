@@ -1,5 +1,6 @@
 experiment_id: SPS-E01
 protocol_status: internally_frozen_before_performance_run
+protocol_frozen_at_utc: 2026-07-31T09:15:00Z
 primary_condition:
   policy: local_flow_v1
   information: independent_local_plus_teammate_positions
@@ -27,7 +28,29 @@ primary_metric:
 dimensionless_signal_axis:
   formula: signal_strength * sqrt(dt) / diffusion_sigma
   name: per_step_drift_to_brownian_ratio
+  preregistered_grid: [0.0, 0.10, 0.25, 0.50, 1.00, 2.00]
+  signal_strength_conversion: alpha = rho * diffusion_sigma / sqrt(dt)
+pilot:
+  scenario_seeds: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012]
+  purpose: variance, censoring, runtime, and oracle feasibility calibration only
+  scientific_status: exploratory_calibration
+scripted_policies:
+  stationary: zero action
+  pregenerated_random: action tensor fixed by scenario seed and independent policy stream
+  coverage: deterministic ID-indexed horizontal lanes; no particle evidence
+  density_greedy: unit action toward local visible-particle centroid; no velocity evidence
+  local_flow_v1: unit action opposite mean causally valid local apparent velocity; stationary if none valid
+  privileged_upstream_oracle: unit action opposite the true latent field velocity
+collector_controls:
+  - one_local_flow_collector
+  - four_independent_local_flow_collectors
 sampling_unit: scenario_seed
+inference:
+  resampling_unit: complete scenario-seed row across all nonzero grid points
+  method: nonparametric paired studentized bootstrap
+  bootstrap_draws: 10000
+  bootstrap_seed: 73031
+  familywise_rule: common 95th percentile of maximum studentized observed-minus-bootstrap mean shortfall
 boundary:
   rule: smallest_grid_strength_with_positive_one_sided_95pct_simultaneous_lower_bound
   report: grid_interval_or_censoring
