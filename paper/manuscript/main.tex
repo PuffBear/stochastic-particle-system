@@ -52,7 +52,8 @@ first mobile particle collector, vortex-flow collection problem, particle
 foraging system, or local-sensing learning formulation.  The proposed
 contribution is a controlled multi-collector measurement instrument combining
 matched null episodes, a policy-relative detectability boundary, explicit
-first-contact/cascade separation, and trajectory-level release.
+first-contact/cascade separation, and a closed trajectory/provenance schema.
+No trajectory dataset has yet been generated or released.
 
 \section{Canonical stochastic system}
 
@@ -68,10 +69,70 @@ capture, particle \(k\) follows
 \]
 where \(\epsilon_{k,t}\sim\mathcal{N}(0,I_2)\), \(\mathcal{R}\) is exact
 reflection, \(\alpha\) is field strength, and \(b_z\) is null, uniform, or
-vortex flow.  Collectors use bounded holonomic velocity actions and local
-particle observations.  The primary condition uses a uniform field, fixed
-capture geometry, no shared team summary, and a frozen deterministic
-local-flow policy.
+vortex flow.  For normalized collector action \(a_{i,t}\in\mathbb{R}^2\), the
+implemented collector transition is
+\[
+ y_{i,t+1}=\mathcal{R}\!\left(y_{i,t}+\Delta t\,v_{\max}
+ \frac{a_{i,t}}{\max\{1,\lVert a_{i,t}\rVert_2\}}\right).
+\]
+Thus every action is projected onto the unit Euclidean ball before a common
+speed limit is applied.  The current canonical values are
+\(M=4\), \(N=256\), \(H=400\), \(\Delta t=0.02\),
+\(\sigma=0.06\), and \(v_{\max}=0.12\) in the unit square.
+
+At reset, collectors occupy the deterministic ID-ordered lattice
+\((.25,.25),(.25,.75),(.75,.25),(.75,.75)\).  Particle positions are sampled
+from an initialization-specific random stream by bounded rejection sampling
+until every particle is strictly outside all initial capture discs, including
+a numerical clearance.  Reset also pre-generates the complete Brownian tensor
+for the episode and draws a uniform-field orientation once from a separate
+field stream.  Initialization, Brownian forcing, field nuisance variables,
+tie breaking, and random-policy actions have distinct named streams.
+
+The primary condition uses a uniform field and fixed point-particle capture
+geometry.  A deterministic \texttt{local\_flow\_v1} research policy remains to
+be frozen; the current stationary, random, and privileged field-aware policies
+are execution diagnostics rather than scientific baselines.
+
+\section{Causal local information contract}
+
+Collector \(i\)'s implemented observation contains its arena-normalized
+position; up to \(K=32\) nearest free particles within sensing radius
+\(r_s=0.16\), ordered by distance and particle ID; and the other collectors'
+relative positions, normalized by arena dimensions and ordered by collector
+ID.  Each populated particle row contains relative position divided by
+\(r_s\), apparent endpoint finite-difference particle velocity, and normalized radial
+distance, together with presence and velocity-validity masks.  Velocity is
+revealed only when that particle was visible to the same collector in both
+consecutive observations.  A newly visible particle therefore receives a zero
+velocity entry and a false validity mask.
+
+The observation constructor accepts neither field strength or orientation,
+global state, a random generator, nor future noise.  Tests additionally check
+that changing an out-of-radius particle, changing future Brownian draws, or
+toggling signal strength before motion cannot change the reset observation.
+These checks validate the implemented interface; they do not prove that a
+future policy or adapter cannot introduce leakage.
+
+\section{Environment transition order}
+
+For each one-based environment step, the implementation applies the following
+order:
+\begin{enumerate}
+  \item project and advance collector actions, with exact reflection;
+  \item advance all free particles with that step's pre-generated Brownian
+        slice and the episode field, again with exact reflection;
+  \item compute finite-difference particle velocities;
+  \item resolve captures, assign each newly captured particle one permanent
+        owner, and award its collector one unit of reward;
+  \item increment the step counter, record the first nonempty capture step,
+        update consecutive-visibility masks, and evaluate all-captured
+        termination or horizon truncation;
+  \item construct the next local observations.
+\end{enumerate}
+The current tie resolver uses a dedicated but stateful random stream.  It is
+not yet suitable for the primary comparison after signal/null trajectories
+diverge; event-keyed tie breaking is a blocking requirement.
 
 \section{Matched primary estimand}
 
@@ -112,6 +173,17 @@ field leakage, and matched signal/null provenance.  Fixed and growing
 geometries must agree through first contact under matched actions and noise.
 Failure blocks performance experiments.
 
+The present correctness suite contains 44 passing tests under Python 3.12.13
+and NumPy 2.3.5.  It covers deterministic capture-free resets over 100 canonical
+seeds, action and speed limits, exact reflected motion, causal visibility
+masks, forbidden-information checks, fixed-ID teammate ordering, one-draw
+field orientation, paired random actions, complete zero-signal rollout
+identity, the zero-diffusion stationary limit, capture ownership, one-based
+first contact, horizon truncation, schema parsing, and a deterministic
+high-signal oracle calibration microcase.  This is engineering evidence only:
+none of the tests estimates \(\delta(\alpha)\), compares baseline performance,
+or establishes a multi-agent mechanism.
+
 \section{Evaluation plan}
 
 Scripted policies are evaluated before learning: stationary/passive, random,
@@ -126,17 +198,38 @@ area- or perimeter-matched non-growing control.  A coordination claim requires
 matched information bandwidth, policy capacity, action budget, and evaluation
 conditions.
 
-\section{Current evidence status}
+\section{Trajectory and provenance contracts}
 
-\pending{PettingZoo environment, observation construction, scripted policies,
-trajectory writer, dataset manifest, statistical boundary estimator,
-performance runs, figures, tables, and all empirical conclusions.}
+Two closed JSON Schema documents specify, but do not yet produce, the planned
+artifacts.  A trajectory-step record requires a schema version, run and
+scenario identifiers, condition and policy identifiers, the step index,
+particle and collector positions, collector actions, capture ownership and
+events, and termination flags.  A run manifest requires the repository branch
+and 40-character commit, dirty-worktree flag, environment-config path and
+SHA-256 digest, paired-condition declarations, policy configuration and
+privilege flag, Python/NumPy/platform/command provenance, and artifact byte
+counts and SHA-256 digests.  Both schemas reject unspecified top-level fields.
+A writer, schema-instance validation, checksumming pipeline, and generated
+dataset are still absent.
 
-The current implementation evidence is limited to unit tests for random-stream
-separation, field primitives, exact reflection, fixed/growing capture
-invariants, matched free-particle counterfactual propagation, and metric
-microcases.  These tests establish code behavior only; they do not support a
-scientific claim.
+\section{Current evidence status and blockers}
+
+The deterministic core can reset and execute complete bounded episodes, build
+causal local observations, run three smoke policies, and represent planned
+trajectory and manifest records.  \textbf{There is no scientific performance
+result, generated dataset, detectability-boundary estimate, aggregation
+evidence, or coordination evidence.}  All active claims therefore remain
+proposed.
+
+\pending{Before any performance pilot: replace stateful ties with event-keyed
+ties; implement and validate a complete matched null/signal episode wrapper;
+resolve endpoint-only capture with continuous-contact handling or a frozen
+timestep-convergence criterion;
+freeze \texttt{local\_flow\_v1} using only causal masked observations; write,
+validate, and hash trajectories and manifests; and freeze the growing attached
+disc's radius, motion, wall, and visualization semantics.  A PettingZoo/Gym
+adapter, statistical boundary estimator, figures, tables, and learned-policy
+runs remain later work.}
 
 \section{Limitations}
 
@@ -164,4 +257,3 @@ learning.
 \end{thebibliography}
 
 \end{document}
-
