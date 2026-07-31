@@ -1,0 +1,12 @@
+experiment_id: SPS-P00
+purpose: correctness and baseline-range pilot
+field_families: [null, uniform, vortex]
+signal_strengths: [0.0, 0.05, 0.10, 0.20, 0.40, 0.80]
+capture_geometries: [fixed, growing]
+policies: [random, coverage, density_greedy, local_flow, oracle_field]
+scenario_seeds: [0, 1, 2]
+collector_count: 4
+particle_count: 256
+save_trajectories: true
+performance_inference_authorized: false
+
