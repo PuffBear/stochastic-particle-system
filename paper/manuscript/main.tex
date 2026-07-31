@@ -16,230 +16,255 @@ A Matched-Counterfactual Multi-Collector Benchmark}
 \maketitle
 
 \begin{abstract}
-We specify a benchmark for measuring when a team of locally observing mobile
-collectors can behaviorally exploit a weak latent transport field in the
-motion of many stochastic, non-learning particles.  The primary design couples
-each signal episode to a no-signal episode with identical initial states,
-Brownian forcing, field geometry, and random-number provenance.  It separates
-pre-contact search and first interception from irreversible post-contact
-aggregation.  The proposed primary outcome is the matched reduction in
-time-to-first interception under a fixed local-flow policy, reported against a
-dimensionless per-step drift-to-Brownian ratio and with a grid-censored
-boundary.  Transparent random, passive, coverage, flow-following, and
-privileged controls precede recurrent IPPO and MAPPO.  This document currently
-records the formal design and correctness requirements.  \textbf{No benchmark
-result or detectability-boundary claim is reported.}
+We develop a benchmark for measuring when locally observing mobile collectors
+can exploit a weak latent transport field in many stochastic, non-learning
+particles. Each signal episode is paired with a no-signal episode sharing its
+initial state, Brownian forcing, field nuisance variables, and policy
+randomness. Fixed-geometry contact is solved along exact piecewise specular
+paths, and exact ownership ties are event-keyed. The proposed outcome is the
+matched reduction in time to first interception under a frozen local-flow
+policy, indexed by a dimensionless drift-to-Brownian ratio. A 12-seed
+exploratory calibration on five nonzero signal levels produced no positive
+simultaneous lower bound. At the strongest level, stationary, random, and
+privileged controls descriptively matched or exceeded the local-flow policy.
+Moreover, the four collectors execute identical independent rules, so the
+current treatment isolates no coordination mechanism and fails the intended
+AAMAS relevance gate. The calibration seeds are ineligible for confirmation:
+\textbf{no detectability boundary, coordination effect, or MARL result is
+claimed.}
 \end{abstract}
 
-\section{Introduction}
+\section{Research question and novelty boundary}
 
-Many local observations of stochastic motion may contain a weak common
-structure even when any individual displacement is dominated by noise.  A
-mobile team can, in principle, use those observations to intercept particle
-flow.  In practice, a large collection event can also result from passive flux
-or one lucky contact amplified by growing capture geometry.
-
-We therefore ask one question: \emph{what is the weakest latent-field signal
+We ask exactly one question: \emph{what is the weakest latent-field signal
 strength at which a team of locally observing collectors achieves a reliably
 positive matched improvement in pre-contact first-interception performance
 over otherwise identical no-signal episodes?}
 
-The closest current work already studies a locally informed mobile collector
-capturing passive particles in chaotic flow~\cite{wang2025collector}, and
-reinforcement learning has already produced collective foraging in locally
-observing active particles~\cite{loeffler2023foraging}.  We do not claim the
-first mobile particle collector, vortex-flow collection problem, particle
-foraging system, or local-sensing learning formulation.  The proposed
-contribution is a controlled multi-collector measurement instrument combining
-matched null episodes, a policy-relative detectability boundary, explicit
-first-contact/cascade separation, and a closed trajectory/provenance schema.
-No trajectory dataset has yet been generated or released.
+Prior work already studies a locally informed mobile collector capturing
+passive particles in chaotic flow~\cite{wang2025collector}, and local-sensing
+reinforcement learning for active-particle foraging already
+exists~\cite{loeffler2023foraging}. We therefore do not claim the first mobile
+particle collector, locally guided capture task, particle-foraging problem, or
+local-sensing learning formulation. The intended contribution is narrower: a
+reproducible policy-relative boundary instrument under exact signal/null
+pairing and explicit multi-agent controls.
 
-\section{Canonical stochastic system}
+\section{Frozen system and local policy}
 
-The canonical domain is the unit square with reflecting boundaries.  Four
-collectors act in a population of \(N=256\) non-learning particles.  Before
-capture, particle \(k\) follows
+The canonical domain is the unit square with reflecting boundaries. Four
+collectors act among \(N=256\) non-learning particles for \(H=400\) steps with
+\(\Delta t=0.02\) and \(\sigma=0.06\). Before capture, particle \(k\) follows
 \[
- x_{k,t+1} =
- \mathcal{R}\!\left(
- x_{k,t} + \Delta t\,\alpha b_z(x_{k,t})
- + \sigma\sqrt{\Delta t}\,\epsilon_{k,t}
- \right),
+ x_{k,t+1}=\mathcal R\!\left(x_{k,t}+\Delta t\,\alpha b_z(x_{k,t})
+ +\sigma\sqrt{\Delta t}\,\epsilon_{k,t}\right),
+ \qquad \epsilon_{k,t}\sim\mathcal N(0,I_2),
 \]
-where \(\epsilon_{k,t}\sim\mathcal{N}(0,I_2)\), \(\mathcal{R}\) is exact
-reflection, \(\alpha\) is field strength, and \(b_z\) is null, uniform, or
-vortex flow.  For normalized collector action \(a_{i,t}\in\mathbb{R}^2\), the
-implemented collector transition is
+where the primary field is spatially uniform. Collector action
+\(a_{i,t}\in\mathbb R^2\) is projected onto the unit ball before a common speed
+limit \(v_{\max}=0.12\) is applied:
 \[
- y_{i,t+1}=\mathcal{R}\!\left(y_{i,t}+\Delta t\,v_{\max}
+ y_{i,t+1}=\mathcal R\!\left(y_{i,t}+\Delta t\,v_{\max}
  \frac{a_{i,t}}{\max\{1,\lVert a_{i,t}\rVert_2\}}\right).
 \]
-Thus every action is projected onto the unit Euclidean ball before a common
-speed limit is applied.  The current canonical values are
-\(M=4\), \(N=256\), \(H=400\), \(\Delta t=0.02\),
-\(\sigma=0.06\), and \(v_{\max}=0.12\) in the unit square.
 
-At reset, collectors occupy the deterministic ID-ordered lattice
-\((.25,.25),(.25,.75),(.75,.25),(.75,.75)\).  Particle positions are sampled
-from an initialization-specific random stream by bounded rejection sampling
-until every particle is strictly outside all initial capture discs, including
-a numerical clearance.  Reset also pre-generates the complete Brownian tensor
-for the episode and draws a uniform-field orientation once from a separate
-field stream.  Initialization, Brownian forcing, field nuisance variables,
-tie breaking, and random-policy actions have distinct named streams.
+Collectors reset in ID order at
+\((.25,.25),(.25,.75),(.75,.25),(.75,.75)\). Particles are rejection-sampled
+from a dedicated initialization stream until strictly outside every initial
+capture disc. The episode pre-generates its full Brownian tensor and draws one
+field orientation from a separate stream.
 
-The primary condition uses a uniform field and fixed point-particle capture
-geometry.  A deterministic \texttt{local\_flow\_v1} research policy remains to
-be frozen; the current stationary, random, and privileged field-aware policies
-are execution diagnostics rather than scientific baselines.
+The frozen \texttt{local\_flow\_v1} rule acts independently for each collector.
+It averages only causally valid visible-particle velocity slots, moves at unit
+normalized speed opposite that mean, and stops when none is valid. It has no
+density fallback and ignores the available teammate-position channel. Thus the
+nominal four-agent treatment is exactly four independent replicas, not a
+coordination treatment.
 
-\section{Causal local information contract}
+Each local observation contains the arena-normalized self position; up to
+\(K=32\) nearest free particles within radius \(0.16\); masks; and teammate
+positions relative to self in fixed ID order. A particle velocity is emitted
+only when that particle was visible to the same collector in both consecutive
+observations. The interface receives no field parameter, global state, future
+noise, or random generator.
 
-Collector \(i\)'s implemented observation contains its arena-normalized
-position; up to \(K=32\) nearest free particles within sensing radius
-\(r_s=0.16\), ordered by distance and particle ID; and the other collectors'
-relative positions, normalized by arena dimensions and ordered by collector
-ID.  Each populated particle row contains relative position divided by
-\(r_s\), apparent endpoint finite-difference particle velocity, and normalized radial
-distance, together with presence and velocity-validity masks.  Velocity is
-revealed only when that particle was visible to the same collector in both
-consecutive observations.  A newly visible particle therefore receives a zero
-velocity entry and a false validity mask.
+\section{Exact fixed-geometry contact and event-keyed ties}
 
-The observation constructor accepts neither field strength or orientation,
-global state, a random generator, nor future noise.  Tests additionally check
-that changing an out-of-radius particle, changing future Brownian draws, or
-toggling signal strength before motion cannot change the reset observation.
-These checks validate the implemented interface; they do not prove that a
-future policy or adapter cannot introduce leakage.
+Endpoint contact is inadequate when either body reflects during a step. The
+implemented fixed-geometry rule retains each unfolded proposal, finds the union
+of particle and collector wall-hit fractions, and decomposes the step into
+piecewise-linear rectangular specular segments. On each interval, the earliest
+disc--point contact is the first admissible root of the relative-motion
+quadratic. Ownership is ordered by earliest contact fraction, then closest
+segment distance.
 
-\section{Environment transition order}
+Any remaining exact tie is sampled from sorted stable collector IDs using
+\texttt{SeedSequence}$(s,t,k)$, where \(s\) is the scenario seed, \(t\) the
+one-based step, and \(k\) the stable particle ID. The decision therefore does
+not depend on previous random-number consumption, entity-array order, or
+unrelated events. The solver is exact for the piecewise-linear specular path
+inside one Euler step; it is not evidence that the discretized stochastic
+dynamics have converged as \(\Delta t\to0\). Growing aggregates retain deferred
+endpoint semantics and are excluded from the primary experiment.
 
-For each one-based environment step, the implementation applies the following
-order:
-\begin{enumerate}
-  \item project and advance collector actions, with exact reflection;
-  \item advance all free particles with that step's pre-generated Brownian
-        slice and the episode field, again with exact reflection;
-  \item compute finite-difference particle velocities;
-  \item resolve captures, assign each newly captured particle one permanent
-        owner, and award its collector one unit of reward;
-  \item increment the step counter, record the first nonempty capture step,
-        update consecutive-visibility masks, and evaluate all-captured
-        termination or horizon truncation;
-  \item construct the next local observations.
-\end{enumerate}
-The current tie resolver uses a dedicated but stateful random stream.  It is
-not yet suitable for the primary comparison after signal/null trajectories
-diverge; event-keyed tie breaking is a blocking requirement.
+\section{Paired estimand, runner, and provenance}
 
-\section{Matched primary estimand}
-
-For scenario seed \(s\), signal strength \(\alpha\), horizon \(H\), and
-condition \(c\in\{0,\alpha\}\), define
+Let \(T^*_{s,c}\in\{1,\ldots,H,H+1\}\) be the one-based first-interception
+step for seed \(s\) and condition \(c\), with \(H+1\) denoting no contact. The
+paired gain and target mean are
 \[
-T^*_{s,c} =
-\begin{cases}
-\text{first capture step in }\{1,\ldots,H\}, & \text{capture occurs},\\
-H+1, & \text{otherwise}.
-\end{cases}
+ D_s(\alpha)=\frac{T^*_{s,0}-T^*_{s,\alpha}}{H},\qquad
+ \delta(\alpha)=\mathbb E_s[D_s(\alpha)],
 \]
-The paired improvement is
+and the dimensionless signal coordinate is
 \[
-D_s(\alpha)=\frac{T^*_{s,0}-T^*_{s,\alpha}}{H},
-\qquad
-\delta(\alpha)=\mathbb{E}_s[D_s(\alpha)].
+ \rho=\frac{\alpha\sqrt{\Delta t}}{\sigma}.
 \]
-Positive values mean that the signal episode intercepted earlier than its
-matched null episode.  The dimensionless primary x-axis is the per-step
-drift-to-Brownian ratio
+Complete scenario-seed blocks are the sampling units. The primary boundary is
+the smallest preregistered grid point whose one-sided simultaneous 95\% lower
+bound is strictly positive; it is reported as a grid interval or as censored,
+without primary interpolation.
+
+The matched runner rejects a pair unless its environment configurations differ
+only in signal strength and the null strength is zero. It verifies identical
+particle and collector initialization, Brownian tensors, and field nuisance
+variables. It records SHA-256 digests of those inputs, policy randomness, and
+the event-key specification. At zero signal, full records must be identical
+after ignoring only the condition label.
+
+Each pair is schema-validated before an immutable write. The runner produces
+null and signal JSONL trajectories, a pair summary, and a manifest containing
+the repository commit and dirty flag, environment-config digest, runtime
+command and versions, policy privilege flag, and artifact byte counts and
+SHA-256 digests. The bounded pilots retain compact pair summaries and aggregate
+analyses; they are not a released trajectory dataset.
+
+\section{Studentized simultaneous bootstrap}
+
+Rows of effect matrix \(G\) are scenario-seed blocks and columns are the five
+nonzero preregistered values \(\rho\in\{0.1,0.25,0.5,1,2\}\). Each bootstrap
+draw resamples complete rows, retaining dependence across the grid. With
+observed means \(\bar G_j\) and standard errors
+\(\widehat{\mathrm{se}}_j\), the common correction is
 \[
-\rho=\frac{\alpha\sqrt{\Delta t}}{\sigma}.
+ q_{.95}=Q_{.95}\!\left[\max_j
+ \frac{\bar G_j-\bar G_j^*}{\widehat{\mathrm{se}}_j^*}\right],
+ \qquad L_j=\bar G_j-q_{.95}\widehat{\mathrm{se}}_j.
 \]
+The frozen implementation uses 10,000 draws and bootstrap seed 73,031.
 
-Complete scenario-seed blocks, not particles, collectors, or time steps, are
-the sampling units.  The primary boundary is the smallest tested grid point
-whose one-sided simultaneous 95\% lower confidence bound exceeds zero.  It is
-reported as a grid interval or as censored; continuous logistic or isotonic
-crossings are sensitivity analyses only.
+Synthetic null calibration used 2,000 trials, 2,000 bootstrap draws per trial,
+12 rows, and five columns. The familywise false-crossing rate was 0.040 under a
+correlated continuous null (Wilson 95\% upper bound 0.0495) and 0.006 under a
+zero-inflated symmetric discrete null (upper bound 0.0105). Both met the
+predeclared acceptance rule that this upper bound not exceed 0.07. This checks
+only synthetic calibration, not the scientific hypothesis.
 
-\section{Correctness gates}
+\section{Twelve-seed exploratory calibration}
 
-The simulator must establish deterministic random streams, exact zero-signal
-equivalence, Brownian scaling, uniform-field displacement, multi-wall
-reflection, single permanent capture ownership, reproducible ties, absence of
-field leakage, and matched signal/null provenance.  Fixed and growing
-geometries must agree through first contact under matched actions and noise.
-Failure blocks performance experiments.
+SPS-P02 used scenario seeds 1001--1012 to reproduce the frozen calibration
+after the exact contact repair. These seeds were assigned to runtime, variance,
+censoring, oracle-feasibility, and contact diagnostics. They \emph{cannot}
+update SPS-C01. Table~\ref{tab:grid} documents the exploratory calculation.
 
-The present correctness suite contains 44 passing tests under Python 3.12.13
-and NumPy 2.3.5.  It covers deterministic capture-free resets over 100 canonical
-seeds, action and speed limits, exact reflected motion, causal visibility
-masks, forbidden-information checks, fixed-ID teammate ordering, one-draw
-field orientation, paired random actions, complete zero-signal rollout
-identity, the zero-diffusion stationary limit, capture ownership, one-based
-first contact, horizon truncation, schema parsing, and a deterministic
-high-signal oracle calibration microcase.  This is engineering evidence only:
-none of the tests estimates \(\delta(\alpha)\), compares baseline performance,
-or establishes a multi-agent mechanism.
+\begin{table}[ht]
+\centering
+\caption{Exploratory \texttt{local\_flow\_v1} calibration. Each row uses the
+same 12 pilot seeds; LCBs are simultaneous one-sided 95\% bounds.}
+\label{tab:grid}
+\begin{tabular}{rrrr}
+\toprule
+\(\rho\) & Mean \(D\) & Paired SE & Simultaneous LCB \\
+\midrule
+0.10 & 0.00563 & 0.00339 & -0.01533 \\
+0.25 & 0.00375 & 0.00457 & -0.02452 \\
+0.50 & 0.00708 & 0.00423 & -0.01908 \\
+1.00 & 0.00896 & 0.00459 & -0.01944 \\
+2.00 & 0.01104 & 0.00514 & -0.02079 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\section{Evaluation plan}
+The studentized maximum critical value was 6.187. Every LCB was negative, so
+the exploratory rule returned right-censoring beyond the largest tested point,
+\(\rho=2\). Because the seeds are calibration-only, this neither supports nor
+refutes a finite boundary and is not a boundary estimate.
 
-Scripted policies are evaluated before learning: stationary/passive, random,
-coverage, density-greedy, local-flow, team-flow, and privileged field-aware
-controls.  Single-collector and independent multi-collector controls separate
-parallel swept area from coordination.  Recurrent IPPO and standard MAPPO are
-benchmark participants only after scripted and data-validation gates pass.
+Table~\ref{tab:controls} shows the strongest-signal controls. Stationary,
+pre-generated random, and privileged upstream policies descriptively matched
+or exceeded the four-independent local-flow mean. The one-collector row is not
+capacity-matched and is diagnostic only. No inferential comparison among these
+controls was authorized.
 
-Growing capture, bounded shared summaries, vortex fields, and collector-count
-scaling are secondary analyses.  An aggregation claim additionally requires an
-area- or perimeter-matched non-growing control.  A coordination claim requires
-matched information bandwidth, policy capacity, action budget, and evaluation
-conditions.
+\begin{table}[ht]
+\centering
+\caption{Exploratory controls at \(\rho=2\), each with 12 calibration seeds.}
+\label{tab:controls}
+\begin{tabular}{lrr}
+\toprule
+Policy / treatment & Mean \(D\) & Median \(D\) \\
+\midrule
+Stationary, \(M=4\) & 0.01313 & 0.00625 \\
+Pre-generated random, \(M=4\) & 0.01292 & 0.00875 \\
+Privileged upstream oracle, \(M=4\) & 0.01292 & 0.00625 \\
+\texttt{local\_flow\_v1}, \(M=4\) independent & 0.01104 & 0.00375 \\
+Coverage, \(M=4\) & 0.00771 & 0.00625 \\
+Density greedy, \(M=4\) & 0.00625 & 0.00250 \\
+\texttt{local\_flow\_v1}, \(M=1\), diagnostic & 0.06938 & 0.01625 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\section{Trajectory and provenance contracts}
+\paragraph{Contact-repair comparison.}
+SPS-P01 guarded every reflected path pair; SPS-P02 used exact specular
+segments. Across the same 144 matched pairs, guarded diagnostics fell from
+28,929 to zero and zero of 144 first-interception outcomes changed. This
+supports the regression repair, not independent scientific replication.
 
-Two closed JSON Schema documents specify, but do not yet produce, the planned
-artifacts.  A trajectory-step record requires a schema version, run and
-scenario identifiers, condition and policy identifiers, the step index,
-particle and collector positions, collector actions, capture ownership and
-events, and termination flags.  A run manifest requires the repository branch
-and 40-character commit, dirty-worktree flag, environment-config path and
-SHA-256 digest, paired-condition declarations, policy configuration and
-privilege flag, Python/NumPy/platform/command provenance, and artifact byte
-counts and SHA-256 digests.  Both schemas reject unspecified top-level fields.
-A writer, schema-instance validation, checksumming pipeline, and generated
-dataset are still absent.
+\paragraph{Seed budget.}
+The maximum exploratory simultaneous half-width was 0.03183. For target
+half-width 0.05, variance scaling gives
+\[
+ n_{\mathrm{raw}}=12(0.03183/0.05)^2=4.863.
+\]
+After 1.25 inflation, a minimum of 24, rounding to a multiple of four, and a
+maximum authorization of 64, the recorded plan reserves 24 independent seeds
+(2001--2024). This budget calculation does not authorize SPS-E01.
 
-\section{Current evidence status and blockers}
+\section{AAMAS relevance failure and blockers}
 
-The deterministic core can reset and execute complete bounded episodes, build
-causal local observations, run three smoke policies, and represent planned
-trajectory and manifest records.  \textbf{There is no scientific performance
-result, generated dataset, detectability-boundary estimate, aggregation
-evidence, or coordination evidence.}  All active claims therefore remain
-proposed.
+The current treatment is not yet a multi-agent contribution. Teammate
+positions are observed but unused; the four collectors apply independent
+copies of one scripted rule; and no learned policy is evaluated. The pilot
+therefore concerns replicated local control and passive transport, not
+cooperation, communication, strategic interaction, or MARL. No coordination
+or MARL claim is supported.
 
-\pending{Before any performance pilot: replace stateful ties with event-keyed
-ties; implement and validate a complete matched null/signal episode wrapper;
-resolve endpoint-only capture with continuous-contact handling or a frozen
-timestep-convergence criterion;
-freeze \texttt{local\_flow\_v1} using only causal masked observations; write,
-validate, and hash trajectories and manifests; and freeze the growing attached
-disc's radius, motion, wall, and visualization semantics.  A PettingZoo/Gym
-adapter, statistical boundary estimator, figures, tables, and learned-policy
-runs remain later work.}
+This also creates a direct scientific no-go: at \(\rho=2\), passive stationary
+and uninformed random controls descriptively match or exceed
+\texttt{local\_flow\_v1}, while the privileged oracle does not separate from
+them. SPS-E01 remains blocked until (i) timestep convergence is measured for
+the Euler/Brownian chord model; (ii) the passive-flux/policy ordering is
+diagnosed; and (iii) a genuinely multi-agent mechanism is frozen with matched
+information, action, and capacity budgets. Growing-aggregate physics,
+PettingZoo/Gym adapters, IPPO/MAPPO, and aggregation analysis remain later
+work.
+
+The implementation currently has 79 passing tests covering deterministic
+reset, causal observations, zero-signal identity, exact specular contacts,
+event-order and event-key invariance, schema validation, immutable writes,
+paired provenance, frozen policies, and row-order-invariant inference. These
+are engineering checks only. All paper claims remain proposed, and \textbf{no
+detectability boundary is supported by SPS-P01 or SPS-P02}.
 
 \section{Limitations}
 
-The boundary is policy-, horizon-, field-, geometry-, and resource-relative,
-not a universal physical critical point.  Common random numbers reduce
-variance only when their coupling remains causally coherent.  A positive
-paired effect can still arise from passive transport, so random, stationary,
-and coverage controls govern the interpretation.  Without an isolated effect
-of complementary local information or coordination, the benchmark's AAMAS fit
-would remain weak.
+Any eventual boundary is policy-, horizon-, field-, geometry-, grid-, and
+resource-relative rather than a universal physical critical point. Common
+random numbers reduce variance only under causally coherent pairing. Exact
+within-step specular contact does not replace a timestep-convergence study.
+First contact can still be explained by passive transport or swept area. AAMAS
+fit requires an isolated multi-agent mechanism, not merely four collectors.
 
 \begin{thebibliography}{9}
 \bibitem{wang2025collector}
