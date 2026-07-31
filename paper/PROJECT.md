@@ -4,36 +4,97 @@
 
 What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?
 
+This is the only active research question. Aggregation, communication, field family, and scale remain controlled factors or secondary analyses unless a later Program Director decision establishes a genuinely separable paper.
+
+## Frozen primary condition
+
+The first estimable condition is `local_flow_v1`: four identical collectors receive only their own local sensor summary plus teammate positions; the field is spatially uniform; the arena and initialization protocol are fixed; and
+
+`M=4, N=256, H=400, dt=0.02, sigma=0.06`.
+
+Collector dynamics, sensing radius, action bounds, and initialization must be frozen in the environment contract before any performance sweep.
+
+## Primary estimand
+
+Let `T*` be the one-based first-interception step in `{1,...,H}`, with `T*=H+1` when no particle is intercepted. For matched seed `s` and signal strength `alpha`,
+
+`D_s(alpha) = (T*_{s,null} - T*_{s,signal(alpha)}) / H`.
+
+The primary effect is `delta(alpha)=E_s[D_s(alpha)]`. Positive values mean the signal episode intercepts earlier. The dimensionless signal coordinate is
+
+`rho = alpha * sqrt(dt) / sigma`.
+
+The reported boundary is grid-censored: the smallest preregistered tested `rho` whose one-sided simultaneous 95% lower confidence bound for `delta(rho)` is strictly above zero. If no tested point crosses, report right-censoring; if the weakest tested point crosses, report left-censoring. No interpolated primary boundary is permitted.
+
+## Matched counterfactual contract
+
+Signal and null episodes must share the same initial state, pre-generated Brownian-noise tensor, field nuisance variables, and dedicated tie-breaking randomness. The only allowed causal difference is the planted field strength. Stateful random-number consumption after trajectory divergence is prohibited for the primary comparison.
+
 ## Central hypothesis
 
-For at least one transparent local-flow or team-flow policy, the paired lower confidence bound on the signal-minus-null change in first-interception performance crosses zero at a finite signal strength below the oracle boundary and above the random/coverage boundary.
+For `local_flow_v1`, the paired lower confidence bound crosses zero at a finite preregistered signal level. This claim is policy-relative and grid-relative; it is not an information-theoretic detection limit.
 
-## Estimand
+## Closest prior work and novelty boundary
 
-The primary estimand is the matched signal-minus-null change in a protocol-frozen pre-contact first-interception statistic, using identical initial states, Brownian noise, field orientation/centre, and tie-breaking randomness. The exact statistic and threshold estimator must be frozen before the main sweep.
+- Wang et al. (2025), *Mobile-collector capture of particles in a chaotic flow*, studies one mobile collector using local particle information in prescribed flows. We cannot claim the first mobile particle collector, first locally guided capture, or first vortex-flow collection benchmark.
+- Löffler et al. (2023), *Reinforcement learning and optimal control of a minimal active particle foraging*, studies local-sensing reinforcement learning for active-particle foraging. We cannot claim the first local-sensing RL particle-foraging task.
 
-## Controlled factors and secondary analyses
-
-- null, uniform, and vortex fields;
-- fixed and growing capture geometry;
-- independent and shared-summary information;
-- post-contact cascade growth and false cascades;
-- collector count and one scale axis.
-
-These are not additional research questions.
+The defensible target is narrower: a reproducible multi-collector instrument for estimating a policy-relative weak-field detectability boundary under exact signal/null counterfactual pairing, with explicit coordination and geometry controls.
 
 ## Mandatory baselines
 
-Random, coverage, density-greedy, local-flow, team-flow, and oracle-field scripted policies precede shared-parameter recurrent IPPO and one standard MAPPO implementation.
+Before learned policies:
+
+1. stationary collectors / passive flux;
+2. random motion;
+3. area-coverage motion;
+4. density-greedy motion;
+5. local-flow scripted policy;
+6. published-strategy adaptations from the closest mobile-collector work when implementable;
+7. centralized full-state oracle.
+
+For the AAMAS coordination claim:
+
+1. one collector;
+2. `M` independent collectors with no shared summary;
+3. the same policy class with and without a bounded shared summary;
+4. centralized full-state control;
+5. shared-parameter IPPO;
+6. one standard MAPPO implementation.
+
+Growing-capture analysis additionally requires an area/perimeter-matched non-growing control.
 
 ## Validity gates
 
-Deterministic seeding; exact matched counterfactuals; Brownian scaling by sqrt(dt); correct reflecting boundaries; permanent single-owner capture; growing aggregates represented as attached capture discs; no field leakage; pre-contact/first-contact/post-contact event separation; trajectory and manifest validation.
+- deterministic named seed streams;
+- pre-generated or event-keyed stochastic disturbances;
+- exact matched signal/null initialization and Brownian noise;
+- Brownian scaling by `sqrt(dt)`;
+- correct reflecting boundaries, including arbitrary overshoot;
+- permanent single-owner capture with dedicated tie-breaking randomness;
+- attached-node growth active only from the next step;
+- no field, future-noise, or global-state leakage into local observations;
+- one-based first-contact semantics and explicit no-contact censoring;
+- stationary and zero-signal limiting cases;
+- trajectory, manifest, and analysis validation;
+- fixed confirmatory signal grid and simultaneous inference rule.
 
 ## Kill criteria
 
-Narrow or stop the detectability-boundary claim if the oracle cannot exploit planted fields, null and signal pairs are not exact counterfactual matches, boundary estimates are dominated by arbitrary metric thresholds, or scripted local-flow policies cannot distinguish signal from null over a defensible signal range.
+Narrow or stop the active claim if:
+
+- the oracle cannot exploit the planted field under the frozen task;
+- exact null/signal counterfactual pairing fails;
+- stationary or passive-flux controls explain the apparent improvement;
+- the boundary changes materially under defensible metric encodings;
+- `local_flow_v1` never crosses below the oracle reference across the frozen grid;
+- a claimed team advantage vanishes when collector count, swept area, information, and policy capacity are matched;
+- the task remains a replicated single-agent collection problem with no isolated multi-agent mechanism.
+
+## Compute policy
+
+Correctness tests and scripted pilots run on Codex cloud. No HPC request is justified until the simulator, observation contract, scripted baselines, seed audit, and pilot variance estimate pass. The first confirmatory budget must be derived from measured pilot variance and documented before execution.
 
 ## Current stage
 
-Repository and research-control layer initialized. Next: simulator skeleton and fail-closed correctness tests. No experiment result exists yet.
+The deterministic simulation primitives, matched-pair utility, metric definitions, protocol skeleton, 17-test correctness suite, literature ledger, immutable fresh review, and evidence-constrained LaTeX scaffold exist. No collector-motion environment, policy benchmark, dataset, or scientific performance result exists yet.
