@@ -1,36 +1,20 @@
 {
   "schema_version": 1,
-  "program_director": {
-    "responsibility": "continuity, integration, evidence control, scheduling"
-  },
+  "director": "program-director",
   "roles": [
-    {
-      "name": "Research Lead",
-      "responsibility": "single falsifiable question, assumptions, claims, kill criteria"
-    },
-    {
-      "name": "Experiment Engineer",
-      "responsibility": "simulator, tests, baselines, runs, analysis, reproducibility"
-    },
-    {
-      "name": "Literature Scout",
-      "responsibility": "nearest work, benchmarks, methods, novelty threats"
-    },
-    {
-      "name": "LaTeX Writer",
-      "responsibility": "evidence-licensed manuscript and supplement"
-    },
-    {
-      "name": "Fresh Reviewer",
-      "responsibility": "immutable fresh AAMAS-style reviews"
-    },
-    {
-      "name": "Reporting Agent",
-      "responsibility": "daily detailed report and plain-language explanation"
-    },
-    {
-      "name": "Expansionist",
-      "responsibility": "deduplicated future research and industry backlogs"
-    }
+    {"id": "program-director", "state": "active", "persistent_memory": "repository-artifacts"},
+    {"id": "research-lead", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "experiment-engineer", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "literature-scout", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "latex-writer", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "fresh-reviewer", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "reporting-agent", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "expansionist", "state": "ready", "persistent_memory": "repository-artifacts"}
+  ],
+  "max_concurrent_workers_beside_director": 3,
+  "waves": [
+    ["research-lead", "literature-scout", "fresh-reviewer"],
+    ["experiment-engineer", "latex-writer", "expansionist"],
+    ["reporting-agent"]
   ]
 }
