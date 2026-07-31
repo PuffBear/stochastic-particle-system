@@ -97,4 +97,6 @@ Correctness tests and scripted pilots run on Codex cloud. No HPC request is just
 
 ## Current stage
 
-The deterministic simulation primitives, matched-pair utility, metric definitions, protocol skeleton, 17-test correctness suite, literature ledger, immutable fresh review, and evidence-constrained LaTeX scaffold exist. No collector-motion environment, policy benchmark, dataset, or scientific performance result exists yet.
+The deterministic simulation primitives, bounded collector dynamics, capture-free deterministic collector lattice, causal local observation contract, minimal end-to-end environment, stationary/random/privileged smoke policies, trajectory schemas, metric definitions, protocol skeleton, 44-test correctness suite, literature ledger, immutable fresh review, and evidence-constrained LaTeX scaffold exist.
+
+The environment gate is not complete. Event-keyed tie breaking, a paired-episode wrapper, the frozen `local_flow_v1` research policy, trajectory writing and checksum validation, and the growing attached-disc geometry remain unresolved. No scientific performance result or dataset exists yet.
