@@ -45,8 +45,19 @@ except ImportError:
 from particle_benchmark.environment import ParticleCollectorEnv, ParticleEnvConfig
 from particle_benchmark.marl.ippo import IPPO
 from particle_benchmark.marl.mappo import MAPPO
+from particle_benchmark.marl.maddpg import MADDPG
+from particle_benchmark.marl.coma import COMA
+from particle_benchmark.marl.commnet import CommNet
+from particle_benchmark.marl.vdn import VDN
 from particle_benchmark.marl.networks import compute_obs_dim
-from particle_benchmark.marl.trainer import train_ippo, train_mappo
+from particle_benchmark.marl.trainer import (
+    train_ippo,
+    train_mappo,
+    train_maddpg,
+    train_coma,
+    train_commnet,
+    train_vdn,
+)
 from particle_benchmark.policies import (
     capacity_matched_velocity_controller,
     local_flow_v1_policy,
@@ -62,6 +73,7 @@ EVAL_SEEDS = tuple(range(5501, 5509))    # 8 eval seeds (diagnostic only, inelig
 FROZEN_ALPHA = 0.06
 EVALUATION_STEPS = 67
 N_TRAINING_EPISODES = 500
+ALL_ALGORITHMS = ("ippo", "mappo", "maddpg", "coma", "commnet", "vdn")
 
 
 # ---------------------------------------------------------------------------
@@ -104,13 +116,13 @@ def evaluate_scripted_baseline(
 
 
 def evaluate_learned_policy(
-    policy: IPPO | MAPPO,
+    policy: IPPO | MAPPO | COMA | CommNet | VDN,
     env: ParticleCollectorEnv,
     seeds: tuple[int, ...],
     algorithm: str,
     train_seed: int,
 ) -> dict:
-    """Evaluate a trained IPPO or MAPPO policy over diagnostic eval seeds."""
+    """Evaluate a trained on-policy algorithm over diagnostic eval seeds."""
     yields = []
     for seed in seeds:
         observations, _ = env.reset(seed=seed)
@@ -124,6 +136,36 @@ def evaluate_learned_policy(
 
     return {
         "algorithm": algorithm,
+        "train_seed": train_seed,
+        "eval_seeds": list(seeds),
+        "yields": yields,
+        "mean_yield": float(np.mean(yields)),
+        "std_yield": float(np.std(yields)),
+        "min_yield": float(np.min(yields)),
+        "max_yield": float(np.max(yields)),
+    }
+
+
+def evaluate_maddpg_policy(
+    policy: MADDPG,
+    env: ParticleCollectorEnv,
+    seeds: tuple[int, ...],
+    train_seed: int,
+) -> dict:
+    """Evaluate a trained MADDPG policy in deterministic mode."""
+    yields = []
+    for seed in seeds:
+        observations, _ = env.reset(seed=seed)
+        done = False
+        while not done:
+            actions = policy.get_actions(observations, explore=False)
+            observations, reward, terminated, truncated, info = env.step(actions)
+            done = terminated or truncated
+        yield_frac = info["captured_total"] / env.config.particle_count
+        yields.append(float(yield_frac))
+
+    return {
+        "algorithm": "MADDPG",
         "train_seed": train_seed,
         "eval_seeds": list(seeds),
         "yields": yields,
@@ -160,18 +202,39 @@ def main() -> None:
         "--n-training-episodes",
         type=int,
         default=N_TRAINING_EPISODES,
-        help="Number of training episodes per seed.",
+        help="Number of training episodes per seed (on-policy algorithms).",
+    )
+    parser.add_argument(
+        "--n-training-steps",
+        type=int,
+        default=100_000,
+        help="Number of environment steps per seed (MADDPG off-policy).",
     )
     parser.add_argument(
         "--skip-mappo",
         action="store_true",
-        help="Skip MAPPO training (saves time during debugging).",
+        help="Skip MAPPO training (legacy flag; use --algorithms instead).",
+    )
+    parser.add_argument(
+        "--algorithms",
+        nargs="+",
+        choices=list(ALL_ALGORITHMS),
+        default=list(ALL_ALGORITHMS),
+        metavar="ALG",
+        help=(
+            f"Algorithms to train (default: all). "
+            f"Choices: {', '.join(ALL_ALGORITHMS)}"
+        ),
     )
     args = parser.parse_args()
 
     train_seeds = TRAIN_SEEDS[:2] if args.dry_run else TRAIN_SEEDS
     eval_seeds = EVAL_SEEDS[:2] if args.dry_run else EVAL_SEEDS
     n_episodes = 10 if args.dry_run else args.n_training_episodes
+    n_steps = 2000 if args.dry_run else args.n_training_steps
+
+    # Respect legacy --skip-mappo flag.
+    algorithms = [a for a in args.algorithms if not (a == "mappo" and args.skip_mappo)]
 
     env_config = ParticleEnvConfig(horizon=EVALUATION_STEPS, signal_strength=FROZEN_ALPHA)
     env = ParticleCollectorEnv(env_config)
@@ -188,7 +251,9 @@ def main() -> None:
         },
         "train_seeds": list(train_seeds),
         "eval_seeds": list(eval_seeds),
+        "algorithms_run": algorithms,
         "n_training_episodes": n_episodes,
+        "n_training_steps_maddpg": n_steps,
         "note": (
             "Eval seeds are diagnostic only and ineligible for confirmation. "
             "MARL training uses per-seed random initialisation; results may "
@@ -197,6 +262,10 @@ def main() -> None:
         "scripted_baselines": {},
         "ippo_results": [],
         "mappo_results": [],
+        "maddpg_results": [],
+        "coma_results": [],
+        "commnet_results": [],
+        "vdn_results": [],
     }
 
     # ------------------------------------------------------------------
@@ -225,51 +294,52 @@ def main() -> None:
     print(f"\nFlat obs_dim = {obs_dim}")
 
     # ------------------------------------------------------------------
-    # IPPO training
+    # Helper: build a per-seed result dict from a history
     # ------------------------------------------------------------------
-    print(f"\n{'='*60}")
-    print(f"Training IPPO across {len(train_seeds)} seeds ...")
-    print(f"{'='*60}")
-    for train_seed in train_seeds:
-        print(f"\n[IPPO] seed={train_seed} ...")
-        t0 = time.time()
-        history = train_ippo(
-            env_config,
-            n_episodes=n_episodes,
-            eval_every=max(1, n_episodes // 5),
-            seed=train_seed,
-            verbose=False,
-        )
-        elapsed = time.time() - t0
-
-        # Reconstruct policy and evaluate.
-        ippo = IPPO(obs_dim=obs_dim, n_agents=env_config.collector_count)
-        # Re-train was already done; use the trained history's networks.
-        # (trainer returns history but not the policy object — we need to re-run)
-        # For a lightweight eval we use the final eval from history instead.
+    def _make_result(history: dict, train_seed: int, n_ep: int) -> dict:
         final_eval = history.get("final_eval", {})
-
-        result = {
+        return {
             "train_seed": train_seed,
-            "n_training_episodes": n_episodes,
+            "n_training_episodes": n_ep,
             "training_history_summary": {
                 "n_updates": len(history.get("losses", [])),
                 "final_loss": history["losses"][-1] if history.get("losses") else None,
             },
             "final_eval_fixed_seeds": final_eval,
-            "wall_time_s": elapsed,
         }
-        report["ippo_results"].append(result)
-        print(
-            f"  [IPPO] seed={train_seed}: "
-            f"final_eval_yield={final_eval.get('mean_yield', 'N/A'):.3f}  "
-            f"({elapsed:.1f}s)"
-        )
+
+    # ------------------------------------------------------------------
+    # IPPO training
+    # ------------------------------------------------------------------
+    if "ippo" in algorithms:
+        print(f"\n{'='*60}")
+        print(f"Training IPPO across {len(train_seeds)} seeds ...")
+        print(f"{'='*60}")
+        for train_seed in train_seeds:
+            print(f"\n[IPPO] seed={train_seed} ...")
+            t0 = time.time()
+            history = train_ippo(
+                env_config,
+                n_episodes=n_episodes,
+                eval_every=max(1, n_episodes // 5),
+                seed=train_seed,
+                verbose=False,
+            )
+            elapsed = time.time() - t0
+            final_eval = history.get("final_eval", {})
+            result = _make_result(history, train_seed, n_episodes)
+            result["wall_time_s"] = elapsed
+            report["ippo_results"].append(result)
+            print(
+                f"  [IPPO] seed={train_seed}: "
+                f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
+                f"({elapsed:.1f}s)"
+            )
 
     # ------------------------------------------------------------------
     # MAPPO training
     # ------------------------------------------------------------------
-    if not args.skip_mappo:
+    if "mappo" in algorithms:
         print(f"\n{'='*60}")
         print(f"Training MAPPO across {len(train_seeds)} seeds ...")
         print(f"{'='*60}")
@@ -284,11 +354,38 @@ def main() -> None:
                 verbose=False,
             )
             elapsed = time.time() - t0
+            final_eval = history.get("final_eval", {})
+            result = _make_result(history, train_seed, n_episodes)
+            result["wall_time_s"] = elapsed
+            report["mappo_results"].append(result)
+            print(
+                f"  [MAPPO] seed={train_seed}: "
+                f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
+                f"({elapsed:.1f}s)"
+            )
 
+    # ------------------------------------------------------------------
+    # MADDPG training  (off-policy)
+    # ------------------------------------------------------------------
+    if "maddpg" in algorithms:
+        print(f"\n{'='*60}")
+        print(f"Training MADDPG across {len(train_seeds)} seeds ({n_steps} steps each) ...")
+        print(f"{'='*60}")
+        for train_seed in train_seeds:
+            print(f"\n[MADDPG] seed={train_seed} ...")
+            t0 = time.time()
+            history = train_maddpg(
+                env_config,
+                n_steps=n_steps,
+                eval_every=max(1, n_steps // 5),
+                seed=train_seed,
+                verbose=False,
+            )
+            elapsed = time.time() - t0
             final_eval = history.get("final_eval", {})
             result = {
                 "train_seed": train_seed,
-                "n_training_episodes": n_episodes,
+                "n_training_steps": n_steps,
                 "training_history_summary": {
                     "n_updates": len(history.get("losses", [])),
                     "final_loss": history["losses"][-1] if history.get("losses") else None,
@@ -296,14 +393,96 @@ def main() -> None:
                 "final_eval_fixed_seeds": final_eval,
                 "wall_time_s": elapsed,
             }
-            report["mappo_results"].append(result)
+            report["maddpg_results"].append(result)
             print(
-                f"  [MAPPO] seed={train_seed}: "
-                f"final_eval_yield={final_eval.get('mean_yield', 'N/A'):.3f}  "
+                f"  [MADDPG] seed={train_seed}: "
+                f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
                 f"({elapsed:.1f}s)"
             )
-    else:
-        print("\n[Skipped MAPPO training (--skip-mappo)]")
+
+    # ------------------------------------------------------------------
+    # COMA training
+    # ------------------------------------------------------------------
+    if "coma" in algorithms:
+        print(f"\n{'='*60}")
+        print(f"Training COMA across {len(train_seeds)} seeds ...")
+        print(f"{'='*60}")
+        for train_seed in train_seeds:
+            print(f"\n[COMA] seed={train_seed} ...")
+            t0 = time.time()
+            history = train_coma(
+                env_config,
+                n_episodes=n_episodes,
+                eval_every=max(1, n_episodes // 5),
+                seed=train_seed,
+                verbose=False,
+            )
+            elapsed = time.time() - t0
+            final_eval = history.get("final_eval", {})
+            result = _make_result(history, train_seed, n_episodes)
+            result["wall_time_s"] = elapsed
+            report["coma_results"].append(result)
+            print(
+                f"  [COMA] seed={train_seed}: "
+                f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
+                f"({elapsed:.1f}s)"
+            )
+
+    # ------------------------------------------------------------------
+    # CommNet training
+    # ------------------------------------------------------------------
+    if "commnet" in algorithms:
+        print(f"\n{'='*60}")
+        print(f"Training CommNet across {len(train_seeds)} seeds ...")
+        print(f"{'='*60}")
+        for train_seed in train_seeds:
+            print(f"\n[CommNet] seed={train_seed} ...")
+            t0 = time.time()
+            history = train_commnet(
+                env_config,
+                n_episodes=n_episodes,
+                eval_every=max(1, n_episodes // 5),
+                seed=train_seed,
+                verbose=False,
+            )
+            elapsed = time.time() - t0
+            final_eval = history.get("final_eval", {})
+            result = _make_result(history, train_seed, n_episodes)
+            result["wall_time_s"] = elapsed
+            report["commnet_results"].append(result)
+            print(
+                f"  [CommNet] seed={train_seed}: "
+                f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
+                f"({elapsed:.1f}s)"
+            )
+
+    # ------------------------------------------------------------------
+    # VDN training
+    # ------------------------------------------------------------------
+    if "vdn" in algorithms:
+        print(f"\n{'='*60}")
+        print(f"Training VDN across {len(train_seeds)} seeds ...")
+        print(f"{'='*60}")
+        for train_seed in train_seeds:
+            print(f"\n[VDN] seed={train_seed} ...")
+            t0 = time.time()
+            history = train_vdn(
+                env_config,
+                n_episodes=n_episodes,
+                eval_every=max(1, n_episodes // 5),
+                seed=train_seed,
+                verbose=False,
+            )
+            elapsed = time.time() - t0
+            final_eval = history.get("final_eval", {})
+            result = _make_result(history, train_seed, n_episodes)
+            result["wall_time_s"] = elapsed
+            report["vdn_results"].append(result)
+            print(
+                f"  [VDN] seed={train_seed}: "
+                f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
+                f"({elapsed:.1f}s)"
+            )
 
     # ------------------------------------------------------------------
     # Write report
@@ -320,12 +499,20 @@ def main() -> None:
     print(f"{'='*60}")
     for name, result in report["scripted_baselines"].items():
         print(f"  scripted/{name:40s}: mean_yield={result['mean_yield']:.4f}")
-    for r in report["ippo_results"]:
-        ey = r["final_eval_fixed_seeds"].get("mean_yield", float("nan"))
-        print(f"  IPPO seed={r['train_seed']:5d}:                             final_eval_yield={ey:.4f}")
-    for r in report["mappo_results"]:
-        ey = r["final_eval_fixed_seeds"].get("mean_yield", float("nan"))
-        print(f"  MAPPO seed={r['train_seed']:5d}:                            final_eval_yield={ey:.4f}")
+    for alg_key, label in [
+        ("ippo_results", "IPPO"),
+        ("mappo_results", "MAPPO"),
+        ("maddpg_results", "MADDPG"),
+        ("coma_results", "COMA"),
+        ("commnet_results", "CommNet"),
+        ("vdn_results", "VDN"),
+    ]:
+        for r in report[alg_key]:
+            ey = r["final_eval_fixed_seeds"].get("mean_yield", float("nan"))
+            print(
+                f"  {label} seed={r['train_seed']:5d}: "
+                f"final_eval_yield={ey:.4f}"
+            )
 
 
 if __name__ == "__main__":
