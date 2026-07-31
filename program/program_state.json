@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "project": "stochastic-particle-system",
+  "repository_full_name": "PuffBear/stochastic-particle-system",
+  "repository_visibility": "public",
+  "publication_authorized_on": "2026-07-31",
+  "autonomy_branch": "research-autonomy",
+  "timezone": "Asia/Kolkata",
+  "report_email": "agriya.yadav_ug2023@ashoka.edu.in",
+  "attention_mode": "minimal",
+  "no_reply_policy": "continue-safe-default",
+  "active_papers": 1,
+  "phase": "simulator-contract-and-benchmark-initialization",
+  "primary_question": "What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?",
+  "inactive_scopes": [
+    "baseball-paper-a",
+    "baseball-paper-b",
+    "h-sharc",
+    "counter-swarm"
+  ],
+  "hpc_status": "not-configured",
+  "last_updated": "2026-07-31"
+}
