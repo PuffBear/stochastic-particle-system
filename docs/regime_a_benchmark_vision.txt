@@ -1,0 +1,154 @@
+A Benchmark for Detecting and Exploiting Weak Structure
+            in Stochastic Particle Systems
+
+
+
+1     Research vision
+This project should be a benchmark and dataset paper, not an architecture paper. The benchmark studies a small team
+of mobile collectors operating in a two-dimensional environment filled with many non-learning particles. Individual
+particle motion is noisy, but the population may contain weak and persistent structure: a drift, transport corridor,
+vortex, or correlated collective pattern. Each collector sees only a local neighbourhood. The scientific problem is to
+determine when a team can distinguish genuine structure from random fluctuation and exploit it before the opportunity
+disappears.
+The key mechanic is irreversible capture growth. When a free particle touches a collector, it attaches permanently.
+Later particles can attach to the collector or to its existing aggregate, so an early interception may produce a capture
+cascade. This creates a useful ambiguity. A large cascade may indicate that the collectors correctly located a transport
+path, or it may be the amplified consequence of one lucky collision. The benchmark must therefore separate three
+stages: evidence gathering before contact, the first successful interception, and the growth that follows.
+The central question is:
+
+      At what signal strength can locally informed collectors reliably detect and exploit hidden structure in
+      stochastic particle motion, and how do coordination and irreversible aggregation change that threshold?
+
+The particles are not learning adversaries. They follow fixed stochastic rules. This makes the first paper interpretable
+and reproducible: performance changes can be attributed to observation quality, coordination, signal strength, or
+capture geometry rather than to instability from two learning populations. Strategic evasion is a natural later extension,
+but it is not part of the initial benchmark.
+The contribution should be a controlled environment family, a trajectory dataset, a set of transparent baselines, and
+empirical measurements of where reliable exploitation begins. The paper should not claim a new general-purpose
+MARL solution. Standard learning methods are included only as benchmark participants.
+
+
+2     The benchmark
+The canonical environment contains M mobile collectors and N particles in a bounded continuous arena. A practical
+starting point is M = 4 and N ∈ [250, 500]. Collectors have bounded speed and local sensing. Particles move under a
+mixture of stochastic diffusion, local collective interactions, and an optional hidden transport field.
+At a high level, a free particle follows
+
+                                                     collective
+                                                                                √
+                                 xk,t+1 = xk,t + ∆t fk,t        + αbz (xk,t ) + σ ∆t εk,t ,                           (1)
+
+where f collective controls passive correlations among nearby particles, bz is a latent field, α controls signal strength,
+and σ controls stochastic noise. The benchmark varies the ratio between structured and unstructured motion rather
+than fixing a single difficulty level.
+The first release should contain only three environment families:
+ • Null motion: diffusion and optional collective interactions, but no planted transport field.
+ • Uniform drift: a simple field with controllable direction and strength.
+ • Curved transport: one nonlinear family, such as a vortex or curved corridor.
+
+
+
+                                                             1
+These are enough to test whether a method detects a signal, generalizes across field orientations, and handles structure
+more complex than a single direction. Moving fields, reactive avoidance, and multiple interacting swarms should be
+postponed.
+Each collector observes nearby particle positions and short velocity histories. It does not observe the global field, the
+full particle configuration, or the true signal strength. The benchmark should support two information conditions:
+independent collectors using only local observations, and collectors allowed to share bounded messages or local
+summaries. This isolates the value of coordination without requiring a new coordination architecture.
+Two capture conditions should be implemented. In the fixed-geometry condition, a collector keeps a constant capture
+radius. In the growing-geometry condition, captured particles remain attached and extend the absorbing boundary.
+The comparison reveals whether irreversible aggregation changes only total capture volume or creates a genuinely
+path-dependent problem in which early positioning determines later success.
+The reward can remain simple: total captured fraction minus small movement and communication costs. The
+benchmark should not directly reward classification of the latent field. Signal detection should be evaluated through
+behaviour and diagnostics, not supplied as a supervised objective.
+The primary difficulty axis is signal-to-noise ratio. For each method, the benchmark estimates the weakest signal at
+which performance becomes reliably distinguishable from matched no-signal behaviour. Signal-present and signal-absent
+episodes should share initial particle positions and random noise whenever possible, differing only in whether the latent
+field is active. This matched design reduces variance and makes causal interpretation much stronger.
+
+
+3    Dataset, baselines, and empirical claims
+Every episode should be saved as a trajectory rather than only as a final score. The released dataset should contain
+particle positions and velocities, collector observations and actions, capture events, aggregate geometry, latent-field
+parameters, signal labels, environment configuration, and random seed. This supports future work on representation
+learning, system identification, offline MARL, imitation, and event prediction without requiring every user to rerun
+the simulator.
+The benchmark should provide fixed train, validation, and test splits. Test episodes should hold out field orientations,
+initial configurations, and random seeds. One stronger out-of-distribution split should hold out either an arena scale,
+sensing radius, or signal-strength interval. The release should also include a compact subset that can be evaluated on
+a workstation and a full dataset generated on the HPC system.
+The baseline suite should be small and interpretable:
+ • random movement;
+ • systematic coverage;
+ • local-density chasing;
+ • a scripted local flow estimator that follows estimated particle velocity;
+ • independent recurrent PPO;
+ • one standard cooperative MARL method, such as MAPPO;
+ • a privileged oracle that observes the true field.
+The scripted flow-estimation baseline is essential. It shows whether the signal is usable with local temporal information
+even if learned agents fail. The privileged oracle shows the maximum value available from knowing the latent field.
+Together they prevent a weak MARL result from being mistaken for proof that the task itself is impossible.
+The paper should target four empirical claims.
+Claim 1: A detectability boundary exists. As signal strength increases, methods move from chance-level
+behaviour to reliable interception. The paper should estimate this transition rather than report performance at one
+arbitrary noise setting.
+Claim 2: Aggregation amplifies both signal and accident. Growing geometry should improve post-contact
+capture when a true transport structure exists, but may also increase false cascades under null motion. Reporting
+both effects is more informative than reporting total capture alone.
+Claim 3: Coordination is most useful near the boundary. At very low signal, no method has enough information.
+At very high signal, individual collectors may already succeed. The largest coordination advantage should appear in
+
+
+                                                           2
+the intermediate regime where distributed observations jointly resolve an otherwise ambiguous pattern.
+Claim 4: Difficulty shifts under scale. A restrained scaling study should vary collector count and one environmental
+axis, preferably arena size or sensing radius. The result should show how the detectability boundary moves when the
+same local sensing capability is applied to a larger or more weakly observed system.
+The three indispensable figures are therefore:
+
+1. success or capture versus signal strength for all baselines;
+2. fixed versus growing geometry, including false cascades under null motion;
+3. independent versus coordinated collectors around the transition region.
+
+A fourth scaling figure is valuable but not required for the minimum viable paper.
+
+
+4    Two-week empirical plan
+The HPC deadline means the project must be frozen quickly. The goal is not to exhaust every design possibility. It is
+to leave the two-week window with a complete canonical dataset and the runs needed for the paper’s central figures.
+Days 1–2: Freeze the simulator. Implement null motion, uniform drift, one curved field, local observations, fixed
+and growing capture, deterministic seeds, and matched signal/no-signal episodes. Select one canonical arena, collector
+count, particle count, and episode horizon. After Day 2, modify mechanics only to fix correctness bugs.
+Days 3–4: Validate with transparent baselines. Run random, coverage, density, flow-estimation, and oracle
+policies using a few seeds. Identify a signal range containing clear failure, a transition region, and clear success.
+Confirm that growing geometry changes outcomes in a path-dependent way rather than simply enlarging every score.
+Days 5–8: Run the main detectability sweep. Use roughly six to eight signal levels. Start with five seeds per
+cell for all baselines. Allocate additional seeds only near the transition and for headline comparisons. Run fixed and
+growing geometry with matched null controls.
+Days 9–10: Run the coordination comparison. Compare independent recurrent PPO and one standard
+cooperative MARL baseline at one low, two intermediate, and one high signal level. Avoid broad hyperparameter
+sweeps. The purpose is to locate where information sharing matters, not to crown an architecture.
+Days 11–12: Run one scaling study. Vary collector count and either arena size or sensing radius. Use fewer signal
+points concentrated near the canonical transition. Do not add another environment family at this stage.
+Days 13–14: Verify and freeze. Rerun missing or anomalous cells, calculate seed-level bootstrap intervals, generate
+final figures, export the complete trajectory dataset, and freeze all configurations and code. Exploratory jobs should
+stop once the required figure cells are complete.
+The minimum successful outcome after two weeks is not a finished polished paper. It is a frozen benchmark, a
+documented dataset, and enough validated runs to support the first three claims. Writing, analysis refinement, and
+additional lightweight baselines can continue after HPC access ends.
+The paper’s concise contribution statement should be:
+
+     We introduce a controlled benchmark and trajectory dataset for measuring when multi-agent collectors
+     can detect and exploit weak structure in stochastic particle motion. The benchmark separates pre-contact
+     detection from post-contact aggregation, quantifies noise-induced capture cascades through matched null
+     episodes, and measures how coordination and environmental scale shift the signal strength required for
+     reliable collection.
+
+
+
+
+                                                           3
+
