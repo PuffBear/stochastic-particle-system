@@ -18,10 +18,10 @@
       "id": "paper-a",
       "title": "Weak-field multi-collector benchmark",
       "status": "active",
-      "current_stage": "end-to-end-environment-core-passed",
+      "current_stage": "scripted-calibration-complete-confirmatory-no-go",
       "hypothesis": "A frozen local-flow policy has a finite grid-censored positive matched first-interception boundary under the primary uniform-field condition.",
       "kill_criterion": "Stop or narrow if the oracle cannot exploit the field, exact counterfactual matching fails, or passive and swept-area controls explain the effect.",
-      "open_blocker": "Event-keyed tie breaking, within-step continuous contact or timestep convergence, matched-pair episode wrapper, and frozen local_flow_v1 remain incomplete; growing geometry is not primary-ready."
+      "open_blocker": "The primary policy is four independent replicas and fails the AAMAS multi-agent gate; passive/random controls descriptively match or exceed it; timestep convergence and an independent confirmatory protocol remain unresolved. Growing geometry is not primary-ready."
     },
     {
       "id": "paper-b",
@@ -33,24 +33,27 @@
       "open_blocker": "Intentionally inactive."
     }
   ],
-  "phase": "end-to-end-environment-core-passed-with-blockers",
-  "primary_question": "What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?",
+  "phase": "exploratory-calibration-complete-confirmatory-blocked",
+  "primary_question": "Under the frozen canonical uniform-drift task and scripted local_flow_v1, which preregistered rho is the first grid point at which mean matched horizon-censored first-interception improvement has a strictly positive one-sided simultaneous 95% lower confidence bound?",
   "primary_condition": "local_flow_v1",
   "scientific_results_available": false,
+  "exploratory_calibration_available": true,
+  "exploratory_result": "SPS-P02 has no positive simultaneous LCB through rho=2.0; this cannot update SPS-C01 because calibration seeds were used.",
   "engineering_tests": {
-    "passed": 44,
+    "passed": 79,
     "failed": 0,
-    "scope": "simulation primitives, collector dynamics, deterministic reset, causal local observations, minimal environment, smoke policies, trajectory schemas, and limiting cases"
+    "scope": "simulation primitives, exact specular continuous contact, event-keyed ties, deterministic reset, causal local observations, matched runner, immutable schema-validated artifacts, scripted policies, inference, and limiting cases"
   },
   "fresh_review": {
     "date": "2026-07-31",
     "verdict": "reject",
-    "score": "2/10",
-    "snapshot": "post-environment",
-    "strongest_new_threat": "Endpoint-only capture can miss within-step crossings and move the primary first-contact outcome."
+    "score": "3/10",
+    "confidence": "5/5",
+    "snapshot": "compressed-week-post-pilot",
+    "strongest_new_threat": "The provisional 0.05 simultaneous half-width is coarser than observed effects near 0.004--0.011, so a 24-seed confirmation would be structurally uninformative."
   },
   "hpc_status": "not-needed",
-  "report_count": 3,
+  "report_count": 4,
   "inactive_scopes": [
     "baseball-paper-a",
     "baseball-paper-b",
