@@ -10,14 +10,27 @@
   "attention_mode": "minimal",
   "no_reply_policy": "continue-safe-default",
   "active_papers": 1,
-  "phase": "simulator-contract-and-benchmark-initialization",
+  "phase": "correctness-core-partial",
   "primary_question": "What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?",
+  "primary_condition": "local_flow_v1",
+  "scientific_results_available": false,
+  "engineering_tests": {
+    "passed": 17,
+    "failed": 0,
+    "scope": "simulation primitives and matched-pair utilities only"
+  },
+  "fresh_review": {
+    "date": "2026-07-31",
+    "verdict": "reject",
+    "score": "2/10"
+  },
+  "hpc_status": "not-needed",
+  "report_count": 2,
   "inactive_scopes": [
     "baseball-paper-a",
     "baseball-paper-b",
     "h-sharc",
     "counter-swarm"
   ],
-  "hpc_status": "not-configured",
   "last_updated": "2026-07-31"
 }
