@@ -1,0 +1,167 @@
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\newcommand{\pending}[1]{\textcolor{red}{\textbf{PENDING: #1}}}
+
+\title{Detecting Weak Structure in Stochastic Particle Systems:\\
+A Matched-Counterfactual Multi-Collector Benchmark}
+\author{Anonymous Authors}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We specify a benchmark for measuring when a team of locally observing mobile
+collectors can behaviorally exploit a weak latent transport field in the
+motion of many stochastic, non-learning particles.  The primary design couples
+each signal episode to a no-signal episode with identical initial states,
+Brownian forcing, field geometry, and random-number provenance.  It separates
+pre-contact search and first interception from irreversible post-contact
+aggregation.  The proposed primary outcome is the matched reduction in
+time-to-first interception under a fixed local-flow policy, reported against a
+dimensionless per-step drift-to-Brownian ratio and with a grid-censored
+boundary.  Transparent random, passive, coverage, flow-following, and
+privileged controls precede recurrent IPPO and MAPPO.  This document currently
+records the formal design and correctness requirements.  \textbf{No benchmark
+result or detectability-boundary claim is reported.}
+\end{abstract}
+
+\section{Introduction}
+
+Many local observations of stochastic motion may contain a weak common
+structure even when any individual displacement is dominated by noise.  A
+mobile team can, in principle, use those observations to intercept particle
+flow.  In practice, a large collection event can also result from passive flux
+or one lucky contact amplified by growing capture geometry.
+
+We therefore ask one question: \emph{what is the weakest latent-field signal
+strength at which a team of locally observing collectors achieves a reliably
+positive matched improvement in pre-contact first-interception performance
+over otherwise identical no-signal episodes?}
+
+The closest current work already studies a locally informed mobile collector
+capturing passive particles in chaotic flow~\cite{wang2025collector}, and
+reinforcement learning has already produced collective foraging in locally
+observing active particles~\cite{loeffler2023foraging}.  We do not claim the
+first mobile particle collector, vortex-flow collection problem, particle
+foraging system, or local-sensing learning formulation.  The proposed
+contribution is a controlled multi-collector measurement instrument combining
+matched null episodes, a policy-relative detectability boundary, explicit
+first-contact/cascade separation, and trajectory-level release.
+
+\section{Canonical stochastic system}
+
+The canonical domain is the unit square with reflecting boundaries.  Four
+collectors act in a population of \(N=256\) non-learning particles.  Before
+capture, particle \(k\) follows
+\[
+ x_{k,t+1} =
+ \mathcal{R}\!\left(
+ x_{k,t} + \Delta t\,\alpha b_z(x_{k,t})
+ + \sigma\sqrt{\Delta t}\,\epsilon_{k,t}
+ \right),
+\]
+where \(\epsilon_{k,t}\sim\mathcal{N}(0,I_2)\), \(\mathcal{R}\) is exact
+reflection, \(\alpha\) is field strength, and \(b_z\) is null, uniform, or
+vortex flow.  Collectors use bounded holonomic velocity actions and local
+particle observations.  The primary condition uses a uniform field, fixed
+capture geometry, no shared team summary, and a frozen deterministic
+local-flow policy.
+
+\section{Matched primary estimand}
+
+For scenario seed \(s\), signal strength \(\alpha\), horizon \(H\), and
+condition \(c\in\{0,\alpha\}\), define
+\[
+T^*_{s,c} =
+\begin{cases}
+\text{first capture step in }\{1,\ldots,H\}, & \text{capture occurs},\\
+H+1, & \text{otherwise}.
+\end{cases}
+\]
+The paired improvement is
+\[
+D_s(\alpha)=\frac{T^*_{s,0}-T^*_{s,\alpha}}{H},
+\qquad
+\delta(\alpha)=\mathbb{E}_s[D_s(\alpha)].
+\]
+Positive values mean that the signal episode intercepted earlier than its
+matched null episode.  The dimensionless primary x-axis is the per-step
+drift-to-Brownian ratio
+\[
+\rho=\frac{\alpha\sqrt{\Delta t}}{\sigma}.
+\]
+
+Complete scenario-seed blocks, not particles, collectors, or time steps, are
+the sampling units.  The primary boundary is the smallest tested grid point
+whose one-sided simultaneous 95\% lower confidence bound exceeds zero.  It is
+reported as a grid interval or as censored; continuous logistic or isotonic
+crossings are sensitivity analyses only.
+
+\section{Correctness gates}
+
+The simulator must establish deterministic random streams, exact zero-signal
+equivalence, Brownian scaling, uniform-field displacement, multi-wall
+reflection, single permanent capture ownership, reproducible ties, absence of
+field leakage, and matched signal/null provenance.  Fixed and growing
+geometries must agree through first contact under matched actions and noise.
+Failure blocks performance experiments.
+
+\section{Evaluation plan}
+
+Scripted policies are evaluated before learning: stationary/passive, random,
+coverage, density-greedy, local-flow, team-flow, and privileged field-aware
+controls.  Single-collector and independent multi-collector controls separate
+parallel swept area from coordination.  Recurrent IPPO and standard MAPPO are
+benchmark participants only after scripted and data-validation gates pass.
+
+Growing capture, bounded shared summaries, vortex fields, and collector-count
+scaling are secondary analyses.  An aggregation claim additionally requires an
+area- or perimeter-matched non-growing control.  A coordination claim requires
+matched information bandwidth, policy capacity, action budget, and evaluation
+conditions.
+
+\section{Current evidence status}
+
+\pending{PettingZoo environment, observation construction, scripted policies,
+trajectory writer, dataset manifest, statistical boundary estimator,
+performance runs, figures, tables, and all empirical conclusions.}
+
+The current implementation evidence is limited to unit tests for random-stream
+separation, field primitives, exact reflection, fixed/growing capture
+invariants, matched free-particle counterfactual propagation, and metric
+microcases.  These tests establish code behavior only; they do not support a
+scientific claim.
+
+\section{Limitations}
+
+The boundary is policy-, horizon-, field-, geometry-, and resource-relative,
+not a universal physical critical point.  Common random numbers reduce
+variance only when their coupling remains causally coherent.  A positive
+paired effect can still arise from passive transport, so random, stationary,
+and coverage controls govern the interpretation.  Without an isolated effect
+of complementary local information or coordination, the benchmark's AAMAS fit
+would remain weak.
+
+\begin{thebibliography}{9}
+\bibitem{wang2025collector}
+Wang et al.
+\newblock Mobile-collector capture of particles in a chaotic flow.
+\newblock \emph{PLOS ONE}, 2025.
+\newblock \url{https://doi.org/10.1371/journal.pone.0329766}.
+
+\bibitem{loeffler2023foraging}
+R. C. L\"offler, E. Panizon, and C. Bechinger.
+\newblock Collective foraging of active particles trained by reinforcement
+learning.
+\newblock \emph{Scientific Reports}, 2023.
+\newblock \url{https://doi.org/10.1038/s41598-023-44268-3}.
+\end{thebibliography}
+
+\end{document}
+
