@@ -1,7 +1,10 @@
 {
   "schema_version": 1,
+  "deadline": "unverified-2026-10-09-planning-horizon",
+  "internal_deadline": "2026-09-29-planning-freeze",
   "project": "stochastic-particle-system",
   "repository_full_name": "PuffBear/stochastic-particle-system",
+  "repository_status": "configured",
   "repository_visibility": "public",
   "publication_authorized_on": "2026-07-31",
   "autonomy_branch": "research-autonomy",
@@ -10,22 +13,44 @@
   "attention_mode": "minimal",
   "no_reply_policy": "continue-safe-default",
   "active_papers": 1,
-  "phase": "correctness-core-partial",
+  "papers": [
+    {
+      "id": "paper-a",
+      "title": "Weak-field multi-collector benchmark",
+      "status": "active",
+      "current_stage": "end-to-end-environment-core-passed",
+      "hypothesis": "A frozen local-flow policy has a finite grid-censored positive matched first-interception boundary under the primary uniform-field condition.",
+      "kill_criterion": "Stop or narrow if the oracle cannot exploit the field, exact counterfactual matching fails, or passive and swept-area controls explain the effect.",
+      "open_blocker": "Event-keyed tie breaking, within-step continuous contact or timestep convergence, matched-pair episode wrapper, and frozen local_flow_v1 remain incomplete; growing geometry is not primary-ready."
+    },
+    {
+      "id": "paper-b",
+      "title": "Inactive placeholder",
+      "status": "paused",
+      "current_stage": "inactive",
+      "hypothesis": "",
+      "kill_criterion": "No second paper may activate without a genuinely separable question and Program Director decision.",
+      "open_blocker": "Intentionally inactive."
+    }
+  ],
+  "phase": "end-to-end-environment-core-passed-with-blockers",
   "primary_question": "What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?",
   "primary_condition": "local_flow_v1",
   "scientific_results_available": false,
   "engineering_tests": {
-    "passed": 17,
+    "passed": 44,
     "failed": 0,
-    "scope": "simulation primitives and matched-pair utilities only"
+    "scope": "simulation primitives, collector dynamics, deterministic reset, causal local observations, minimal environment, smoke policies, trajectory schemas, and limiting cases"
   },
   "fresh_review": {
     "date": "2026-07-31",
     "verdict": "reject",
-    "score": "2/10"
+    "score": "2/10",
+    "snapshot": "post-environment",
+    "strongest_new_threat": "Endpoint-only capture can miss within-step crossings and move the primary first-contact outcome."
   },
   "hpc_status": "not-needed",
-  "report_count": 2,
+  "report_count": 3,
   "inactive_scopes": [
     "baseball-paper-a",
     "baseball-paper-b",
