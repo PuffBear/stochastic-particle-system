@@ -1,0 +1,10 @@
+experiment_id: SPS-P04-ORACLE-STATE-REPAIR
+pre_registered_at_utc: 2026-07-31T15:50:00Z
+purpose: repeat the bounded oracle feasibility gate after correcting the oracle input from realized Brownian displacement to the latent current drift state specified by SPS-WO-04
+change_from_sps_p03: oracle receives current particle positions and current latent field velocity; no future Brownian increments; every physical task parameter remains canonical
+diagnostic_seeds: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008]
+alpha: [0.0, 0.03, 0.06, 0.12]
+policies: [stationary, true_field_upstream_control, full_state_interception_oracle, local_flow_v1]
+confirmation_eligible: false
+gate: positive mean passive-adjusted oracle gain, better absolute first-contact time than stationary and true-field-only controls, and positive direction in at least 6 of 8 seeds at one nonzero point
+stop_rule: if the gate fails, do not run shared-versus-independent or timestep scientific slices

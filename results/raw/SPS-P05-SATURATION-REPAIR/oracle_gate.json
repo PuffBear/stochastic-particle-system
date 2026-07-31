@@ -1,0 +1,36 @@
+{
+  "confirmation_eligible": false,
+  "downstream_sharing_run_authorized": false,
+  "experiment_id": "SPS-P05-SATURATION-REPAIR",
+  "gate_points": [
+    {
+      "alpha": 0.03,
+      "kappa": 0.25,
+      "mean_passive_adjusted_gain": 0.033437499999999995,
+      "mean_steps_earlier_than_stationary": 44.125,
+      "mean_steps_earlier_than_true_field_control": 18.5,
+      "passes": false,
+      "positive_seed_count": 3
+    },
+    {
+      "alpha": 0.06,
+      "kappa": 0.5,
+      "mean_passive_adjusted_gain": -0.015,
+      "mean_steps_earlier_than_stationary": 24.75,
+      "mean_steps_earlier_than_true_field_control": 26.0,
+      "passes": false,
+      "positive_seed_count": 4
+    },
+    {
+      "alpha": 0.12,
+      "kappa": 1.0,
+      "mean_passive_adjusted_gain": -0.013125000000000001,
+      "mean_steps_earlier_than_stationary": 25.5,
+      "mean_steps_earlier_than_true_field_control": 4.5,
+      "passes": false,
+      "positive_seed_count": 4
+    }
+  ],
+  "interpretation": "Diagnostic feasibility only; failure stops sharing execution.",
+  "oracle_gate_passed": false
+}

@@ -16,39 +16,59 @@ A Matched-Counterfactual Multi-Collector Benchmark}
 \maketitle
 
 \begin{abstract}
-We develop a benchmark for measuring when locally observing mobile collectors
-can exploit a weak latent transport field in many stochastic, non-learning
-particles. Each signal episode is paired with a no-signal episode sharing its
-initial state, Brownian forcing, field nuisance variables, and policy
-randomness. Fixed-geometry contact is solved along exact piecewise specular
-paths, and exact ownership ties are event-keyed. The proposed outcome is the
-matched reduction in time to first interception under a frozen local-flow
-policy, indexed by a dimensionless drift-to-Brownian ratio. A 12-seed
-exploratory calibration on five nonzero signal levels produced no positive
-simultaneous lower bound. At the strongest level, stationary, random, and
-privileged controls descriptively matched or exceeded the local-flow policy.
-Moreover, the four collectors execute identical independent rules, so the
-current treatment isolates no coordination mechanism and fails the intended
-AAMAS relevance gate. The calibration seeds are ineligible for confirmation:
-\textbf{no detectability boundary, coordination effect, or MARL result is
-claimed.}
+We develop a matched-counterfactual instrument for testing whether mobile
+collectors exploit a weak latent transport field beyond capture induced by
+passive advection. Each signal episode is paired with a no-signal episode
+sharing its initial state, Brownian forcing, field nuisance variables, and
+policy randomness. Fixed-geometry contact is solved along exact piecewise
+specular paths, and exact ownership ties are event-keyed. A 12-seed exploratory
+calibration produced no positive simultaneous lower bound, while stationary
+and random controls descriptively matched or exceeded the local-flow policy.
+We therefore corrected the first-event estimand to subtract the stationary
+signal--null response and introduced a catchability ratio that separates drift
+strength from collector speed. A distinct full-state action-feasible oracle
+failed that preregistered first-event feasibility gate after one bounded
+state-input repair: first contacts occurred within a few steps, indicating
+endpoint saturation rather than a compute shortage. We then changed only the
+endpoint and stopping rule to count unique team captures through the inclusive
+end of step 67, one sensing-radius traversal at maximum collector speed. On
+eight fresh diagnostic seeds at \(\alpha=0.06\), the oracle exceeded stationary
+collectors by 9.375 particles on average (8/8 positive) and the true-field-only
+control by 7.5 (7/8 positive); all frozen correctness, direction, targeting,
+pairing, checksum, and artifact gates passed. This establishes diagnostic
+action-contingent headroom for the redesigned endpoint only. The shared-summary
+treatment remains unexecuted and its claim remains blocked. \textbf{No
+coordination effect, timestep convergence, power, confirmation, learning, or
+MARL result is claimed.}
 \end{abstract}
 
 \section{Research question and novelty boundary}
 
-We ask exactly one question: \emph{what is the weakest latent-field signal
-strength at which a team of locally observing collectors achieves a reliably
-positive matched improvement in pre-contact first-interception performance
-over otherwise identical no-signal episodes?}
+The intended paper asks one question: \emph{with four collectors in the frozen
+unit-square task at \(\alpha=0.06\), does replacing each collector's independent
+local velocity estimate with the same bounded team-mean estimate increase the
+number of unique particles captured through the inclusive end of step 67?}
+This comparison is presently blocked rather than answered: the redesigned
+endpoint has passed its upstream action-sensitivity gate, but coupled-noise
+timestep validation and a separate sharing preregistration must precede any
+shared-versus-independent execution.
 
-Prior work already studies a locally informed mobile collector capturing
-passive particles in chaotic flow~\cite{wang2025collector}, and local-sensing
-reinforcement learning for active-particle foraging already
-exists~\cite{loeffler2023foraging}. We therefore do not claim the first mobile
-particle collector, locally guided capture task, particle-foraging problem, or
-local-sensing learning formulation. The intended contribution is narrower: a
-reproducible policy-relative boundary instrument under exact signal/null
-pairing and explicit multi-agent controls.
+Prior work already studies stationary capture in chaotic flow
+~\cite{wang2021stationary}, a locally informed mobile collector capturing
+passive particles~\cite{wang2025collector}, local-communication collective
+sensing~\cite{hornischer2019cimax}, learned and bandwidth-aware multi-agent
+communication~\cite{foerster2016dial,wang2020imac}, and local-sensing
+reinforcement learning for active-particle foraging
+~\cite{loeffler2023foraging}. We therefore do not claim the first mobile
+particle collector, locally guided capture task, distributed flow-sensing
+framework, bounded communication method, particle-foraging problem, or
+local-sensing learning formulation. A fixed team mean is only a mechanism
+probe. The defensible target, if upstream gates eventually pass, is the causal
+effect of sharing that precisely defined statistic under matched sensing,
+action, and policy-capacity budgets, beyond passive advection and independent
+parallel search. Exact within-step intersection is likewise not a numerical
+novelty or a substitute for convergence of stochastic hitting statistics
+~\cite{gobet2000,giles2008}.
 
 \section{Frozen system and local policy}
 
@@ -107,23 +127,61 @@ inside one Euler step; it is not evidence that the discretized stochastic
 dynamics have converged as \(\Delta t\to0\). Growing aggregates retain deferred
 endpoint semantics and are excluded from the primary experiment.
 
-\section{Paired estimand, runner, and provenance}
+\section{First-event diagnostic history, physical axes, and provenance}
 
-Let \(T^*_{s,c}\in\{1,\ldots,H,H+1\}\) be the one-based first-interception
-step for seed \(s\) and condition \(c\), with \(H+1\) denoting no contact. The
-paired gain and target mean are
+Let \(T^*_{s,\pi,c}\in\{1,\ldots,H,H+1\}\) be the one-based
+first-interception step for scenario seed \(s\), policy \(\pi\), and condition
+\(c\), with \(H+1\) denoting no contact. The policy-specific signal--null gain
+is
 \[
- D_s(\alpha)=\frac{T^*_{s,0}-T^*_{s,\alpha}}{H},\qquad
- \delta(\alpha)=\mathbb E_s[D_s(\alpha)],
+ G_s(\pi,\alpha)=
+ \frac{T^*_{s,\pi,0}-T^*_{s,\pi,\alpha}}{H}.
 \]
-and the dimensionless signal coordinate is
+Because the same signal can change passive flux, the corrected mechanism
+estimand subtracts the response of stationary collectors:
 \[
- \rho=\frac{\alpha\sqrt{\Delta t}}{\sigma}.
+ A_s(\pi,\alpha)=G_s(\pi,\alpha)-G_s(\mathrm{stationary},\alpha).
 \]
-Complete scenario-seed blocks are the sampling units. The primary boundary is
-the smallest preregistered grid point whose one-sided simultaneous 95\% lower
-bound is strictly positive; it is reported as a grid interval or as censored,
-without primary interpolation.
+For the superseded first-event coordination comparison,
+\[
+ \Gamma_s(\alpha)=A_s(\mathrm{shared},\alpha)
+ -A_s(\mathrm{independent},\alpha)
+ =G_s(\mathrm{shared},\alpha)-G_s(\mathrm{independent},\alpha).
+\]
+The stationary term cancels algebraically in \(\Gamma_s\), but all four
+absolute signal/null outcomes and both passive-adjusted effects must still be
+reported so that passive flux and endpoint saturation remain visible.
+
+The active redesigned endpoint instead lets
+\(Y_s(\pi,\alpha)\) denote the number of unique particles captured by the team
+through the inclusive end of step 67. The episode continues after its first
+contact. The window is
+\[
+ L=\left\lceil\frac{0.16}{0.12\times0.02}\right\rceil=67,
+\]
+so a maximum-speed collector can traverse one sensing radius. The frozen
+upstream contrast is
+\(d_s=Y_s(\mathrm{oracle},0.06)-Y_s(\mathrm{stationary},0.06)\), with practical
+threshold \(E[d_s]\geq4\), corresponding to one additional capture per
+collector. A mandatory targeting contrast replaces stationary with the
+true-field-only upstream control. Any later coordination estimand will be the
+matched seed-level difference
+\(Y_s(\mathrm{shared},0.06)-Y_s(\mathrm{independent},0.06)\); its minimum
+relevant effect, inference procedure, and seed budget have not been frozen.
+
+Two dimensionless coordinates are required:
+\[
+ \rho=\frac{\alpha\sqrt{\Delta t}}{\sigma},\qquad
+ \kappa=\frac{\alpha}{v_{\max}}.
+\]
+Here \(\rho\) compares drift with per-step Brownian displacement, whereas
+\(\kappa\) compares particle drift with collector control authority. Under the
+canonical \(\Delta t=0.02\), \(\sigma=0.06\), and \(v_{\max}=0.12\), the old
+\(\rho=2\) point has \(\kappa\approx7.07\); it is therefore a poor catchability
+diagnostic. The bounded oracle gate instead used
+\(\kappa\in\{0.25,0.5,1.0\}\). Complete scenario-seed blocks remain the
+sampling units. Any future boundary requires a separately preregistered grid,
+minimum effect, simultaneous lower bound, and independent confirmation seeds.
 
 The matched runner rejects a pair unless its environment configurations differ
 only in signal strength and the null strength is zero. It verifies identical
@@ -221,15 +279,106 @@ segments. Across the same 144 matched pairs, guarded diagnostics fell from
 28,929 to zero and zero of 144 first-interception outcomes changed. This
 supports the regression repair, not independent scientific replication.
 
-\paragraph{Seed budget.}
-The maximum exploratory simultaneous half-width was 0.03183. For target
-half-width 0.05, variance scaling gives
+\paragraph{Power status.}
+The earlier provisional 24-seed plan targeted a half-width of 0.05, which is
+coarser than the exploratory effects of approximately 0.004--0.011. It is not
+a scientifically usable confirmation budget and SPS-E01 remains blocked. No
+simulation-based power study has been run for the passive-adjusted or
+coordination estimand. \pending{After a redesigned endpoint passes its oracle
+and timestep gates, freeze a minimum relevant effect and calibrate type-I error
+and power over complete scenario-seed blocks before authorizing confirmation.}
+
+\section{First-event oracle failure on the catchable grid}
+
+The legacy \texttt{privileged\_upstream\_oracle} is renamed conceptually as a
+\emph{true-field upstream control}: it knows the true field direction and moves
+upstream, but it neither observes every target position nor computes a feasible
+intercept. It is not an interception oracle. The distinct full-state oracle
+observes all free-particle positions and the known current deterministic drift,
+assigns distinct feasible targets to collectors over a bounded receding
+horizon, obeys the same action and speed limits, and receives no future
+Brownian increments.
+
+SPS-P03 exposed an implementation error: the first oracle version treated the
+last realized Brownian displacement as predictive motion state. The only
+permitted state-input repair replaced that quantity with current deterministic
+drift and was preregistered as SPS-P04. The corrected oracle still failed every
+nonzero feasibility point (Table~\ref{tab:p04}). This is an exploratory
+diagnostic gate, not a significance test or confirmatory claim.
+
+\begin{table}[ht]
+\centering
+\caption{SPS-P04 corrected full-state-oracle gate on eight diagnostic seeds.
+Passing required positive mean passive-adjusted gain, at least six positive
+seed directions, and favorable absolute comparisons. No point passed.}
+\label{tab:p04}
+\begin{tabular}{rrrrr}
+\toprule
+\(\alpha\) & \(\kappa\) & Mean \(A_s\) & Positive seeds & Gate \\
+\midrule
+0.03 & 0.25 & -0.00844 & 0/8 & Fail \\
+0.06 & 0.50 & -0.00563 & 1/8 & Fail \\
+0.12 & 1.00 & -0.01063 & 2/8 & Fail \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The failure is consistent with first-event saturation in the canonical reset.
+Across the diagnostic grid, stationary collectors averaged 5.78 steps to first
+contact and the corrected oracle averaged 3.00; every episode was uncensored,
+so the 400-step horizon never bound. The early contacts showed no wall
+involvement. The oracle can improve absolute null performance while still having
+a negative policy-minus-stationary signal response because passive signal
+transport benefits stationary collectors strongly and leaves little
+action-contingent headroom in the signal arm. Thus the current first-event
+endpoint and initial geometry do not identify the proposed mechanism.
+
+Per the preregistered stop rule, SPS-P04 blocks SPS-C03 and all downstream
+scientific execution. A later run that exceeded the one-repair allowance is
+preserved for audit but procedurally excluded from every claim, manuscript
+decision, design choice, and power calculation; none of its outcomes are used
+here.
+
+\section{Fixed-horizon action-sensitivity gate}
+
+SPS-WO-05 changed only the endpoint and episode stopping rule. The unit-square
+arena, canonical collector lattice, 256 particles, four collectors, field,
+diffusion, capture geometry, actions, policies, and matched random streams were
+unchanged. Captured particles were counted once by stable particle ID, episodes
+continued after first contact, step 67 was included, and step 68 was excluded.
+The frozen diagnostic used fresh scenario seeds 2001--2008, field strengths
+\(\alpha\in\{0,0.06\}\), and stationary, true-field-only, and full-state-oracle
+policies. These seeds and outcomes are permanently ineligible for confirmation.
+
+At \(\alpha=0.06\), the oracle-minus-stationary seed contrasts were
 \[
- n_{\mathrm{raw}}=12(0.03183/0.05)^2=4.863.
+ (11,13,9,12,7,7,11,5),
 \]
-After 1.25 inflation, a minimum of 24, rounding to a multiple of four, and a
-maximum authorization of 64, the recorded plan reserves 24 independent seeds
-(2001--2024). This budget calculation does not authorize SPS-E01.
+with mean 9.375, median 10, sample standard deviation 2.825, and positive
+direction in 8/8 seeds. The descriptive paired-bootstrap 95\% interval was
+\([7.5,11.25]\). Oracle-minus-true-field-control contrasts were
+\[
+ (6,12,6,15,8,3,11,-1),
+\]
+with mean 7.5, median 7, sample standard deviation 5.155, and positive direction
+in 7/8 seeds; the descriptive paired-bootstrap 95\% interval was
+\([4.125,10.875]\). All frozen gate components passed: deterministic
+correctness and execution, mean oracle gain of at least four, positive primary
+direction in at least six seeds, positive mean targeting contrast, matched
+streams, checksums, and artifact completeness. The intervals are descriptive,
+not confirmatory.
+
+The valid package contains all 48 policy-condition episodes and 3,216
+environment steps. A process-control race caused an earlier identical process
+to finish after it had been prematurely classified as invalid. Its episode and
+event files are bitwise identical to the canonical R1 package; it is retained
+only for audit and is neither pooled, counted as replication, nor used to
+improve precision. R1 is the sole evidence package.
+
+This result repairs the upstream feasibility diagnosis: unlike time to first
+contact, fixed-horizon unique yield leaves measurable room for legal actions to
+matter. It does not show that local observations are sufficient, that sharing
+helps, or that any learned multi-agent policy can exploit this headroom.
 
 \section{AAMAS relevance failure and blockers}
 
@@ -240,22 +389,29 @@ therefore concerns replicated local control and passive transport, not
 cooperation, communication, strategic interaction, or MARL. No coordination
 or MARL claim is supported.
 
-This also creates a direct scientific no-go: at \(\rho=2\), passive stationary
-and uninformed random controls descriptively match or exceed
-\texttt{local\_flow\_v1}, while the privileged oracle does not separate from
-them. SPS-E01 remains blocked until (i) timestep convergence is measured for
-the Euler/Brownian chord model; (ii) the passive-flux/policy ordering is
-diagnosed; and (iii) a genuinely multi-agent mechanism is frozen with matched
-information, action, and capacity budgets. Growing-aggregate physics,
-PettingZoo/Gym adapters, IPPO/MAPPO, and aggregation analysis remain later
-work.
+The initial scientific no-go remains relevant to the superseded endpoint. At
+\(\rho=2\), passive stationary and uninformed random controls descriptively
+matched or exceeded \texttt{local\_flow\_v1}; at the catchable points, the
+repaired full-state oracle failed its passive-adjusted first-event gate. The
+fixed-horizon diagnostic now establishes action-contingent headroom, but not a
+multi-agent effect. SPS-C03 therefore remains blocked and the shared-summary
+policy, although implemented and unit-tested, has not been run as a scientific
+treatment. Coupled Brownian aggregation utilities are tested, but no
+timestep-convergence experiment has been executed. No empirical power
+calculation, independent confirmation, learned policy, IPPO/MAPPO baseline, or
+MARL experiment exists. Growing-aggregate physics and aggregation analysis
+remain later work.
 
-The implementation currently has 79 passing tests covering deterministic
+The implementation currently has 89 passing tests covering deterministic
 reset, causal observations, zero-signal identity, exact specular contacts,
 event-order and event-key invariance, schema validation, immutable writes,
-paired provenance, frozen policies, and row-order-invariant inference. These
-are engineering checks only. All paper claims remain proposed, and \textbf{no
-detectability boundary is supported by SPS-P01 or SPS-P02}.
+paired provenance, frozen policies, row-order-invariant inference, bounded
+team-summary invariance, full-state-oracle microcases, and exact Brownian
+aggregation, as well as unique-yield counting, inclusive step-67 evaluation,
+post-contact continuation, and matched yield-run provenance. These are
+engineering checks only. SPS-C01 remains proposed but inactive, SPS-C03 is
+blocked, and \textbf{no detectability boundary is supported by SPS-P01 or
+SPS-P02}.
 
 \section{Limitations}
 
@@ -263,10 +419,23 @@ Any eventual boundary is policy-, horizon-, field-, geometry-, grid-, and
 resource-relative rather than a universal physical critical point. Common
 random numbers reduce variance only under causally coherent pairing. Exact
 within-step specular contact does not replace a timestep-convergence study.
-First contact can still be explained by passive transport or swept area. AAMAS
-fit requires an isolated multi-agent mechanism, not merely four collectors.
+The canonical first-contact endpoint is saturated by initial geometry and
+passive transport. The fixed-horizon endpoint clears an eight-seed diagnostic
+oracle gate but has not passed stochastic timestep validation. AAMAS fit
+requires an isolated multi-agent mechanism, not merely four collectors or a
+fixed statistic whose empirical effect has not been tested. \pending{Run the
+separately preregistered coupled-noise timestep diagnostic for unique yield;
+only if it passes, freeze and run a bounded shared-versus-independent
+diagnostic before any power, learning, or confirmation experiment.}
 
 \begin{thebibliography}{9}
+\small
+\bibitem{wang2021stationary}
+Wang et al.
+\newblock Particle capture in a model chaotic flow.
+\newblock \emph{Physical Review E}, 2021.
+\newblock \url{https://doi.org/10.1103/PhysRevE.104.064203}.
+
 \bibitem{wang2025collector}
 Wang et al.
 \newblock Mobile-collector capture of particles in a chaotic flow.
@@ -279,6 +448,39 @@ R. C. L\"offler, E. Panizon, and C. Bechinger.
 learning.
 \newblock \emph{Scientific Reports}, 2023.
 \newblock \url{https://doi.org/10.1038/s41598-023-44268-3}.
+
+\bibitem{hornischer2019cimax}
+H. Hornischer et al.
+\newblock CIMAX: Collective information maximization in robotic swarms using
+local communication.
+\newblock arXiv:1903.05444, 2019.
+\newblock \url{https://arxiv.org/abs/1903.05444}.
+
+\bibitem{foerster2016dial}
+J. Foerster et al.
+\newblock Learning to communicate with deep multi-agent reinforcement
+learning.
+\newblock \emph{NeurIPS}, 2016.
+\newblock \url{https://proceedings.neurips.cc/paper_files/paper/2016/hash/c7635bfd99248a2cdef8249ef7bfbef4-Abstract.html}.
+
+\bibitem{wang2020imac}
+T. Wang et al.
+\newblock Learning efficient multi-agent communication: An information
+bottleneck approach.
+\newblock \emph{ICML}, 2020.
+\newblock \url{https://proceedings.mlr.press/v119/wang20i.html}.
+
+\bibitem{gobet2000}
+E. Gobet.
+\newblock Weak approximation of killed diffusion using Euler schemes.
+\newblock \emph{Stochastic Processes and their Applications}, 2000.
+\newblock \url{https://doi.org/10.1016/S0304-4149(99)00109-X}.
+
+\bibitem{giles2008}
+M. B. Giles.
+\newblock Multilevel Monte Carlo path simulation.
+\newblock \emph{Operations Research}, 2008.
+\newblock \url{https://doi.org/10.1287/opre.1070.0496}.
 \end{thebibliography}
 
 \end{document}

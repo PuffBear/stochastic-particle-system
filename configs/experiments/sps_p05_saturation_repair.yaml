@@ -1,0 +1,18 @@
+experiment_id: SPS-P05-SATURATION-REPAIR
+pre_registered_at_utc: 2026-07-31T16:00:00Z
+purpose: execute the single permitted bounded task-parameter repair after the corrected full-state oracle failed the canonical feasibility gate
+evidence_for_change:
+  canonical_mean_first_interception_step_stationary: 5.78125
+  canonical_median_range_note: many canonical outcomes occur at steps 1 or 2
+  canonical_mean_first_interception_step_corrected_oracle: 3.0
+  diagnosis: 256 particles make first contact saturate before collector actions can accumulate enough leverage; horizon censoring and wall accumulation are not active at these early times
+single_changed_task_parameter:
+  particle_count:
+    from: 256
+    to: 64
+unchanged: [arena, dt, horizon, diffusion_sigma, collector_count, collector_max_speed, sensing_radius, capture_radius, initialization_method, field, endpoint, policies]
+diagnostic_seeds: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008]
+alpha: [0.0, 0.03, 0.06, 0.12]
+confirmation_eligible: false
+gate: positive mean passive-adjusted oracle gain, better absolute first-contact time than stationary and true-field-only controls, and positive direction in at least 6 of 8 seeds at one nonzero point
+stop_rule: if this gate fails, record the canonical first-interception task for kill/redesign and do not execute sharing, timestep interpretation, power, or MARL

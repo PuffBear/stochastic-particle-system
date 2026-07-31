@@ -22,6 +22,7 @@ from typing import Any, Mapping
 import numpy as np
 import yaml
 
+from .dynamics.fields import field_velocity
 from .environment import ParticleCollectorEnv, ParticleEnvConfig
 from .io import (
     PreparedArtifact,
@@ -34,8 +35,10 @@ from .io import (
 )
 from .observations import LocalObservation
 from .policies import (
+    capacity_matched_velocity_controller,
     coverage_policy,
     density_greedy_policy,
+    full_state_interception_oracle,
     local_flow_v1_policy,
     privileged_field_policy,
     random_action_tensor,
@@ -51,6 +54,10 @@ SUPPORTED_POLICIES = frozenset(
         "density_greedy",
         "local_flow_v1",
         "privileged_upstream_oracle",
+        "true_field_upstream_control",
+        "full_state_interception_oracle",
+        "capacity_matched_independent",
+        "shared_summary",
     }
 )
 EVENT_KEYED_TIE_SCHEME = "event_keyed_seed_step_particle_v1"
@@ -105,7 +112,10 @@ class PairExperimentConfig:
             raise ValueError("created_at_utc must be ISO-8601") from exc
         if parsed.tzinfo is None:
             raise ValueError("created_at_utc must contain an explicit timezone")
-        unknown = set(self.policy_config) - ({"sweep_period"} if self.policy_id == "coverage" else set())
+        allowed = {"sweep_period"} if self.policy_id == "coverage" else set()
+        if self.policy_id == "full_state_interception_oracle":
+            allowed = {"receding_horizon"}
+        unknown = set(self.policy_config) - allowed
         if unknown:
             raise ValueError(f"unexpected policy config keys: {sorted(unknown)}")
 
@@ -256,7 +266,7 @@ def _policy_actions(
         return density_greedy_policy(observations)
     if policy_id == "local_flow_v1":
         return local_flow_v1_policy(observations)
-    if policy_id == "privileged_upstream_oracle":
+    if policy_id in {"privileged_upstream_oracle", "true_field_upstream_control"}:
         assert env.collector_positions is not None
         assert env._episode_field_kwargs is not None
         return privileged_field_policy(
@@ -265,6 +275,29 @@ def _policy_actions(
             signal_strength=env.config.signal_strength,
             field_kwargs=env._episode_field_kwargs,
         )
+    if policy_id == "full_state_interception_oracle":
+        assert env.collector_positions is not None
+        assert env.particle_positions is not None
+        assert env._episode_field_kwargs is not None
+        assert env.capture_state is not None
+        true_motion = field_velocity(
+            env.particle_positions,
+            env.config.field_family,
+            env.config.signal_strength,
+            **env._episode_field_kwargs,
+        )
+        return full_state_interception_oracle(
+            env.collector_positions,
+            env.particle_positions,
+            true_motion,
+            env.capture_state.owner < 0,
+            collector_max_speed=env.config.collector_max_speed,
+            receding_horizon=float(policy_config.get("receding_horizon", 2.0)),
+        )
+    if policy_id == "capacity_matched_independent":
+        return capacity_matched_velocity_controller(observations, shared=False)
+    if policy_id == "shared_summary":
+        return capacity_matched_velocity_controller(observations, shared=True)
     raise AssertionError(f"unreachable policy {policy_id}")
 
 
@@ -489,7 +522,11 @@ def run_matched_pair(config: PairExperimentConfig, output_dir: str | Path) -> Pa
         "policy": {
             "policy_id": config.policy_id,
             "config": _jsonable(config.policy_config),
-            "privileged": config.policy_id == "privileged_upstream_oracle",
+            "privileged": config.policy_id in {
+                "privileged_upstream_oracle",
+                "true_field_upstream_control",
+                "full_state_interception_oracle",
+            },
         },
         "runtime": {
             "python": platform.python_version(),

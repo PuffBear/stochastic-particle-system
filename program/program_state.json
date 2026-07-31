@@ -18,10 +18,10 @@
       "id": "paper-a",
       "title": "Weak-field multi-collector benchmark",
       "status": "active",
-      "current_stage": "scripted-calibration-complete-confirmatory-no-go",
-      "hypothesis": "A frozen local-flow policy has a finite grid-censored positive matched first-interception boundary under the primary uniform-field condition.",
-      "kill_criterion": "Stop or narrow if the oracle cannot exploit the field, exact counterfactual matching fails, or passive and swept-area controls explain the effect.",
-      "open_blocker": "The primary policy is four independent replicas and fails the AAMAS multi-agent gate; passive/random controls descriptively match or exceed it; timestep convergence and an independent confirmatory protocol remain unresolved. Growing geometry is not primary-ready."
+      "current_stage": "fixed-horizon-yield-feasibility-passed-coordination-unexecuted",
+      "hypothesis": "Under matched observation and policy-capacity budgets, a bounded shared velocity summary improves fixed-horizon unique team capture yield relative to the identical-shape independent controller.",
+      "kill_criterion": "Stop or narrow if coupled-noise timestep validation fails, shared-minus-independent yield is non-positive or below the relevance threshold, shuffled/delayed messages explain the effect, or useful power exceeds the bounded seed cap.",
+      "open_blocker": "SPS-WO-05 establishes diagnostic action-contingent headroom for the step-67 unique-yield endpoint, but no shared-versus-independent treatment, timestep validation, power study, learned baseline, or confirmation has run. SPS-C03 remains blocked and AAMAS fit is unestablished."
     },
     {
       "id": "paper-b",
@@ -33,27 +33,28 @@
       "open_blocker": "Intentionally inactive."
     }
   ],
-  "phase": "exploratory-calibration-complete-confirmatory-blocked",
-  "primary_question": "Under the frozen canonical uniform-drift task and scripted local_flow_v1, which preregistered rho is the first grid point at which mean matched horizon-censored first-interception improvement has a strictly positive one-sided simultaneous 95% lower confidence bound?",
-  "primary_condition": "local_flow_v1",
+  "phase": "yield-endpoint-feasibility-passed-numerical-and-coordination-gates-pending",
+  "primary_question": "At alpha=0.06 under the canonical four-collector task and a fixed 67-step window, does a bounded three-number shared velocity summary improve unique team capture yield over the identical-shape independent controller?",
+  "primary_condition": "shared_summary_vs_capacity_matched_independent",
   "scientific_results_available": false,
   "exploratory_calibration_available": true,
-  "exploratory_result": "SPS-P02 has no positive simultaneous LCB through rho=2.0; this cannot update SPS-C01 because calibration seeds were used.",
+  "exploratory_result": "SPS-P02 found no first-interception boundary and exposed passive confounding. After that endpoint was killed, SPS-WO-05-R1 passed the preregistered fixed-horizon yield feasibility gate: oracle minus stationary mean 9.375 unique captures with 8/8 positive diagnostic seeds; oracle minus true-field control mean 7.5. This authorizes numerical and coordination diagnostics only and does not support SPS-C03.",
+  "diagnostic_action_headroom_available": true,
   "engineering_tests": {
-    "passed": 79,
+    "passed": 89,
     "failed": 0,
-    "scope": "simulation primitives, exact specular continuous contact, event-keyed ties, deterministic reset, causal local observations, matched runner, immutable schema-validated artifacts, scripted policies, inference, and limiting cases"
+    "scope": "simulation primitives, exact specular continuous contact, event-keyed ties, deterministic reset, causal local observations, matched runner, immutable schema-validated artifacts, scripted and oracle policies, coupled Brownian aggregation, bounded team summaries, fixed-horizon unique-yield accounting, inference, and limiting cases"
   },
   "fresh_review": {
     "date": "2026-07-31",
     "verdict": "reject",
-    "score": "3/10",
+    "score": "2/10",
     "confidence": "5/5",
-    "snapshot": "compressed-week-post-pilot",
-    "strongest_new_threat": "The provisional 0.05 simultaneous half-width is coarser than observed effects near 0.004--0.011, so a 24-seed confirmation would be structurally uninformative."
+    "snapshot": "post-WO-05-yield-feasibility",
+    "strongest_new_threat": "The positive oracle diagnostic establishes action headroom but the central shared-versus-independent multi-agent treatment remains unexecuted, so there is still no coordination, communication, or MARL result."
   },
   "hpc_status": "not-needed",
-  "report_count": 4,
+  "report_count": 5,
   "inactive_scopes": [
     "baseball-paper-a",
     "baseball-paper-b",

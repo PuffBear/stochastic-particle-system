@@ -1,0 +1,10 @@
+{
+  "work_order_id": "SPS-WO-05",
+  "experiment_id": "SPS-WO-05-YIELD-GATE",
+  "status": "invalid",
+  "performance_interpretation": "prohibited",
+  "outcomes_inspected": false,
+  "failure": "The process ended without writing its immutable artifact bundle or returning captured stdout/stderr to the engineering agent.",
+  "repair_authorized": "One identical-design implementation rerun under SPS-WO-05-YIELD-GATE-R1; no scientific parameter changed.",
+  "preserved_artifacts": "No performance artifact was emitted; this status record preserves the failed attempt."
+}
