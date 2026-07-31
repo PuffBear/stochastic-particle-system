@@ -124,6 +124,19 @@ class MAPPO:
         actions, _, _, _ = self._get_actions_with_raw(observations)
         return actions
 
+    def ablated_get_actions(self, observations: tuple) -> np.ndarray:
+        """Return clipped actions (M, 2) — ablation is identity for MAPPO.
+
+        MAPPO's communication is embedded in the centralised critic, which is
+        used only during training to compute value estimates for advantage
+        computation. At inference time the actor produces actions from
+        per-agent observations only, with no inter-agent communication.
+        Ablating the critic therefore does not change the actor's output, so
+        this method is identical to get_actions. It is provided to satisfy the
+        common ablation interface for Coordination Efficiency computation.
+        """
+        return self.get_actions(observations)
+
     # ------------------------------------------------------------------
     # Rollout collection
     # ------------------------------------------------------------------

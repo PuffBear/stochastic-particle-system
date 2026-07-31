@@ -161,6 +161,20 @@ class COMA:
         actions, _, _, _ = self._get_actions_with_raw(observations)
         return actions
 
+    def ablated_get_actions(self, observations: tuple) -> np.ndarray:
+        """Return clipped actions (M, 2) — ablation is identity for COMA.
+
+        COMA's counterfactual advantage shaping is a critic-side mechanism used
+        only during training to shape the policy gradient. At inference time the
+        actor samples actions from per-agent observations without any critic
+        involvement. Ablating communication (i.e. removing the counterfactual
+        advantage shaping) therefore does not change the actor's output at
+        evaluation time, so this method is identical to get_actions. It is
+        provided to satisfy the common ablation interface for Coordination
+        Efficiency computation.
+        """
+        return self.get_actions(observations)
+
     # ------------------------------------------------------------------
     # Rollout collection (on-policy)
     # ------------------------------------------------------------------

@@ -170,6 +170,19 @@ class VDN:
         actions, _, _, _ = self._get_actions_with_raw(observations)
         return actions
 
+    def ablated_get_actions(self, observations: tuple) -> np.ndarray:
+        """Return clipped actions (M, 2) — ablation is identity for VDN.
+
+        VDN's value decomposition (Q_tot = Σ Q_i) is a critic-side mechanism
+        that influences training via advantage computation. At inference time
+        actions are sampled from the shared actor using per-agent observations
+        only, with no value-function involvement. Using per-agent Q_i instead
+        of Q_tot at inference therefore does not change the actor's output, so
+        this method is identical to get_actions. It is provided to satisfy the
+        common ablation interface for Coordination Efficiency computation.
+        """
+        return self.get_actions(observations)
+
     # ------------------------------------------------------------------
     # Rollout collection (on-policy)
     # ------------------------------------------------------------------

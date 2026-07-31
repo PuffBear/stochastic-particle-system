@@ -81,12 +81,19 @@ class CommNetModule(nn.Module):
         # Learnable log-std (shared across agents, one per action dimension).
         self.log_std = nn.Parameter(torch.zeros(2))
 
-    def _communicate(self, h: torch.Tensor) -> torch.Tensor:
+    def _communicate(
+        self, h: torch.Tensor, comm_ablated: bool = False
+    ) -> torch.Tensor:
         """Run K rounds of mean-pooled communication.
 
         Parameters
         ----------
-        h : Tensor (*, M, h_dim)  where * may be (T,) or empty
+        h            : Tensor (*, M, h_dim)  where * may be (T,) or empty
+        comm_ablated : if True, zero out all received communication vectors
+                       before each round so agents receive no teammate messages.
+                       This is the architecturally meaningful ablation: agents
+                       still apply their self-recurrence W_h but receive zero
+                       input from W_c, isolating the effect of communication.
 
         Returns
         -------
@@ -94,32 +101,40 @@ class CommNetModule(nn.Module):
         """
         M = h.shape[-2]
         for _ in range(self.n_comm_rounds):
-            # Mean of all agents excluding self.
-            h_sum = h.sum(dim=-2, keepdim=True)          # (*, 1, h_dim)
-            h_mean_excl = (h_sum - h) / max(1, M - 1)   # (*, M, h_dim)
-
             shape = h.shape
             h_flat = h.reshape(-1, self.h_dim)
-            hm_flat = h_mean_excl.reshape(-1, self.h_dim)
-            h = torch.tanh(self.W_h(h_flat) + self.W_c(hm_flat)).reshape(shape)
+
+            if comm_ablated:
+                # Zero out all communication: agents receive no teammate messages.
+                zeros = torch.zeros_like(h_flat)
+                h = torch.tanh(self.W_h(h_flat) + self.W_c(zeros)).reshape(shape)
+            else:
+                # Mean of all agents excluding self.
+                h_sum = h.sum(dim=-2, keepdim=True)          # (*, 1, h_dim)
+                h_mean_excl = (h_sum - h) / max(1, M - 1)   # (*, M, h_dim)
+                hm_flat = h_mean_excl.reshape(-1, self.h_dim)
+                h = torch.tanh(self.W_h(h_flat) + self.W_c(hm_flat)).reshape(shape)
         return h
 
-    def forward_step(self, obs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    def forward_step(
+        self, obs: torch.Tensor, comm_ablated: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         """Forward pass for a single timestep.
 
         Parameters
         ----------
-        obs : Tensor (M, obs_dim)
+        obs          : Tensor (M, obs_dim)
+        comm_ablated : if True, zero all communication vectors (ablation mode)
 
         Returns
         -------
         action_mean : Tensor (M, 2)
         value       : Tensor (M,)
         """
-        h = self.encoder(obs)             # (M, h_dim)
-        h = self._communicate(h)          # (M, h_dim)
-        action_mean = self.actor_head(h)  # (M, 2)
-        value = self.value_head(h).squeeze(-1)  # (M,)
+        h = self.encoder(obs)                              # (M, h_dim)
+        h = self._communicate(h, comm_ablated=comm_ablated)  # (M, h_dim)
+        action_mean = self.actor_head(h)                   # (M, 2)
+        value = self.value_head(h).squeeze(-1)             # (M,)
         return action_mean, value
 
     def forward_batch(
@@ -260,6 +275,30 @@ class CommNet:
         """
         actions, _, _, _ = self._get_actions_with_raw(observations)
         return actions
+
+    @torch.no_grad()
+    def ablated_get_actions(self, observations: tuple) -> np.ndarray:
+        """Return clipped actions (M, 2) with communication ablated.
+
+        Runs encoder and decoder but zeros out all communication vectors before
+        each communication round. Agents use their own encoding but receive no
+        teammate messages. This is the architecturally meaningful communication
+        ablation for CommNet: W_c receives zero input so each agent acts as if
+        it were alone, exposing the pure contribution of learned communication.
+        """
+        self.net.eval()
+        flat_obs = flatten_all_observations(observations)  # (M, obs_dim)
+        obs_t = torch.from_numpy(flat_obs)                 # (M, obs_dim)
+
+        # Run forward with communication zeroed out.
+        action_means, _ = self.net.forward_step(obs_t, comm_ablated=True)
+        std = self.net.log_std.exp().expand_as(action_means)
+        dist = Normal(action_means, std)
+        raw = dist.rsample()                               # (M, 2)
+        norm = raw.norm(dim=-1, keepdim=True).clamp(min=1.0)
+        actions = raw / norm
+
+        return actions.numpy()
 
     # ------------------------------------------------------------------
     # Rollout collection (on-policy)
