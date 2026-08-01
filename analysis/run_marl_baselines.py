@@ -69,6 +69,7 @@ from particle_benchmark.metrics.coordination import (
 from particle_benchmark.dynamics.fields import field_velocity
 from particle_benchmark.policies import (
     capacity_matched_velocity_controller,
+    capacity_matched_velocity_controller_v2,
     full_state_interception_oracle,
     local_flow_v1_policy,
     stationary_policy,
@@ -78,11 +79,13 @@ from particle_benchmark.policies import (
 # Experiment constants
 # ---------------------------------------------------------------------------
 EXPERIMENT_ID = "SPS-WO-08-MARL-BASELINES"
-TRAIN_SEEDS = tuple(range(5001, 5017))   # 16 training seeds
-EVAL_SEEDS = tuple(range(5501, 5509))    # 8 eval seeds (diagnostic only, ineligible for confirmation)
+# Seed firewall: 8001-8008 reserved for SPS-WO-08 training; 9001-9008 for eval.
+# Neither range may be used for any other experiment.
+TRAIN_SEEDS = tuple(range(8001, 8009))   # 8 training seeds
+EVAL_SEEDS = tuple(range(9001, 9009))    # 8 eval seeds (diagnostic only, ineligible for confirmation)
 FROZEN_ALPHA = 0.06
 EVALUATION_STEPS = 67
-N_TRAINING_EPISODES = 500
+N_TRAINING_EPISODES = 20_000
 ALL_ALGORITHMS = ("ippo", "mappo", "maddpg", "coma", "commnet", "vdn")
 
 # CE threshold in yield-fraction units (×256 particles).
@@ -116,6 +119,8 @@ def evaluate_scripted_baseline(
                 actions = local_flow_v1_policy(observations)
             elif policy_name == "capacity_matched_independent":
                 actions = capacity_matched_velocity_controller(observations, shared=False)
+            elif policy_name == "shared_summary_v2":
+                actions = capacity_matched_velocity_controller_v2(observations, shared=True)
             elif policy_name == "full_state_interception_oracle":
                 assert env.collector_positions is not None
                 assert env.particle_positions is not None
@@ -424,7 +429,7 @@ def main() -> None:
             "centralisation (CTDE), not execution-time communication. Only "
             "CommNet is eligible for an execution-message ablation."
         ),
-        "workflow_status": "DOWNSTREAM_BLOCKED_PENDING_WO06_AND_SPS_C03_GATES",
+        "workflow_status": "ACTIVE_SPS_WO_08",
         "scripted_baselines": {},
         "ippo_results": [],
         "mappo_results": [],
@@ -445,6 +450,7 @@ def main() -> None:
         "stationary",
         "local_flow_v1",
         "capacity_matched_independent",
+        "shared_summary_v2",
         "full_state_interception_oracle",
     ):
         t0 = time.time()
