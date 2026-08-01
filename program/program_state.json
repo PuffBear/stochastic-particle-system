@@ -18,10 +18,10 @@
       "id": "paper-a",
       "title": "Weak-field multi-collector benchmark",
       "status": "active",
-      "current_stage": "fixed-horizon-yield-feasibility-passed-coordination-unexecuted",
+      "current_stage": "fixed-horizon-yield-and-timestep-gates-passed-coordination-unexecuted",
       "hypothesis": "Under matched observation and policy-capacity budgets, a bounded shared velocity summary improves fixed-horizon unique team capture yield relative to the identical-shape independent controller.",
       "kill_criterion": "Stop or narrow if coupled-noise timestep validation fails, shared-minus-independent yield is non-positive or below the relevance threshold, shuffled/delayed messages explain the effect, or useful power exceeds the bounded seed cap.",
-      "open_blocker": "SPS-WO-05 establishes diagnostic action-contingent headroom for the step-67 unique-yield endpoint. The repaired SPS-WO-06 numerical implementation is preregistered but not run. SPS-WO-07 remains dependency-blocked, SPS-WO-08 is design-stage only, and all learned MARL work remains downstream. SPS-C03 has no coordination result."
+      "open_blocker": "SPS-WO-05 establishes diagnostic action-contingent headroom and SPS-WO-06 passes the coupled-noise numerical gate for the step-67 unique-yield endpoint. SPS-WO-07 is authorized but unexecuted, SPS-WO-08 is design-stage only, and all learned MARL work remains downstream. SPS-C03 has no coordination result."
     },
     {
       "id": "paper-b",
@@ -33,17 +33,17 @@
       "open_blocker": "Intentionally inactive."
     }
   ],
-  "phase": "yield-endpoint-feasibility-passed-repaired-numerical-gate-pending",
+  "phase": "yield-endpoint-and-numerical-gates-passed-attribution-diagnostic-authorized",
   "primary_question": "At alpha=0.06 under the canonical four-collector task and a fixed 67-step window, does a bounded three-number shared velocity summary improve unique team capture yield over the identical-shape independent controller?",
   "primary_condition": "shared_summary_vs_capacity_matched_independent",
   "scientific_results_available": false,
   "exploratory_calibration_available": true,
-  "exploratory_result": "SPS-P02 found no first-interception boundary and exposed passive confounding. After that endpoint was killed, SPS-WO-05-R1 passed the preregistered fixed-horizon yield feasibility gate: oracle minus stationary mean 9.375 unique captures with 8/8 positive diagnostic seeds; oracle minus true-field control mean 7.5. This authorizes numerical and coordination diagnostics only and does not support SPS-C03.",
+  "exploratory_result": "SPS-P02 found no first-interception boundary and exposed passive confounding. After that endpoint was killed, SPS-WO-05-R1 passed the preregistered fixed-horizon yield feasibility gate: oracle minus stationary mean 9.375 unique captures with 8/8 positive diagnostic seeds; oracle minus true-field control mean 7.5. SPS-WO-06 then passed the coupled-noise timestep gate: oracle minus stationary mean 8.625 at both dt=0.02 and dt=0.01 with 0/8 sign changes; dt=0.005 mean 8.375. These results authorize SPS-WO-07 only and do not support SPS-C03.",
   "diagnostic_action_headroom_available": true,
   "pending_diagnostic_scripts": {
     "SPS-WO-06-TIMESTEP-CONVERGENCE": {
       "script": "analysis/run_timestep_convergence.py",
-      "status": "preregistered-implementation-validated-not-run",
+      "status": "complete-passed-diagnostic-only",
       "purpose": "Validate that dt=0.02 is a converged discretization; seeds 3001-3008 permanently ineligible for confirmation",
       "gate": "absolute mean oracle-minus-stationary difference between dt=0.02 and dt=0.01 strictly below 1 particle, with at most 1/8 seed-level sign changes; dt=0.005 mandatory informational"
     },
@@ -73,7 +73,7 @@
     "strongest_new_threat": "The positive oracle diagnostic establishes action headroom but the central shared-versus-independent multi-agent treatment remains unexecuted, so there is still no coordination, communication, or MARL result."
   },
   "hpc_status": "not-needed",
-  "report_count": 5,
+  "report_count": 6,
   "inactive_scopes": [
     "baseball-paper-a",
     "baseball-paper-b",
@@ -81,5 +81,5 @@
     "counter-swarm"
   ],
   "last_updated": "2026-08-01",
-  "last_engineering_action": "Audited and repaired the Claude branch: true coupled timestep refinement, supported attribution IDs, aligned preregistration/power design, deterministic MARL scaffolds, genuine communication-ablation eligibility, and evidence-constrained manuscript/ledger updates. No registered diagnostic or MARL training run was executed."
+  "last_engineering_action": "Executed and independently verified SPS-WO-06 on its frozen diagnostic seed block: 96 episodes and 15,008 environment steps; the coupled timestep gate passed with all correctness and provenance components true. No SPS-WO-07, confirmation, or MARL run was executed."
 }

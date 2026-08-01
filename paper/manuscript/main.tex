@@ -35,11 +35,16 @@ end of step 67, one sensing-radius traversal at maximum collector speed. On
 eight fresh diagnostic seeds at \(\alpha=0.06\), the oracle exceeded stationary
 collectors by 9.375 particles on average (8/8 positive) and the true-field-only
 control by 7.5 (7/8 positive); all frozen correctness, direction, targeting,
-pairing, checksum, and artifact gates passed. This establishes diagnostic
-action-contingent headroom for the redesigned endpoint only. The shared-summary
-treatment remains unexecuted and its claim remains blocked. \textbf{No
-coordination effect, timestep convergence, power, confirmation, learning, or
-MARL result is claimed.}
+pairing, checksum, and artifact gates passed. A separately frozen eight-seed
+coupled-noise diagnostic then found mean oracle-minus-stationary yield contrasts
+of 8.625 particles at both \(\Delta t=0.02\) and \(0.01\), with zero seed-level
+direction changes; the mandatory \(\Delta t=0.005\) result was 8.375. All
+preregistered numerical gate components passed. These results establish
+diagnostic action-contingent headroom and timestep robustness for the redesigned
+endpoint only. They authorize, but do not answer, the bounded shared-summary
+diagnostic. That treatment remains unexecuted and SPS-C03 remains blocked.
+\textbf{No coordination effect, power, confirmation, learning, or MARL result
+is claimed.}
 \end{abstract}
 
 \section{Related work}
@@ -483,6 +488,44 @@ contact, fixed-horizon unique yield leaves measurable room for legal actions to
 matter. It does not show that local observations are sufficient, that sharing
 helps, or that any learned multi-agent policy can exploit this headroom.
 
+\section{Coupled-noise timestep diagnostic}
+
+SPS-WO-06 tested the fixed physical duration 1.34 at
+\(\Delta t\in\{0.02,0.01,0.005\}\), corresponding to 67, 134, and 268 steps.
+For each of fresh diagnostic seeds 3001--3008, Brownian increments were generated
+at the finest resolution and summed to obtain the coarser paths. Stationary and
+full-state-oracle episodes therefore used a genuinely coupled refinement rather
+than unrelated noise draws. All 96 preregistered episodes completed, totaling
+15,008 environment steps. These seeds and outcomes are permanently ineligible
+for confirmation.
+
+At \(\alpha=0.06\), the oracle-minus-stationary seed contrasts were
+\[
+ (5,13,8,12,7,10,8,6)
+\]
+at \(\Delta t=0.02\),
+\[
+ (4,16,8,9,6,11,10,5)
+\]
+at \(\Delta t=0.01\), and
+\[
+ (4,15,9,9,6,9,8,7)
+\]
+at \(\Delta t=0.005\). The corresponding means were 8.625, 8.625, and
+8.375 particles, with positive direction in 8/8 seeds at every resolution.
+The preregistered primary comparison had absolute mean change
+\(0.0<1.0\) particle from \(\Delta t=0.02\) to \(0.01\) and zero of eight
+seed-level sign changes. The mandatory finest-grid result differed from the
+\(\Delta t=0.01\) mean by 0.25 particle and was informational rather than a
+rescue criterion. Correctness, coupling, provenance, and artifact gates all
+passed.
+
+This is a numerical diagnostic of one policy contrast at one field strength,
+horizon, geometry, and seed block. It is not a confirmation, a coordination
+effect, or evidence that the shared summary helps. Passing SPS-WO-06 authorizes
+only the separately preregistered SPS-WO-07 attribution-control diagnostic;
+SPS-WO-07 has not been executed.
+
 \section{AAMAS relevance failure and blockers}
 
 The current treatment is not yet a multi-agent contribution. Teammate
@@ -496,14 +539,15 @@ The initial scientific no-go remains relevant to the superseded endpoint. At
 \(\rho=2\), passive stationary and uninformed random controls descriptively
 matched or exceeded \texttt{local\_flow\_v1}; at the catchable points, the
 repaired full-state oracle failed its passive-adjusted first-event gate. The
-fixed-horizon diagnostic now establishes action-contingent headroom, but not a
-multi-agent effect. SPS-C03 therefore remains blocked and the shared-summary
-policy, although implemented and unit-tested, has not been run as a scientific
-treatment. Coupled Brownian aggregation utilities are tested, but no
-timestep-convergence experiment has been executed. No empirical power
-calculation, independent confirmation, learned policy, IPPO/MAPPO baseline, or
-MARL experiment exists. Growing-aggregate physics and aggregation analysis
-remain later work.
+fixed-horizon diagnostic establishes action-contingent headroom, and SPS-WO-06
+passes its preregistered coupled-noise timestep gate for the
+oracle-minus-stationary contrast. Neither result is a multi-agent effect.
+SPS-C03 therefore remains blocked and the shared-summary policy, although
+implemented and unit-tested, has not been run as a scientific treatment.
+SPS-WO-07 is authorized but unexecuted. No empirical power calculation,
+independent confirmation, learned policy, IPPO/MAPPO baseline, or MARL
+experiment exists. Growing-aggregate physics and aggregation analysis remain
+later work.
 
 The dependency-free implementation currently has 96 passing tests covering deterministic
 reset, causal observations, zero-signal identity, exact specular contacts,
@@ -522,15 +566,16 @@ SPS-P02}.
 Any eventual boundary is policy-, horizon-, field-, geometry-, grid-, and
 resource-relative rather than a universal physical critical point. Common
 random numbers reduce variance only under causally coherent pairing. Exact
-within-step specular contact does not replace a timestep-convergence study.
-The canonical first-contact endpoint is saturated by initial geometry and
-passive transport. The fixed-horizon endpoint clears an eight-seed diagnostic
-oracle gate but has not passed stochastic timestep validation. AAMAS fit
-requires an isolated multi-agent mechanism, not merely four collectors or a
-fixed statistic whose empirical effect has not been tested. \pending{Run the
-separately preregistered coupled-noise timestep diagnostic for unique yield;
-only if it passes, freeze and run a bounded shared-versus-independent
-diagnostic before any power, learning, or confirmation experiment.}
+within-step specular contact does not by itself establish timestep robustness;
+SPS-WO-06 supplies only a bounded coupled-noise diagnostic for the fixed-horizon
+oracle-minus-stationary contrast at \(\alpha=0.06\). The canonical first-contact
+endpoint remains saturated by initial geometry and passive transport. The
+fixed-horizon endpoint clears its diagnostic oracle and timestep gates, but
+AAMAS fit still requires an isolated multi-agent mechanism, not merely four
+collectors. \pending{Run the separately preregistered SPS-WO-07
+shared-versus-independent attribution-control diagnostic. Do not proceed to
+power, learning, or confirmation unless that diagnostic passes its frozen
+gates.}
 
 \begin{thebibliography}{99}
 \small

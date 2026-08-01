@@ -120,11 +120,16 @@ The deterministic simulator, exact fixed-geometry contact, causal observations,
 strict matched runner, immutable artifacts, bounded independent/shared scripted
 controllers, and the step-67 unique-yield endpoint are implemented. SPS-WO-05
 established diagnostic action-contingent headroom: the full-state oracle exceeded
-stationary by 9.375 captures on average with 8/8 positive diagnostic seeds. This
-authorizes numerical and coordination diagnostics only.
+stationary by 9.375 captures on average with 8/8 positive diagnostic seeds.
 
-SPS-C03 remains blocked. Coupled-noise timestep validation must pass before the
-shared-versus-independent diagnostic executes. No learned baseline, power-sized
-confirmation, or AAMAS coordination result exists. MARL implementations are
-downstream engineering scaffolds and must remain inactive until the scripted
-mechanism and numerical gates pass.
+SPS-WO-06 then passed its preregistered coupled-noise timestep gate. The
+oracle-minus-stationary mean was 8.625 particles at both `dt=0.02` and
+`dt=0.01`, with 0/8 seed-level sign changes; the mandatory informational
+`dt=0.005` mean was 8.375. All correctness, coupling, provenance, and artifact
+gates passed. This authorizes SPS-WO-07 only and is not coordination evidence.
+
+SPS-C03 remains blocked. The shared-versus-independent SPS-WO-07 diagnostic has
+not run. No learned baseline, empirical power result, power-sized confirmation,
+or AAMAS coordination result exists. MARL implementations are downstream
+engineering scaffolds and must remain inactive until the scripted mechanism
+gate passes.
