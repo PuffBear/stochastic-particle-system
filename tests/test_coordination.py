@@ -464,6 +464,7 @@ class TestCommNetAblation:
     def test_training_evaluation_preserves_agent_groups(self):
         from particle_benchmark.marl.commnet import CommNetModule
 
+        torch = self.torch
         net = CommNetModule(obs_dim=7, h_dim=8, n_comm_rounds=1)
         obs = torch.randn(3, 4, 7)
         actions = torch.randn(3, 4, 2)
