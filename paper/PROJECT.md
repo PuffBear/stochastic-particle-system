@@ -2,29 +2,43 @@
 
 ## Research question
 
-What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?
+At `alpha=0.06`, with four collectors and a fixed physical window equal to 67
+steps at `dt=0.02`, does one bounded three-number team velocity summary increase
+unique team capture yield relative to an identical-shape controller whose three
+message slots contain only the agent's own local estimate?
 
-This is the only active research question. Aggregation, communication, field family, and scale remain controlled factors or secondary analyses unless a later Program Director decision establishes a genuinely separable paper.
+This is the only active research question. The earlier first-interception
+boundary question was killed after the action-feasible oracle failed its frozen
+gate. Aggregation, learned communication, field families, and scale remain
+inactive directions unless a later Program Director decision establishes a
+genuinely separable question.
 
 ## Frozen primary condition
 
-The first estimable condition is `local_flow_v1`: four identical collectors receive only their own local sensor summary plus teammate positions; the field is spatially uniform; the arena and initialization protocol are fixed; and
+The diagnostic condition compares `shared_summary` with
+`capacity_matched_independent`. Both arms use four identical collectors, the
+same action rule and three additional numeric input slots. The independent arm
+fills those slots from the focal agent's own local estimate; the shared arm
+receives the bounded team mean velocity and validity fraction. The field is
+spatially uniform and the arena, initialization, noise and action limits are
+matched:
 
-`M=4, N=256, H=400, dt=0.02, sigma=0.06`.
+`M=4, N=256, alpha=0.06, dt=0.02, evaluation_steps=67, sigma=0.06`.
 
 Collector dynamics, sensing radius, action bounds, and initialization must be frozen in the environment contract before any performance sweep.
 
 ## Primary estimand
 
-Let `T*` be the one-based first-interception step in `{1,...,H}`, with `T*=H+1` when no particle is intercepted. For matched seed `s` and signal strength `alpha`,
+For matched seed `s`, let `Y_s(shared)` and `Y_s(independent)` be the numbers of
+distinct particles captured by the four-collector team through the inclusive
+fixed physical endpoint. The diagnostic paired contrast is
 
-`D_s(alpha) = (T*_{s,null} - T*_{s,signal(alpha)}) / H`.
+`Delta_s = Y_s(shared) - Y_s(independent)`.
 
-The primary effect is `delta(alpha)=E_s[D_s(alpha)]`. Positive values mean the signal episode intercepts earlier. The dimensionless signal coordinate is
-
-`rho = alpha * sqrt(dt) / sigma`.
-
-The reported boundary is grid-censored: the smallest preregistered tested `rho` whose one-sided simultaneous 95% lower confidence bound for `delta(rho)` is strictly above zero. If no tested point crosses, report right-censoring; if the weakest tested point crosses, report left-censoring. No interpolated primary boundary is permitted.
+The diagnostic gate is descriptive and cannot support the paper claim. If the
+gate passes, a separately frozen confirmation uses a one-sided paired 95% lower
+confidence bound for `E[Delta_s]`; a positive claim requires that bound to be
+strictly above zero and the prespecified minimum relevant effect to be met.
 
 ## Matched counterfactual contract
 
@@ -32,14 +46,19 @@ Signal and null episodes must share the same initial state, pre-generated Browni
 
 ## Central hypothesis
 
-For `local_flow_v1`, the paired lower confidence bound crosses zero at a finite preregistered signal level. This claim is policy-relative and grid-relative; it is not an information-theoretic detection limit.
+At the frozen `alpha=0.06` condition, the bounded team summary produces a
+positive matched fixed-window yield contrast relative to the capacity-matched
+independent controller. This is a mechanism-specific value-of-information
+claim, not a claim that communication or MARL is generally beneficial.
 
 ## Closest prior work and novelty boundary
 
 - Wang et al. (2025), *Mobile-collector capture of particles in a chaotic flow*, studies one mobile collector using local particle information in prescribed flows. We cannot claim the first mobile particle collector, first locally guided capture, or first vortex-flow collection benchmark.
-- Löffler et al. (2023), *Reinforcement learning and optimal control of a minimal active particle foraging*, studies local-sensing reinforcement learning for active-particle foraging. We cannot claim the first local-sensing RL particle-foraging task.
+- Löffler et al. (2023), *Collective foraging of active particles trained by reinforcement learning*, studies locally perceiving active particles trained with PPO. We cannot claim the first local-sensing RL particle-foraging task.
 
-The defensible target is narrower: a reproducible multi-collector instrument for estimating a policy-relative weak-field detectability boundary under exact signal/null counterfactual pairing, with explicit coordination and geometry controls.
+The defensible target is narrower: a reproducible matched intervention testing
+whether one fixed, bounded team statistic has actionable value beyond an
+identical-shape independent controller in a stochastic multi-collector task.
 
 ## Mandatory baselines
 
@@ -97,6 +116,15 @@ Correctness tests and scripted pilots run on Codex cloud. No HPC request is just
 
 ## Current stage
 
-The deterministic primitives, exact piecewise-specular fixed-geometry contact, event-keyed ties, capture-free reset, causal observations, strict matched runner, immutable schema-validated artifacts, frozen scripted controls, calibrated simultaneous estimator, 79-test suite, exploratory seed-level summaries, evidence-constrained LaTeX manuscript, and immutable fresh review now exist.
+The deterministic simulator, exact fixed-geometry contact, causal observations,
+strict matched runner, immutable artifacts, bounded independent/shared scripted
+controllers, and the step-67 unique-yield endpoint are implemented. SPS-WO-05
+established diagnostic action-contingent headroom: the full-state oracle exceeded
+stationary by 9.375 captures on average with 8/8 positive diagnostic seeds. This
+authorizes numerical and coordination diagnostics only.
 
-SPS-P02 is a 12-seed exploratory calibration only. It has no positive simultaneous lower-bound crossing through `rho=2`; stationary and random controls descriptively match or exceed `local_flow_v1`; and the four-collector rule is exactly four independent replicas. SPS-C01 therefore remains proposed, SPS-E01 is blocked, and no coordination, MARL, or AAMAS claim is available. Growing geometry, coupled-noise timestep convergence, a meaningful full-state interception oracle, a policy-specific passive-flux contrast, and a genuinely multi-agent bounded-sharing mechanism remain unresolved.
+SPS-C03 remains blocked. Coupled-noise timestep validation must pass before the
+shared-versus-independent diagnostic executes. No learned baseline, power-sized
+confirmation, or AAMAS coordination result exists. MARL implementations are
+downstream engineering scaffolds and must remain inactive until the scripted
+mechanism and numerical gates pass.

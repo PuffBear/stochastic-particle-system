@@ -169,6 +169,9 @@ class MADDPG:
     noise_std   : standard deviation of Gaussian exploration noise
     """
 
+    execution_time_communication = False
+    training_time_centralization = True
+
     def __init__(
         self,
         obs_dim: int,
@@ -260,17 +263,11 @@ class MADDPG:
         return actions
 
     def ablated_get_actions(self, observations: tuple) -> np.ndarray:
-        """Return deterministic actions (M, 2) — communication ablation for MADDPG.
-
-        MADDPG's centralised critics are used only during training; at inference
-        actors are already independent (each actor observes only its own state).
-        The ablation of communication therefore means disabling exploration noise
-        so actors act deterministically, which corresponds to the standard
-        deterministic evaluation mode. This is equivalent to
-        get_actions(explore=False). It is provided to satisfy the common
-        ablation interface for Coordination Efficiency computation.
-        """
-        return self.get_actions(observations, explore=False)
+        """MADDPG uses CTDE, not an execution-time message channel."""
+        raise NotImplementedError(
+            "MADDPG's centralized critics are training-time CTDE. Disabling "
+            "evaluation noise is not a communication ablation."
+        )
 
     # ------------------------------------------------------------------
     # Rollout collection (off-policy)

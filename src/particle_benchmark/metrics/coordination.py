@@ -16,8 +16,9 @@ CE = 0: communication was neutral (no improvement over the ablated policy).
 CE = 1: communication fully closes the gap to oracle performance.
 CE < 0: communication hurt performance (active interference / noise injection).
 
-When oracle == ablated (no room to improve above ablated), CE is defined as 0
-to avoid division by zero.
+CE is undefined when the claimed oracle does not strictly outperform the
+ablated policy on a seed. Those entries are returned as NaN rather than being
+silently converted to zero.
 
 Field-Informative Seed Split
 ----------------------------
@@ -45,7 +46,7 @@ def per_seed_ce(
     ablated_yields: np.ndarray,
     oracle_yields: np.ndarray,
 ) -> np.ndarray:
-    """Per-seed CE_s. Clips denominator to avoid division by zero.
+    """Compute per-seed CE using a genuine full-state oracle.
 
     Parameters
     ----------
@@ -56,17 +57,53 @@ def per_seed_ce(
     Returns
     -------
     ce : shape (n_seeds,) float64 — CE_s for each seed.
-         When oracle == ablated the denominator is effectively zero and CE_s = 0.
+         Entries with oracle <= ablated are NaN because CE is undefined there.
     """
     comm = np.asarray(comm_yields, dtype=np.float64)
     ablated = np.asarray(ablated_yields, dtype=np.float64)
     oracle = np.asarray(oracle_yields, dtype=np.float64)
 
+    if comm.shape != ablated.shape or comm.shape != oracle.shape:
+        raise ValueError("comm, ablated, and oracle yields must have identical shapes")
+    if not (np.isfinite(comm).all() and np.isfinite(ablated).all() and np.isfinite(oracle).all()):
+        raise ValueError("CE inputs must contain only finite values")
+
     denom = oracle - ablated
-    safe_denom = np.where(np.abs(denom) < 1e-12, 1.0, denom)  # avoid division by zero
-    raw_ce = (comm - ablated) / safe_denom
-    ce = np.where(np.abs(denom) < 1e-12, 0.0, raw_ce)
-    return ce.astype(np.float64)
+    ce = np.full(comm.shape, np.nan, dtype=np.float64)
+    valid = denom > 1e-12
+    ce[valid] = (comm[valid] - ablated[valid]) / denom[valid]
+    return ce
+
+
+def validate_execution_time_ablation(
+    full_actions: np.ndarray,
+    ablated_actions: np.ndarray,
+    *,
+    execution_time_communication: bool,
+    atol: float = 1e-8,
+) -> None:
+    """Reject controls that cannot support an execution-communication claim.
+
+    CTDE, parameter sharing, and centralised critics are training mechanisms;
+    they are not execution-time communication.  For a genuine ablation the
+    architecture must expose a message channel and paired action traces must
+    differ somewhere under matched observations and action noise.
+    """
+    if not execution_time_communication:
+        raise ValueError(
+            "policy has no execution-time communication channel; CE is ineligible"
+        )
+    full = np.asarray(full_actions, dtype=np.float64)
+    ablated = np.asarray(ablated_actions, dtype=np.float64)
+    if full.shape != ablated.shape:
+        raise ValueError("paired full and ablated action traces must have identical shapes")
+    if full.size == 0:
+        raise ValueError("paired action traces must not be empty")
+    if np.allclose(full, ablated, rtol=0.0, atol=atol):
+        raise ValueError(
+            "ablation is an identity operation on the audited action trace; "
+            "no communication claim is permitted"
+        )
 
 
 def split_field_informative(
@@ -95,6 +132,10 @@ def split_field_informative(
     """
     oracle = np.asarray(oracle_yields, dtype=np.float64)
     stationary = np.asarray(stationary_yields, dtype=np.float64)
+    if oracle.shape != stationary.shape:
+        raise ValueError("oracle and stationary yields must have identical shapes")
+    if not (np.isfinite(oracle).all() and np.isfinite(stationary).all()):
+        raise ValueError("field-informative split inputs must be finite")
     informative = (oracle - stationary) > threshold
     return informative, ~informative
 
@@ -124,9 +165,12 @@ def ce_report(
     """
     ce = np.asarray(ce_values, dtype=np.float64)
     info_mask = np.asarray(informative_mask, dtype=bool)
+    if ce.shape != info_mask.shape:
+        raise ValueError("CE values and informative mask must have identical shapes")
     uninf_mask = ~info_mask
 
     def _stats(arr: np.ndarray) -> dict:
+        arr = arr[np.isfinite(arr)]
         n = len(arr)
         if n == 0:
             return {"mean": float("nan"), "median": float("nan"),
@@ -140,8 +184,9 @@ def ce_report(
         }
 
     all_stats = _stats(ce)
-    all_stats["q10"] = float(np.quantile(ce, 0.10)) if len(ce) > 0 else float("nan")
-    all_stats["q90"] = float(np.quantile(ce, 0.90)) if len(ce) > 0 else float("nan")
+    finite_ce = ce[np.isfinite(ce)]
+    all_stats["q10"] = float(np.quantile(finite_ce, 0.10)) if len(finite_ce) > 0 else float("nan")
+    all_stats["q90"] = float(np.quantile(finite_ce, 0.90)) if len(finite_ce) > 0 else float("nan")
     # Remove extra keys (q10, q90 are only in all_seeds)
 
     all_seeds_report = {

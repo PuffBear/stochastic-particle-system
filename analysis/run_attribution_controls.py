@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """Execute the frozen SPS-WO-07 attribution control runs.
 
-Scripts the attribution control episodes that run alongside the main SPS-C03
-coordination diagnostic.  The purpose is to test whether any effect of sharing
-the team velocity summary is attributable to genuine spatial information rather
-than mere noise injection or passive proximity effects.
+Scripts the control episodes that run alongside the main SPS-C03 coordination
+diagnostic. The stationary and oracle arms quantify passive transport and
+action-contingent headroom. They do not identify the communication mechanism;
+that would require a separately registered message-content ablation.
 
 Three attribution comparisons are computed at alpha=0.06:
   - Primary: shared minus independent  (the coordination effect)
-  - Attribution check 1: oracle minus shared  (headroom above sharing)
-  - Attribution check 2: shared minus stationary  (does sharing beat doing nothing)
+  - Context check 1: oracle minus shared  (headroom above sharing)
+  - Context check 2: shared minus stationary  (does sharing beat doing nothing)
 
-The diagnostic gate checks that mean(shared - independent) > 0 at alpha=0.06.
-This is a descriptive pre-confirmation diagnostic only; it does not constitute
-a confirmatory claim for SPS-C03.  Seeds are permanently ineligible for
-confirmation.
+The diagnostic gate implements all frozen SPS-C03 components: positive mean,
+positive direction in at least five of eight seeds, shared above stationary,
+passive-adjusted ordering, correctness, and matched provenance. This remains a
+descriptive pre-confirmation diagnostic; the seeds are permanently ineligible
+for confirmation.
 """
 
 from __future__ import annotations
@@ -46,14 +47,15 @@ FROZEN_SEEDS = tuple(range(4001, 4009))
 FROZEN_ALPHA = 0.06
 FROZEN_ALPHAS = (0.0, 0.06)
 EVALUATION_STEPS = 67
+FROZEN_DT = 0.02
 FROZEN_POLICIES = (
-    "capacity_matched_velocity_controller_independent",
-    "capacity_matched_velocity_controller_shared",
+    "capacity_matched_independent",
+    "shared_summary",
     "stationary",
     "full_state_interception_oracle",
 )
 BOOTSTRAP_DRAWS = 10_000
-BOOTSTRAP_SEED = 9_173
+BOOTSTRAP_SEED = 73_031
 EXPERIMENT_ID = "SPS-WO-07-ATTRIBUTION-CONTROLS"
 
 
@@ -119,7 +121,9 @@ def _stream_checksums(env: ParticleCollectorEnv) -> dict[str, str]:
 
 def rollout(seed: int, alpha: float, policy_id: str) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Run one frozen 67-step policy-condition episode without first-contact stop."""
-    config = ParticleEnvConfig(horizon=EVALUATION_STEPS, signal_strength=alpha)
+    config = ParticleEnvConfig(
+        horizon=EVALUATION_STEPS, signal_strength=alpha, dt=FROZEN_DT
+    )
     env = ParticleCollectorEnv(config)
     observations, reset_info = env.reset(seed=seed)
     if reset_info["captured_total"] != 0 or reset_info["tie_scheme"] != EVENT_KEYED_TIE_SCHEME:
@@ -244,7 +248,9 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
     if len(by_key) != expected:
         raise RuntimeError("missing or duplicate policy-condition episode")
 
-    # Verify matched stream checksums within each seed (all policies same noise)
+    # Verify matched stream checksums within each seed (all policies and alpha
+    # conditions use the same initialization, noise, field nuisance, and tie key).
+    matched_streams_verified = True
     for seed in FROZEN_SEEDS:
         baseline: dict[str, str] | None = None
         for alpha in FROZEN_ALPHAS:
@@ -253,7 +259,7 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
                 if baseline is None:
                     baseline = checks
                 elif checks != baseline:
-                    raise RuntimeError(f"matched stream checksum failure for seed {seed}")
+                    matched_streams_verified = False
 
     def outcome(seed: int, policy: str, alpha: float = FROZEN_ALPHA) -> float:
         return float(by_key[(seed, alpha, policy)]["unique_team_capture_yield"])
@@ -261,8 +267,8 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
     # Primary: shared minus independent (coordination effect)
     shared_minus_independent = np.asarray(
         [
-            outcome(seed, "capacity_matched_velocity_controller_shared")
-            - outcome(seed, "capacity_matched_velocity_controller_independent")
+            outcome(seed, "shared_summary")
+            - outcome(seed, "capacity_matched_independent")
             for seed in FROZEN_SEEDS
         ]
     )
@@ -270,14 +276,14 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
     oracle_minus_shared = np.asarray(
         [
             outcome(seed, "full_state_interception_oracle")
-            - outcome(seed, "capacity_matched_velocity_controller_shared")
+            - outcome(seed, "shared_summary")
             for seed in FROZEN_SEEDS
         ]
     )
     # Attribution check 2: shared minus stationary (does sharing beat doing nothing)
     shared_minus_stationary = np.asarray(
         [
-            outcome(seed, "capacity_matched_velocity_controller_shared")
+            outcome(seed, "shared_summary")
             - outcome(seed, "stationary")
             for seed in FROZEN_SEEDS
         ]
@@ -286,7 +292,7 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
     oracle_minus_independent = np.asarray(
         [
             outcome(seed, "full_state_interception_oracle")
-            - outcome(seed, "capacity_matched_velocity_controller_independent")
+            - outcome(seed, "capacity_matched_independent")
             for seed in FROZEN_SEEDS
         ]
     )
@@ -313,14 +319,35 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
         or int(row["unique_team_capture_yield"]) == 256
         for row in summaries
     )
-    # Descriptive diagnostic gate: mean(shared - independent) > 0 at alpha=0.06
     coordination_direction_passed = float(primary_contrast["mean"]) > 0.0
-    passed = correctness_passed and coordination_direction_passed
+    positive_seed_count_passed = int(primary_contrast["positive_seed_count"]) >= 5
+    shared_mean = float(np.mean([outcome(seed, "shared_summary") for seed in FROZEN_SEEDS]))
+    independent_mean = float(
+        np.mean([outcome(seed, "capacity_matched_independent") for seed in FROZEN_SEEDS])
+    )
+    stationary_mean = float(np.mean([outcome(seed, "stationary") for seed in FROZEN_SEEDS]))
+    shared_exceeds_stationary = shared_mean > stationary_mean
+    passive_adjusted_ordering = (
+        float(np.mean([outcome(seed, "shared_summary") - outcome(seed, "stationary") for seed in FROZEN_SEEDS]))
+        > float(np.mean([outcome(seed, "capacity_matched_independent") - outcome(seed, "stationary") for seed in FROZEN_SEEDS]))
+    )
+    passed = all(
+        (
+            correctness_passed,
+            matched_streams_verified,
+            coordination_direction_passed,
+            positive_seed_count_passed,
+            shared_exceeds_stationary,
+            passive_adjusted_ordering,
+        )
+    )
 
-    if float(primary_contrast["mean"]) <= 0.0:
+    if not correctness_passed or not matched_streams_verified:
+        interpretation = "invalid_correctness_or_provenance_failure"
+    elif not coordination_direction_passed or not positive_seed_count_passed:
         interpretation = "sharing_does_not_help"
-    elif not correctness_passed:
-        interpretation = "correctness_failure"
+    elif not shared_exceeds_stationary or not passive_adjusted_ordering:
+        interpretation = "sharing_effect_fails_attribution_controls"
     else:
         interpretation = "sharing_helps_confirmation_warranted"
 
@@ -345,7 +372,11 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
         ],
         "gate_components": {
             "correctness_and_execution": correctness_passed,
+            "matched_streams_verified": matched_streams_verified,
             "mean_shared_minus_independent_positive": coordination_direction_passed,
+            "positive_shared_minus_independent_in_at_least_5_of_8": positive_seed_count_passed,
+            "mean_shared_exceeds_mean_stationary": shared_exceeds_stationary,
+            "passive_adjusted_ordering": passive_adjusted_ordering,
         },
         "attribution_gate_passed": passed,
         "full_confirmation_run_warranted": passed,
@@ -368,6 +399,12 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--repository-base-commit", required=True)
+    parser.add_argument(
+        "--upstream-gate",
+        type=Path,
+        required=True,
+        help="immutable SPS-WO-06 convergence_report.json",
+    )
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(f"immutable output already exists: {args.output}")
@@ -382,6 +419,19 @@ def main() -> None:
         raise RuntimeError("frozen config policies differ from SPS-WO-07 constants")
     if frozen["evaluation_steps"] != EVALUATION_STEPS:
         raise RuntimeError("frozen config evaluation_steps differ from SPS-WO-07 constants")
+    if float(frozen["dt"]) != FROZEN_DT:
+        raise RuntimeError("frozen config dt differs from SPS-WO-07 constants")
+    if frozen["bootstrap_draws"] != BOOTSTRAP_DRAWS:
+        raise RuntimeError("frozen config bootstrap_draws differ from SPS-WO-07 constants")
+    if frozen["bootstrap_seed"] != BOOTSTRAP_SEED:
+        raise RuntimeError("frozen config bootstrap_seed differs from SPS-WO-07 constants")
+    if frozen.get("upstream_work_order") != "SPS-WO-06":
+        raise RuntimeError("frozen config must require SPS-WO-06")
+    upstream = json.loads(args.upstream_gate.read_text(encoding="utf-8"))
+    if upstream.get("work_order_id") != "SPS-WO-06" or not upstream.get(
+        "convergence_gate_passed", False
+    ):
+        raise RuntimeError("SPS-WO-07 is blocked until a valid SPS-WO-06 gate passes")
 
     started = time.perf_counter()
     summaries: list[dict[str, object]] = []
@@ -430,6 +480,12 @@ def main() -> None:
             "path": args.config.as_posix(),
             "sha256": _file_sha256(args.config),
             "contents": frozen,
+        },
+        "upstream_gate": {
+            "path": args.upstream_gate.as_posix(),
+            "sha256": _file_sha256(args.upstream_gate),
+            "work_order_id": upstream["work_order_id"],
+            "convergence_gate_passed": True,
         },
         "runtime": {
             "command": command,

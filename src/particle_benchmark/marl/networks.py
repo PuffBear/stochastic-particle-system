@@ -168,3 +168,4 @@ class CentralizedCritic(nn.Module):
     def forward(self, global_obs: torch.Tensor) -> torch.Tensor:
         """Return value estimate.  global_obs: (..., obs_dim * n_agents)."""
         return self.net(global_obs).squeeze(-1)
+

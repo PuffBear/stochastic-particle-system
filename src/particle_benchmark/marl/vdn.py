@@ -1,4 +1,4 @@
-"""Value Decomposition Networks (VDN) for the particle-collector benchmark.
+"""Experimental continuous-action value-decomposition-style method.
 
 Reference: Sunehag et al., "Value-Decomposition Networks For Cooperative Multi-Agent
 Learning", AAMAS 2018.
@@ -81,7 +81,10 @@ class VDNMixer(nn.Module):
 # ---------------------------------------------------------------------------
 
 class VDN:
-    """Value Decomposition Networks with shared actor and per-agent Q-nets.
+    """Continuous-action value-decomposition-style prototype.
+
+    This actor-critic adaptation is not canonical discrete-action VDN and must
+    be reported as ``continuous-VD-style`` pending algorithmic validation.
 
     Parameters
     ----------
@@ -93,6 +96,10 @@ class VDN:
     n_epochs  : optimisation epochs per update call
     batch_size: mini-batch size (over time * agents)
     """
+
+    report_label = "continuous-VD-style (experimental)"
+    execution_time_communication = False
+    training_time_centralization = True
 
     def __init__(
         self,
@@ -171,17 +178,11 @@ class VDN:
         return actions
 
     def ablated_get_actions(self, observations: tuple) -> np.ndarray:
-        """Return clipped actions (M, 2) — ablation is identity for VDN.
-
-        VDN's value decomposition (Q_tot = Σ Q_i) is a critic-side mechanism
-        that influences training via advantage computation. At inference time
-        actions are sampled from the shared actor using per-agent observations
-        only, with no value-function involvement. Using per-agent Q_i instead
-        of Q_tot at inference therefore does not change the actor's output, so
-        this method is identical to get_actions. It is provided to satisfy the
-        common ablation interface for Coordination Efficiency computation.
-        """
-        return self.get_actions(observations)
+        """Value decomposition is CTDE, not communication."""
+        raise NotImplementedError(
+            "continuous-VD-style has no execution-time message channel; an "
+            "identity actor comparison cannot support a communication claim."
+        )
 
     # ------------------------------------------------------------------
     # Rollout collection (on-policy)

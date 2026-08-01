@@ -28,6 +28,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -62,6 +63,7 @@ from particle_benchmark.metrics.coordination import (
     per_seed_ce,
     split_field_informative,
     ce_report,
+    validate_execution_time_ablation,
 )
 from particle_benchmark.policies import (
     capacity_matched_velocity_controller,
@@ -98,6 +100,8 @@ def evaluate_scripted_baseline(
     """Evaluate one scripted baseline policy over multiple seeds."""
     yields = []
     for seed in seeds:
+        np.random.seed(seed)
+        torch.manual_seed(seed)
         observations, _ = env.reset(seed=seed)
         done = False
         while not done:
@@ -135,6 +139,8 @@ def evaluate_learned_policy(
     """Evaluate a trained on-policy algorithm over diagnostic eval seeds."""
     yields = []
     for seed in seeds:
+        np.random.seed(seed)
+        torch.manual_seed(seed)
         observations, _ = env.reset(seed=seed)
         done = False
         while not done:
@@ -161,9 +167,29 @@ def evaluate_ablated_policy(
     env: ParticleCollectorEnv,
     seeds: tuple[int, ...],
 ) -> list[float]:
-    """Run ablated_get_actions on each eval seed and return yield list."""
+    """Evaluate a genuine execution-time message ablation on paired seeds."""
+    if not getattr(policy, "execution_time_communication", False):
+        return []
+
+    # Preflight the intervention under identical observation and action noise.
+    paired_seed = seeds[0]
+    observations, _ = env.reset(seed=paired_seed)
+    np.random.seed(paired_seed)
+    torch.manual_seed(paired_seed)
+    full_actions, _, _, _ = policy._get_actions_with_raw(observations)
+    np.random.seed(paired_seed)
+    torch.manual_seed(paired_seed)
+    ablated_actions = policy.ablated_get_actions(observations)
+    validate_execution_time_ablation(
+        full_actions,
+        ablated_actions,
+        execution_time_communication=True,
+    )
+
     yields = []
     for seed in seeds:
+        np.random.seed(seed)
+        torch.manual_seed(seed)
         observations, _ = env.reset(seed=seed)
         done = False
         while not done:
@@ -184,6 +210,8 @@ def evaluate_maddpg_policy(
     """Evaluate a trained MADDPG policy in deterministic mode."""
     yields = []
     for seed in seeds:
+        np.random.seed(seed)
+        torch.manual_seed(seed)
         observations, _ = env.reset(seed=seed)
         done = False
         while not done:
@@ -253,10 +281,6 @@ def _build_ce_report(
 # Main
 # ---------------------------------------------------------------------------
 
-# Allow any type hint for the policy parameter in evaluate_ablated_policy
-from typing import Any
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=f"Run {EXPERIMENT_ID}")
     parser.add_argument(
@@ -321,7 +345,22 @@ def main() -> None:
         default=5_000,
         help="Save a checkpoint every N episodes (on-policy) or steps (MADDPG).",
     )
+    parser.add_argument(
+        "--acknowledge-upstream-gates-passed",
+        action="store_true",
+        help=(
+            "Required safety acknowledgement that WO06 timestep convergence "
+            "and the SPS-C03 scripted mechanism gate have passed."
+        ),
+    )
     args = parser.parse_args()
+
+    if not args.acknowledge_upstream_gates_passed:
+        parser.error(
+            "MARL is downstream and blocked. Pass "
+            "--acknowledge-upstream-gates-passed only after WO06 and SPS-C03 "
+            "are recorded as passed in the scientific ledger."
+        )
 
     train_seeds = TRAIN_SEEDS[:2] if args.dry_run else TRAIN_SEEDS
     eval_seeds = EVAL_SEEDS[:2] if args.dry_run else EVAL_SEEDS
@@ -356,9 +395,12 @@ def main() -> None:
         "n_training_steps_maddpg": n_steps,
         "note": (
             "Eval seeds are diagnostic only and ineligible for confirmation. "
-            "MARL training uses per-seed random initialisation; results may "
-            "vary without fixing torch global seed."
+            "NumPy, PyTorch, and environment seeds are fixed. MAPPO, MADDPG, "
+            "continuous-COMA-style, and continuous-VD-style use training-time "
+            "centralisation (CTDE), not execution-time communication. Only "
+            "CommNet is eligible for an execution-message ablation."
         ),
+        "workflow_status": "DOWNSTREAM_BLOCKED_PENDING_WO06_AND_SPS_C03_GATES",
         "scripted_baselines": {},
         "ippo_results": [],
         "mappo_results": [],
@@ -387,10 +429,9 @@ def main() -> None:
             f"±{result['std_yield']:.3f}  ({elapsed:.1f}s)"
         )
 
-    # Oracle yields (per eval seed): use capacity_matched_independent as upper bound.
-    oracle_yields_per_seed: list[float] = report["scripted_baselines"][
-        "capacity_matched_independent"
-    ]["yields"]
+    # No validated full-state upper-bound oracle is implemented in this work
+    # order. capacity_matched_independent is a comparator, never an oracle.
+    oracle_yields_per_seed: None = None
     stationary_yields_per_seed: list[float] = report["scripted_baselines"][
         "stationary"
     ]["yields"]
@@ -444,7 +485,10 @@ def main() -> None:
                 resume_from=args.resume_from,
             )
             elapsed = time.time() - t0
-            final_eval = history.get("final_eval", {})
+            final_eval = evaluate_learned_policy(
+                history["_trained_policy"], env, eval_seeds, "IPPO", train_seed
+            )
+            history["final_eval"] = final_eval
             result = _make_result(history, train_seed, n_episodes)
             result["wall_time_s"] = elapsed
 
@@ -505,7 +549,10 @@ def main() -> None:
                 resume_from=args.resume_from,
             )
             elapsed = time.time() - t0
-            final_eval = history.get("final_eval", {})
+            final_eval = evaluate_learned_policy(
+                history["_trained_policy"], env, eval_seeds, "MAPPO", train_seed
+            )
+            history["final_eval"] = final_eval
             result = _make_result(history, train_seed, n_episodes)
             result["wall_time_s"] = elapsed
 
@@ -557,7 +604,10 @@ def main() -> None:
                 resume_from=args.resume_from,
             )
             elapsed = time.time() - t0
-            final_eval = history.get("final_eval", {})
+            final_eval = evaluate_maddpg_policy(
+                history["_trained_policy"], env, eval_seeds, train_seed
+            )
+            history["final_eval"] = final_eval
 
             # Reconstruct MADDPG for ablated eval from last checkpoint.
             comm_yields_this = final_eval.get("yields", [])
@@ -603,10 +653,10 @@ def main() -> None:
     # ------------------------------------------------------------------
     if "coma" in algorithms:
         print(f"\n{'='*60}")
-        print(f"Training COMA across {len(train_seeds)} seeds ...")
+        print(f"Training continuous-COMA-style prototype across {len(train_seeds)} seeds ...")
         print(f"{'='*60}")
         for train_seed in train_seeds:
-            print(f"\n[COMA] seed={train_seed} ...")
+            print(f"\n[continuous-COMA-style] seed={train_seed} ...")
             t0 = time.time()
             history = train_coma(
                 env_config,
@@ -619,7 +669,11 @@ def main() -> None:
                 resume_from=args.resume_from,
             )
             elapsed = time.time() - t0
-            final_eval = history.get("final_eval", {})
+            final_eval = evaluate_learned_policy(
+                history["_trained_policy"], env, eval_seeds,
+                "continuous-COMA-style (experimental)", train_seed,
+            )
+            history["final_eval"] = final_eval
             result = _make_result(history, train_seed, n_episodes)
             result["wall_time_s"] = elapsed
 
@@ -644,7 +698,7 @@ def main() -> None:
             result["ablated_yields"] = ablated_yields_this
             report["coma_results"].append(result)
             print(
-                f"  [COMA] seed={train_seed}: "
+                f"  [continuous-COMA-style] seed={train_seed}: "
                 f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
                 f"({elapsed:.1f}s)"
             )
@@ -670,7 +724,10 @@ def main() -> None:
                 resume_from=args.resume_from,
             )
             elapsed = time.time() - t0
-            final_eval = history.get("final_eval", {})
+            final_eval = evaluate_learned_policy(
+                history["_trained_policy"], env, eval_seeds, "CommNet", train_seed
+            )
+            history["final_eval"] = final_eval
             result = _make_result(history, train_seed, n_episodes)
             result["wall_time_s"] = elapsed
 
@@ -705,10 +762,10 @@ def main() -> None:
     # ------------------------------------------------------------------
     if "vdn" in algorithms:
         print(f"\n{'='*60}")
-        print(f"Training VDN across {len(train_seeds)} seeds ...")
+        print(f"Training continuous-VD-style prototype across {len(train_seeds)} seeds ...")
         print(f"{'='*60}")
         for train_seed in train_seeds:
-            print(f"\n[VDN] seed={train_seed} ...")
+            print(f"\n[continuous-VD-style] seed={train_seed} ...")
             t0 = time.time()
             history = train_vdn(
                 env_config,
@@ -721,7 +778,11 @@ def main() -> None:
                 resume_from=args.resume_from,
             )
             elapsed = time.time() - t0
-            final_eval = history.get("final_eval", {})
+            final_eval = evaluate_learned_policy(
+                history["_trained_policy"], env, eval_seeds,
+                "continuous-VD-style (experimental)", train_seed,
+            )
+            history["final_eval"] = final_eval
             result = _make_result(history, train_seed, n_episodes)
             result["wall_time_s"] = elapsed
 
@@ -746,7 +807,7 @@ def main() -> None:
             result["ablated_yields"] = ablated_yields_this
             report["vdn_results"].append(result)
             print(
-                f"  [VDN] seed={train_seed}: "
+                f"  [continuous-VD-style] seed={train_seed}: "
                 f"final_eval_yield={final_eval.get('mean_yield', float('nan')):.3f}  "
                 f"({elapsed:.1f}s)"
             )
@@ -755,44 +816,33 @@ def main() -> None:
     # Coordination Efficiency reports
     # ------------------------------------------------------------------
     print(f"\n{'='*60}")
-    print("Computing Coordination Efficiency reports ...")
+    print("Coordination Efficiency eligibility audit ...")
     print(f"{'='*60}")
 
     alg_label_map = {
         "ippo": "IPPO",
         "mappo": "MAPPO",
         "maddpg": "MADDPG",
-        "coma": "COMA",
+        "coma": "continuous-COMA-style (experimental)",
         "commnet": "CommNet",
-        "vdn": "VDN",
+        "vdn": "continuous-VD-style (experimental)",
     }
 
     for alg_key in algorithms:
-        comm_list = ce_comm[alg_key]
-        ablated_list = ce_ablated[alg_key]
-        if not comm_list or not ablated_list:
-            print(f"  [{alg_label_map[alg_key]}] skipping CE (no checkpoint data)")
-            report["ce_reports"][alg_key] = None
-            continue
-        if len(comm_list) != len(ablated_list):
-            # Align to minimum length.
-            n = min(len(comm_list), len(ablated_list))
-            comm_list = comm_list[:n]
-            ablated_list = ablated_list[:n]
-
-        ce_rep = _build_ce_report(
-            alg_label_map[alg_key],
-            comm_list,
-            ablated_list,
-            oracle_yields_per_seed,
-            stationary_yields_per_seed,
-            env_config.particle_count,
+        has_execution_messages = alg_key == "commnet"
+        reason = (
+            "genuine execution-time message ablation exists, but CE is disabled "
+            "until a validated full-state upper-bound oracle is implemented"
+            if has_execution_messages
+            else "ineligible: CTDE/parameter sharing is not execution-time communication"
         )
-        report["ce_reports"][alg_key] = ce_rep
-        print(
-            f"  [{alg_label_map[alg_key]}] CE mean={ce_rep['all_seeds']['mean']:.3f}, "
-            f"interpretation={ce_rep['interpretation']}"
-        )
+        report["ce_reports"][alg_key] = {
+            "status": "not_computed",
+            "execution_time_communication": has_execution_messages,
+            "oracle_available": False,
+            "reason": reason,
+        }
+        print(f"  [{alg_label_map[alg_key]}] CE not computed — {reason}")
 
     # ------------------------------------------------------------------
     # Write report
@@ -813,9 +863,9 @@ def main() -> None:
         ("ippo_results", "IPPO"),
         ("mappo_results", "MAPPO"),
         ("maddpg_results", "MADDPG"),
-        ("coma_results", "COMA"),
+        ("coma_results", "continuous-COMA-style"),
         ("commnet_results", "CommNet"),
-        ("vdn_results", "VDN"),
+        ("vdn_results", "continuous-VD-style"),
     ]:
         for r in report[alg_key]:
             ey = r["final_eval_fixed_seeds"].get("mean_yield", float("nan"))

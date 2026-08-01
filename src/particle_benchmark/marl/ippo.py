@@ -42,6 +42,9 @@ class IPPO:
     ent_coef  : entropy bonus coefficient
     """
 
+    execution_time_communication = False
+    training_time_centralization = False
+
     def __init__(
         self,
         obs_dim: int,
@@ -148,16 +151,11 @@ class IPPO:
         return all_actions, all_raw, all_log_probs, all_values
 
     def ablated_get_actions(self, observations: tuple) -> np.ndarray:
-        """Return clipped actions (M, 2) — ablation is identity for IPPO.
-
-        IPPO agents are already fully independent: there is no communication
-        channel in the actor or the critic. The ablation of communication
-        therefore has no effect, and this method is identical to calling
-        get_actions. It is provided to satisfy the common ablation interface
-        used for Coordination Efficiency computation.
-        """
-        actions, _, _, _ = self._get_actions_with_raw(observations)
-        return actions
+        """IPPO has no execution-time message channel to ablate."""
+        raise NotImplementedError(
+            "IPPO has no execution-time communication; an identity comparison "
+            "is not a communication ablation."
+        )
 
     # ------------------------------------------------------------------
     # Rollout collection

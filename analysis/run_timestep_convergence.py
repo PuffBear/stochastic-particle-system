@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Execute the frozen SPS-WO-06 timestep-convergence diagnostic.
 
-Validates that dt=0.02 is a converged discretization for the unique-yield
-endpoint. Three candidate timestep sizes are tested; the primary gate checks
-that the dt=0.02 mean oracle-minus-stationary contrast lies within 2 particles
-of the dt=0.01 (finer reference) mean contrast. Seeds are permanently
-ineligible for confirmation.
+Validates the dt=0.02 unique-yield endpoint against dt/2 and dt/4 while
+holding physical duration fixed.  Every level is driven by the same finest
+Brownian path: fine increments are summed exactly before being converted back
+to the standard-normal representation consumed by the environment.  Seeds are
+permanently ineligible for confirmation.
 """
 
 from __future__ import annotations
@@ -26,6 +26,7 @@ import yaml
 
 from particle_benchmark.environment import ParticleCollectorEnv, ParticleEnvConfig
 from particle_benchmark.io import canonical_json_bytes, sha256_json
+from particle_benchmark.refinement import aggregate_brownian_increments
 from particle_benchmark.runner import (
     EVENT_KEYED_TIE_SCHEME,
     _jsonable,
@@ -34,20 +35,55 @@ from particle_benchmark.runner import (
 )
 
 
-FROZEN_DT_VALUES = (0.01, 0.02, 0.04)
+FROZEN_DT_VALUES = (0.02, 0.01, 0.005)
+BASE_DT = 0.02
+BASE_EVALUATION_STEPS = 67
+PHYSICAL_DURATION = BASE_DT * BASE_EVALUATION_STEPS
 FROZEN_SEEDS = tuple(range(3001, 3009))
 FROZEN_ALPHA = 0.06
 FROZEN_ALPHAS = (0.0, 0.06)
 FROZEN_POLICIES = ("stationary", "full_state_interception_oracle")
 BOOTSTRAP_DRAWS = 10_000
 BOOTSTRAP_SEED = 7_031
-CONVERGENCE_TOLERANCE = 2.0  # particles; gate: |dt02_mean - dt01_mean| <= tolerance
+CONVERGENCE_TOLERANCE = 1.0  # strict gate: |dt02_mean - dt01_mean| < tolerance
+MAX_SIGN_CHANGES = 1
 EXPERIMENT_ID = "SPS-WO-06-TIMESTEP-CONVERGENCE"
 
 
 def _evaluation_steps(dt: float) -> int:
-    """Derive evaluation step count so the window stays fixed at 0.16 / (0.12 * dt)."""
-    return math.ceil(0.16 / (0.12 * dt))
+    """Return an integer step count for the frozen 1.34-time-unit window."""
+    steps = PHYSICAL_DURATION / dt
+    rounded = round(steps)
+    if not math.isclose(steps, rounded, rel_tol=0.0, abs_tol=1e-12):
+        raise ValueError("dt must divide the frozen physical duration exactly")
+    return int(rounded)
+
+
+def coupled_noise_bank(seed: int, *, particle_count: int = 256) -> dict[float, np.ndarray]:
+    """Generate one finest tensor and aggregate its Brownian increments.
+
+    The returned arrays are standard normals because ``ParticleCollectorEnv``
+    applies ``sqrt(dt)`` itself.  Thus, for every coarse step, the physical
+    Brownian increment equals the sum of its corresponding finest increments.
+    """
+    finest_dt = min(FROZEN_DT_VALUES)
+    finest_steps = _evaluation_steps(finest_dt)
+    # Use the environment's frozen stream construction, not a new ad-hoc RNG.
+    probe = ParticleCollectorEnv(
+        ParticleEnvConfig(horizon=finest_steps, dt=finest_dt, particle_count=particle_count)
+    )
+    probe.reset(seed=seed)
+    assert probe._noise is not None
+    finest_normals = np.asarray(probe._noise, dtype=np.float64)
+    finest_increments = finest_normals * math.sqrt(finest_dt)
+    bank: dict[float, np.ndarray] = {}
+    for dt in FROZEN_DT_VALUES:
+        factor = int(round(dt / finest_dt))
+        increments = aggregate_brownian_increments(finest_increments, factor)
+        bank[dt] = increments / math.sqrt(dt)
+        if bank[dt].shape != (_evaluation_steps(dt), particle_count, 2):
+            raise RuntimeError("coupled Brownian tensor has an invalid shape")
+    return bank
 
 
 def unique_capture_yield_through_step(
@@ -79,6 +115,7 @@ def _source_snapshot(root: Path) -> dict[str, object]:
         root / "src" / "particle_benchmark" / "environment.py",
         root / "src" / "particle_benchmark" / "policies.py",
         root / "src" / "particle_benchmark" / "runner.py",
+        root / "src" / "particle_benchmark" / "refinement.py",
         root / "src" / "particle_benchmark" / "dynamics" / "capture.py",
         root / "src" / "particle_benchmark" / "dynamics" / "particles.py",
     )
@@ -111,7 +148,13 @@ def _stream_checksums(env: ParticleCollectorEnv) -> dict[str, str]:
 
 
 def rollout(
-    seed: int, alpha: float, policy_id: str, dt: float
+    seed: int,
+    alpha: float,
+    policy_id: str,
+    dt: float,
+    *,
+    coupled_noise: np.ndarray,
+    finest_noise_sha256: str,
 ) -> tuple[dict[str, object], list[dict[str, object]]]:
     """Run one frozen policy-condition episode for a given dt value."""
     evaluation_steps = _evaluation_steps(dt)
@@ -122,7 +165,14 @@ def rollout(
     observations, reset_info = env.reset(seed=seed)
     if reset_info["captured_total"] != 0 or reset_info["tie_scheme"] != EVENT_KEYED_TIE_SCHEME:
         raise RuntimeError("reset or tie provenance violated the frozen task")
+    if coupled_noise.shape != (evaluation_steps, config.particle_count, 2):
+        raise ValueError("coupled_noise does not match the requested dt")
+    # This is the only sanctioned test hook: initialization and field nuisance
+    # remain those produced by reset(seed), while the Brownian stream is
+    # replaced by its pre-generated coupled level.
+    env._noise = np.asarray(coupled_noise, dtype=np.float64).copy()
     checksums = _stream_checksums(env)
+    checksums["coupled_finest_brownian_sha256"] = finest_noise_sha256
     path_length = np.zeros(config.collector_count, dtype=np.float64)
     capture_events: list[dict[str, object]] = []
     first_contact_step: int | None = None
@@ -194,6 +244,8 @@ def rollout(
         "kappa": alpha / config.collector_max_speed,
         "policy_id": policy_id,
         "evaluation_steps": evaluation_steps,
+        "physical_duration": PHYSICAL_DURATION,
+        "brownian_aggregation_factor": int(round(dt / min(FROZEN_DT_VALUES))),
         "executed_steps": executed_steps,
         "first_contact_step": first_contact_step,
         "continued_after_first_contact": bool(
@@ -245,10 +297,35 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
     if len(by_key) != expected:
         raise RuntimeError("missing or duplicate policy-condition episode")
 
+    coupling_and_provenance_verified = True
+    for seed in FROZEN_SEEDS:
+        rows = [row for row in summaries if int(row["seed"]) == seed]
+        initial_hashes = {
+            str(dict(row["stream_checksums"])["initial_state_sha256"]) for row in rows
+        }
+        field_hashes = {
+            str(dict(row["stream_checksums"])["field_nuisance_sha256"]) for row in rows
+        }
+        finest_hashes = {
+            str(dict(row["stream_checksums"])["coupled_finest_brownian_sha256"])
+            for row in rows
+        }
+        if len(initial_hashes) != 1 or len(field_hashes) != 1 or len(finest_hashes) != 1:
+            coupling_and_provenance_verified = False
+        for dt in FROZEN_DT_VALUES:
+            brownian_hashes = {
+                str(dict(row["stream_checksums"])["brownian_sha256"])
+                for row in rows
+                if float(row["dt"]) == dt
+            }
+            if len(brownian_hashes) != 1:
+                coupling_and_provenance_verified = False
+
     def outcome(seed: int, policy: str, dt: float, alpha: float = FROZEN_ALPHA) -> float:
         return float(by_key[(seed, alpha, policy, dt)]["unique_team_capture_yield"])
 
     contrasts_by_dt: dict[float, dict[str, object]] = {}
+    stationary_signal_minus_null_by_dt: dict[float, dict[str, object]] = {}
     for dt in FROZEN_DT_VALUES:
         d = np.asarray(
             [
@@ -262,24 +339,48 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
             name=f"oracle_minus_stationary_at_alpha_{FROZEN_ALPHA}_dt_{dt}",
             n_seeds=n_seeds,
         )
+        passive = np.asarray(
+            [
+                outcome(seed, "stationary", dt, FROZEN_ALPHA)
+                - outcome(seed, "stationary", dt, 0.0)
+                for seed in FROZEN_SEEDS
+            ]
+        )
+        stationary_signal_minus_null_by_dt[dt] = _descriptive_contrast(
+            passive,
+            name=f"stationary_signal_minus_null_dt_{dt}",
+            n_seeds=n_seeds,
+        )
 
-    mean_dt01 = float(contrasts_by_dt[0.01]["mean"])
     mean_dt02 = float(contrasts_by_dt[0.02]["mean"])
-    mean_dt04 = float(contrasts_by_dt[0.04]["mean"])
+    mean_dt01 = float(contrasts_by_dt[0.01]["mean"])
+    mean_dt005 = float(contrasts_by_dt[0.005]["mean"])
+
+    contrasts_02 = np.asarray(contrasts_by_dt[0.02]["seed_level_values"], dtype=float)
+    contrasts_01 = np.asarray(contrasts_by_dt[0.01]["seed_level_values"], dtype=float)
+    signs_02 = np.sign(contrasts_02)
+    signs_01 = np.sign(contrasts_01)
+    sign_change_count = int(np.count_nonzero(signs_02 != signs_01))
 
     correctness_passed = all(
         int(row["executed_steps"]) == _evaluation_steps(float(row["dt"]))
         or int(row["unique_team_capture_yield"]) == 256
         for row in summaries
     )
-    convergence_fine_to_medium = abs(mean_dt02 - mean_dt01) <= CONVERGENCE_TOLERANCE
-    convergence_medium_to_coarse = abs(mean_dt04 - mean_dt02) <= CONVERGENCE_TOLERANCE
+    convergence_base_to_half = abs(mean_dt02 - mean_dt01) < CONVERGENCE_TOLERANCE
+    direction_stable = sign_change_count <= MAX_SIGN_CHANGES
+    finest_level_informational = abs(mean_dt01 - mean_dt005)
 
-    passed = correctness_passed and convergence_fine_to_medium
+    passed = (
+        correctness_passed
+        and coupling_and_provenance_verified
+        and convergence_base_to_half
+        and direction_stable
+    )
 
-    if not correctness_passed:
+    if not correctness_passed or not coupling_and_provenance_verified:
         interpretation = "correctness_failure"
-    elif not convergence_fine_to_medium:
+    elif not convergence_base_to_half or not direction_stable:
         interpretation = "diverged"
     else:
         interpretation = "converged"
@@ -289,25 +390,31 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
         "experiment_id": EXPERIMENT_ID,
         "confirmation_eligible": False,
         "diagnostic_seed_firewall": list(FROZEN_SEEDS),
-        "endpoint": "unique team particle captures through inclusive step derived from dt",
+        "endpoint": "unique team particle captures through fixed physical time 1.34",
+        "base_endpoint_equivalence": "67 inclusive steps at dt=0.02",
         "convergence_tolerance_particles": CONVERGENCE_TOLERANCE,
         "dt_values_tested": list(FROZEN_DT_VALUES),
         "contrasts_by_dt": {
             str(dt): contrasts_by_dt[dt] for dt in FROZEN_DT_VALUES
         },
+        "stationary_signal_minus_null_by_dt": {
+            str(dt): stationary_signal_minus_null_by_dt[dt] for dt in FROZEN_DT_VALUES
+        },
         "dt_means": {
             "dt_0.01": mean_dt01,
             "dt_0.02": mean_dt02,
-            "dt_0.04": mean_dt04,
+            "dt_0.005": mean_dt005,
         },
         "pairwise_differences": {
             "abs_dt02_minus_dt01": abs(mean_dt02 - mean_dt01),
-            "abs_dt04_minus_dt02": abs(mean_dt04 - mean_dt02),
+            "abs_dt01_minus_dt005_informational": finest_level_informational,
+            "dt02_to_dt01_seed_sign_change_count": sign_change_count,
         },
         "gate_components": {
             "correctness_and_execution": correctness_passed,
-            f"dt02_within_{CONVERGENCE_TOLERANCE}_of_dt01": convergence_fine_to_medium,
-            f"dt04_within_{CONVERGENCE_TOLERANCE}_of_dt02_informational": convergence_medium_to_coarse,
+            "coupling_and_provenance_verified": coupling_and_provenance_verified,
+            "abs_mean_dt02_minus_dt01_strictly_below_1_particle": convergence_base_to_half,
+            "dt02_to_dt01_sign_changes_at_most_1_of_8": direction_stable,
         },
         "convergence_gate_passed": passed,
         "interpretation": interpretation,
@@ -339,16 +446,36 @@ def main() -> None:
         raise RuntimeError("frozen config policies differ from SPS-WO-06 constants")
     if frozen["dt_values"] != list(FROZEN_DT_VALUES):
         raise RuntimeError("frozen config dt_values differ from SPS-WO-06 constants")
+    if frozen["base_evaluation_steps"] != BASE_EVALUATION_STEPS:
+        raise RuntimeError("frozen config base_evaluation_steps differ from SPS-WO-06")
+    if float(frozen["physical_duration"]) != PHYSICAL_DURATION:
+        raise RuntimeError("frozen config physical_duration differs from SPS-WO-06")
+    primary_gate = frozen.get("primary_gate", {})
+    if primary_gate.get("mean_absolute_difference_strictly_below_particles") != CONVERGENCE_TOLERANCE:
+        raise RuntimeError("frozen config convergence tolerance differs from SPS-WO-06")
+    if primary_gate.get("maximum_seed_sign_changes") != MAX_SIGN_CHANGES:
+        raise RuntimeError("frozen config sign-change limit differs from SPS-WO-06")
+    if frozen.get("coupling") != "finest_standard_normals_then_sum_brownian_increments":
+        raise RuntimeError("frozen config does not require finest-level Brownian coupling")
 
     started = time.perf_counter()
     summaries: list[dict[str, object]] = []
     events: list[dict[str, object]] = []
     total = len(FROZEN_SEEDS) * len(FROZEN_ALPHAS) * len(FROZEN_POLICIES) * len(FROZEN_DT_VALUES)
-    for dt in FROZEN_DT_VALUES:
-        for seed in FROZEN_SEEDS:
+    for seed in FROZEN_SEEDS:
+        noise_bank = coupled_noise_bank(seed)
+        finest_noise_sha256 = _ndarray_sha256(noise_bank[min(FROZEN_DT_VALUES)])
+        for dt in FROZEN_DT_VALUES:
             for alpha in FROZEN_ALPHAS:
                 for policy in FROZEN_POLICIES:
-                    summary, captures = rollout(seed, alpha, policy, dt)
+                    summary, captures = rollout(
+                        seed,
+                        alpha,
+                        policy,
+                        dt,
+                        coupled_noise=noise_bank[dt],
+                        finest_noise_sha256=finest_noise_sha256,
+                    )
                     summaries.append(summary)
                     events.extend(captures)
                     print(

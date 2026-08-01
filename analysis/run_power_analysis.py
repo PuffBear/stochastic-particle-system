@@ -1,62 +1,47 @@
 #!/usr/bin/env python3
-"""Simulation-based power analysis for the SPS-C03 coordination diagnostic.
+"""Frozen design-stage power analysis for SPS-C03 confirmation.
 
-Estimates the number of confirmation seeds required to detect a coordination
-effect (shared-minus-independent yield improvement) using a one-sided
-studentized bootstrap lower bound.
-
-Rationale for COORDINATION_MINIMUM_EFFECT = 2.0:
-  The oracle-stationary contrast has a mean of 9.375 unique captures across
-  four collectors, so the per-collector headroom is roughly 2.3 particles.
-  Sharing transmits a bounded three-number velocity summary — a partial and
-  noisy proxy for the full oracle state.  A coordination benefit smaller than
-  0.5 particles per collector (2.0 total) would be practically negligible given
-  the measurement noise already present in the fixed-horizon endpoint and the
-  cost of running a full confirmation battery.  Setting the minimum detectable
-  effect at 2.0 ensures that we size for an effect that is scientifically
-  meaningful while remaining conservative relative to what the oracle ceiling
-  would allow.
-
-ASSUMED_SD_RANGE = (2.0, 4.0):
-  The oracle-minus-stationary SD from SPS-WO-05 is 2.825 unique captures.
-  The shared-vs-independent contrast will have a different (likely smaller)
-  variance because both arms share the same noise stream and initial
-  conditions.  We bracket uncertainty by testing the range 2.0–4.0.
-
-Bootstrap critical-value calibration:
-  For IID normal data the studentized bootstrap critical value depends only
-  on n_seeds, not on the population mean or SD — it converges to t_{n-1,0.95}.
-  This script therefore calibrates the critical value once per n_seeds value
-  (using BOOTSTRAP_DRAWS draws on CALIBRATION_DATASETS standard-normal
-  datasets) and then applies it to SIMULATION_TRIALS fully vectorized Monte
-  Carlo trials.  The calibration and simulation give numerically identical power
-  estimates to a full per-trial bootstrap (within simulation noise), but run in
-  under a second instead of ~10 minutes.  The calibrated critical values are
-  reported in the output for audit.
-
-EXPERIMENT_ID = "SPS-POWER-ANALYSIS-COORDINATION"
+This script consumes no diagnostic outcomes.  It sizes a one-sided paired
+studentized-bootstrap confirmation test for an effect frozen ex ante at two
+additional unique team captures.  Outputs are immutable and provenance-rich.
 """
 
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
+import platform
 import sys
+import time
 
 import numpy as np
+import yaml
+
+from particle_benchmark.io import canonical_json_bytes
 
 
 COORDINATION_MINIMUM_EFFECT = 2.0
 ASSUMED_SD_RANGE = (2.0, 4.0)
 ASSUMED_SD_STEPS = 5
-SEED_COUNTS = (16, 24, 32, 48, 64)
+SEED_COUNTS = (16, 24, 32)
 BOOTSTRAP_DRAWS = 10_000
-CALIBRATION_DATASETS = 100  # datasets used to average out Monte Carlo noise in the critical value
+CALIBRATION_DATASETS = 100
 SIMULATION_TRIALS = 2_000
 SIMULATION_RNG_SEED = 8_421
 TARGET_POWER = 0.80
+ONE_SIDED_ALPHA = 0.05
 EXPERIMENT_ID = "SPS-POWER-ANALYSIS-COORDINATION"
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def _calibrate_critical_value(
@@ -66,35 +51,26 @@ def _calibrate_critical_value(
     calibration_datasets: int,
     rng: np.random.Generator,
 ) -> float:
-    """Estimate the 95th-percentile studentized bootstrap critical value.
-
-    Draws ``calibration_datasets`` standard-normal calibration datasets of size
-    ``n_seeds`` and bootstraps each with ``bootstrap_draws`` resamples.  The
-    critical value reported is the median across calibration datasets; this
-    nearly eliminates the Monte Carlo variance in the critical value estimate
-    (< 0.01 in absolute terms for 100 datasets × 10 000 draws).
-
-    For IID normal data this critical value does not depend on the population
-    mean or SD — only on n_seeds.  Applying the same critical value across all
-    (effect, SD) simulation trials is therefore exact conditional on the
-    normality assumption and numerically equivalent to a full per-trial
-    bootstrap.
-    """
+    """Calibrate the one-sided studentized-bootstrap critical value."""
+    if n_seeds < 2 or bootstrap_draws < 1 or calibration_datasets < 1:
+        raise ValueError("power calibration sizes must be positive and n_seeds >= 2")
     critical_values = np.empty(calibration_datasets)
-    for i in range(calibration_datasets):
+    for index in range(calibration_datasets):
         data = rng.standard_normal(n_seeds)
-        obs_mean = float(np.mean(data))
-        obs_se = float(np.std(data, ddof=1)) / np.sqrt(n_seeds)
-        boot_idx = rng.integers(0, n_seeds, size=(bootstrap_draws, n_seeds))
-        boot_data = data[boot_idx]                                   # (bootstrap_draws, n_seeds)
-        boot_means = np.mean(boot_data, axis=1)                      # (bootstrap_draws,)
-        boot_ses = np.std(boot_data, axis=1, ddof=1) / np.sqrt(n_seeds)
-        shortfall = np.where(
-            boot_ses > 1e-15,
-            (obs_mean - boot_means) / boot_ses,
-            0.0,
+        observed_mean = float(np.mean(data))
+        bootstrap_indices = rng.integers(0, n_seeds, size=(bootstrap_draws, n_seeds))
+        bootstrap_data = data[bootstrap_indices]
+        bootstrap_means = np.mean(bootstrap_data, axis=1)
+        bootstrap_ses = np.std(bootstrap_data, axis=1, ddof=1) / np.sqrt(n_seeds)
+        shortfall = np.divide(
+            observed_mean - bootstrap_means,
+            bootstrap_ses,
+            out=np.zeros_like(bootstrap_means),
+            where=bootstrap_ses > 1e-15,
         )
-        critical_values[i] = np.quantile(shortfall, 0.95, method="higher")
+        critical_values[index] = np.quantile(
+            shortfall, 1.0 - ONE_SIDED_ALPHA, method="higher"
+        )
     return float(np.median(critical_values))
 
 
@@ -107,158 +83,203 @@ def _simulate_power(
     simulation_trials: int,
     rng: np.random.Generator,
 ) -> float:
-    """Estimate power via vectorized Monte Carlo simulation.
-
-    Generates ``simulation_trials`` iid datasets of size ``n_seeds`` from
-    N(effect, assumed_sd^2) and counts the fraction for which the one-sided
-    studentized bootstrap lower confidence bound (using the pre-calibrated
-    ``critical_value``) exceeds zero.  All operations are vectorized over
-    trials; no Python loop over trials is needed.
-    """
-    samples = rng.normal(loc=effect, scale=assumed_sd, size=(simulation_trials, n_seeds))
-    obs_means = np.mean(samples, axis=1)                             # (simulation_trials,)
-    obs_ses = np.std(samples, axis=1, ddof=1) / np.sqrt(n_seeds)    # (simulation_trials,)
-    lcbs = obs_means - critical_value * obs_ses                      # (simulation_trials,)
-    return float(np.mean(lcbs > 0))
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Simulation-based power analysis for SPS-C03 coordination diagnostic"
+    """Estimate rejection probability for paired seed-level differences."""
+    if assumed_sd <= 0 or effect <= 0 or simulation_trials < 1:
+        raise ValueError("effect, SD, and trial count must be positive")
+    paired_differences = rng.normal(
+        loc=effect, scale=assumed_sd, size=(simulation_trials, n_seeds)
     )
-    parser.add_argument("--output", type=Path, default=None)
-    args = parser.parse_args()
+    means = np.mean(paired_differences, axis=1)
+    standard_errors = np.std(paired_differences, axis=1, ddof=1) / np.sqrt(n_seeds)
+    lower_bounds = means - critical_value * standard_errors
+    return float(np.mean(lower_bounds > 0.0))
 
-    sd_values = np.linspace(ASSUMED_SD_RANGE[0], ASSUMED_SD_RANGE[1], ASSUMED_SD_STEPS)
-    rng = np.random.default_rng(SIMULATION_RNG_SEED)
 
-    # Phase 1: calibrate critical values (once per n_seeds, independent of SD and effect)
-    print("Calibrating bootstrap critical values...", file=sys.stderr, flush=True)
-    calibrated_critical: dict[int, float] = {}
-    for n_seeds in SEED_COUNTS:
-        cv = _calibrate_critical_value(
+def build_power_report(
+    *,
+    assumed_sd_values: np.ndarray,
+    seed_counts: tuple[int, ...],
+    bootstrap_draws: int,
+    calibration_datasets: int,
+    simulation_trials: int,
+    rng_seed: int,
+) -> dict[str, object]:
+    """Return the frozen report without reading any scientific outcomes."""
+    rng = np.random.default_rng(rng_seed)
+    calibrated: dict[int, float] = {}
+    for n_seeds in seed_counts:
+        calibrated[n_seeds] = _calibrate_critical_value(
             n_seeds,
-            bootstrap_draws=BOOTSTRAP_DRAWS,
-            calibration_datasets=CALIBRATION_DATASETS,
+            bootstrap_draws=bootstrap_draws,
+            calibration_datasets=calibration_datasets,
             rng=rng,
         )
-        calibrated_critical[n_seeds] = cv
-        print(f"  n_seeds={n_seeds}: critical_value={cv:.4f}", file=sys.stderr, flush=True)
 
-    # Phase 2: vectorized power simulation for each (n_seeds, assumed_sd) combination
-    print(
-        f"\n{'n_seeds':>8}  {'assumed_sd':>10}  {'power':>8}",
-        file=sys.stderr,
-        flush=True,
-    )
-    power_table: list[dict[str, object]] = []
-    for n_seeds in SEED_COUNTS:
-        critical_value = calibrated_critical[n_seeds]
-        for assumed_sd in sd_values:
-            power = _simulate_power(
-                n_seeds,
-                float(assumed_sd),
-                COORDINATION_MINIMUM_EFFECT,
-                critical_value,
-                simulation_trials=SIMULATION_TRIALS,
-                rng=rng,
-            )
-            row = {
-                "n_seeds": n_seeds,
-                "assumed_sd": float(assumed_sd),
-                "effect": COORDINATION_MINIMUM_EFFECT,
-                "calibrated_critical_value": critical_value,
-                "power": power,
-            }
-            power_table.append(row)
-            print(
-                f"{n_seeds:>8}  {assumed_sd:>10.3f}  {power:>8.3f}",
-                file=sys.stderr,
-                flush=True,
+    rows: list[dict[str, object]] = []
+    for n_seeds in seed_counts:
+        for assumed_sd in assumed_sd_values:
+            rows.append(
+                {
+                    "n_seeds": n_seeds,
+                    "assumed_sd": float(assumed_sd),
+                    "effect": COORDINATION_MINIMUM_EFFECT,
+                    "calibrated_critical_value": calibrated[n_seeds],
+                    "power": _simulate_power(
+                        n_seeds,
+                        float(assumed_sd),
+                        COORDINATION_MINIMUM_EFFECT,
+                        calibrated[n_seeds],
+                        simulation_trials=simulation_trials,
+                        rng=rng,
+                    ),
+                }
             )
 
-    # Compute minimum seed count to achieve TARGET_POWER for each SD
     recommendations: list[dict[str, object]] = []
-    for assumed_sd in sd_values:
-        rows_for_sd = [
-            r for r in power_table
-            if abs(float(r["assumed_sd"]) - float(assumed_sd)) < 1e-9
+    for assumed_sd in assumed_sd_values:
+        eligible = [
+            row
+            for row in rows
+            if float(row["assumed_sd"]) == float(assumed_sd)
+            and float(row["power"]) >= TARGET_POWER
         ]
-        achieves = [r for r in rows_for_sd if float(r["power"]) >= TARGET_POWER]
-        if achieves:
-            min_seeds: int | None = int(min(int(r["n_seeds"]) for r in achieves))
-        else:
-            min_seeds = None  # exceeds our candidate range
         recommendations.append(
             {
                 "assumed_sd": float(assumed_sd),
-                "min_seeds_for_80pct_power": min_seeds,
+                "min_seeds_for_80pct_power": (
+                    min(int(row["n_seeds"]) for row in eligible) if eligible else None
+                ),
             }
         )
 
-    # Worst-case recommendation across the SD range
-    achievable = [r for r in recommendations if r["min_seeds_for_80pct_power"] is not None]
-    if achievable:
-        recommended_n = int(
-            max(int(r["min_seeds_for_80pct_power"]) for r in achievable)  # type: ignore[arg-type]
+    if all(row["min_seeds_for_80pct_power"] is not None for row in recommendations):
+        recommended_n: int | None = max(
+            int(row["min_seeds_for_80pct_power"]) for row in recommendations
         )
-        recommendation_note = (
-            f"Use at least {recommended_n} confirmation seeds to achieve "
-            f"{int(TARGET_POWER * 100)}% power for a "
-            f"{COORDINATION_MINIMUM_EFFECT}-particle minimum effect across all "
-            f"assumed-SD values in [{ASSUMED_SD_RANGE[0]}, {ASSUMED_SD_RANGE[1]}]."
-        )
+        note = "Use the worst-case qualifying candidate count across the frozen SD range."
     else:
-        recommended_n = max(SEED_COUNTS)
-        recommendation_note = (
-            "80% power was not achieved within the candidate seed range for at least one "
-            "assumed-SD value.  Consider extending SEED_COUNTS or widening the SD range."
+        recommended_n = None
+        note = (
+            "At least one frozen SD scenario does not reach 80% power within "
+            "{16,24,32}; register a successor power design before enlarging the budget."
         )
 
-    report: dict[str, object] = {
+    return {
+        "work_order_id": "SPS-WO-08",
         "experiment_id": EXPERIMENT_ID,
+        "analysis_type": "design-stage simulation; no SPS-C03 outcomes consumed",
         "coordination_minimum_effect": COORDINATION_MINIMUM_EFFECT,
+        "minimum_effect_frozen_ex_ante": True,
         "minimum_effect_rationale": (
-            "2.0 unique captures total (0.5 per collector) is the smallest coordination "
-            "benefit that would be scientifically meaningful given the oracle-stationary "
-            "ceiling of 9.375 and the measurement noise in the fixed-horizon endpoint."
+            "Two unique team captures equals 0.5 capture per collector and is the "
+            "smallest benefit judged worth a confirmation battery. It is fixed before "
+            "seeds 4001-4008 are observed and will not be derived from their outcomes."
         ),
         "assumed_sd_range": list(ASSUMED_SD_RANGE),
+        "assumed_sd_values": assumed_sd_values.astype(float).tolist(),
         "assumed_sd_rationale": (
-            "The oracle-minus-stationary SD from SPS-WO-05 is 2.825.  "
-            "The shared-vs-independent SD will likely be smaller (shared noise stream) "
-            "but we bracket conservatively between 2.0 and 4.0."
+            "The range 2.0-4.0 brackets the earlier oracle-minus-stationary diagnostic "
+            "SD of 2.825 without treating that different contrast as an estimate."
         ),
-        "seed_counts_evaluated": list(SEED_COUNTS),
+        "seed_counts_evaluated": list(seed_counts),
+        "target_power": TARGET_POWER,
+        "test": "one-sided paired studentized-bootstrap 95% lower bound > 0",
+        "one_sided_alpha": ONE_SIDED_ALPHA,
+        "bootstrap_draws": bootstrap_draws,
+        "calibration_datasets": calibration_datasets,
+        "simulation_trials": simulation_trials,
+        "simulation_rng_seed": rng_seed,
+        "calibrated_critical_values": {str(key): value for key, value in calibrated.items()},
+        "power_table": rows,
+        "recommendations_by_sd": recommendations,
+        "recommended_confirmation_seed_count": recommended_n,
+        "recommendation_note": note,
+    }
+
+
+def _write_new(path: Path, payload: bytes) -> None:
+    with path.open("xb") as handle:
+        handle.write(payload)
+        handle.flush()
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--repository-base-commit", required=True)
+    args = parser.parse_args()
+    if args.output.exists():
+        raise FileExistsError(f"immutable output already exists: {args.output}")
+    if len(args.repository_base_commit) != 40:
+        raise ValueError("repository base commit must be a full 40-character SHA")
+
+    frozen = yaml.safe_load(args.config.read_text(encoding="utf-8"))
+    expected = {
+        "minimum_relevant_effect": COORDINATION_MINIMUM_EFFECT,
+        "assumed_sd_range": list(ASSUMED_SD_RANGE),
+        "assumed_sd_steps": ASSUMED_SD_STEPS,
+        "candidate_seed_counts": list(SEED_COUNTS),
         "bootstrap_draws": BOOTSTRAP_DRAWS,
         "calibration_datasets": CALIBRATION_DATASETS,
         "simulation_trials": SIMULATION_TRIALS,
         "simulation_rng_seed": SIMULATION_RNG_SEED,
         "target_power": TARGET_POWER,
-        "test": "one-sided studentized bootstrap lower bound > 0 at 95% confidence",
-        "bootstrap_implementation": (
-            "critical value calibrated once per n_seeds from CALIBRATION_DATASETS "
-            "standard-normal datasets × BOOTSTRAP_DRAWS resamples; "
-            "power estimated from SIMULATION_TRIALS vectorized MC trials using the "
-            "calibrated critical value (numerically equivalent to per-trial bootstrap "
-            "for IID normal data)"
-        ),
-        "calibrated_critical_values": {
-            str(n): v for n, v in calibrated_critical.items()
-        },
-        "power_table": power_table,
-        "recommendations_by_sd": recommendations,
-        "recommended_confirmation_seed_count": recommended_n,
-        "recommendation_note": recommendation_note,
+        "one_sided_alpha": ONE_SIDED_ALPHA,
     }
+    for key, value in expected.items():
+        if frozen.get(key) != value:
+            raise RuntimeError(f"frozen config {key} differs from SPS-WO-08 constants")
 
-    print(json.dumps(report, indent=2))
-
-    if args.output is not None:
-        if args.output.exists():
-            raise FileExistsError(f"immutable output already exists: {args.output}")
-        args.output.write_bytes(json.dumps(report, indent=2).encode("utf-8"))
-        print(f"report written to {args.output}", file=sys.stderr)
+    started = time.perf_counter()
+    report = build_power_report(
+        assumed_sd_values=np.linspace(*ASSUMED_SD_RANGE, ASSUMED_SD_STEPS),
+        seed_counts=SEED_COUNTS,
+        bootstrap_draws=BOOTSTRAP_DRAWS,
+        calibration_datasets=CALIBRATION_DATASETS,
+        simulation_trials=SIMULATION_TRIALS,
+        rng_seed=SIMULATION_RNG_SEED,
+    )
+    args.output.mkdir(parents=False)
+    report_path = args.output / "power_report.json"
+    _write_new(report_path, canonical_json_bytes(report))
+    root = Path(__file__).resolve().parents[1]
+    manifest = {
+        "work_order_id": "SPS-WO-08",
+        "experiment_id": EXPERIMENT_ID,
+        "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "scientific_outcomes_consumed": False,
+        "repository": {
+            "full_name": "PuffBear/stochastic-particle-system",
+            "branch": "research-autonomy",
+            "base_commit_sha": args.repository_base_commit,
+            "workspace_changes_included": True,
+        },
+        "source": {
+            "path": "analysis/run_power_analysis.py",
+            "sha256": _file_sha256(root / "analysis" / "run_power_analysis.py"),
+        },
+        "frozen_config": {
+            "path": args.config.as_posix(),
+            "sha256": _file_sha256(args.config),
+            "contents": frozen,
+        },
+        "runtime": {
+            "command": " ".join(sys.argv),
+            "seconds": time.perf_counter() - started,
+            "python": platform.python_version(),
+            "numpy": np.__version__,
+            "platform": platform.platform(),
+        },
+        "artifacts": {
+            report_path.name: {
+                "sha256": _file_sha256(report_path),
+                "bytes": report_path.stat().st_size,
+            }
+        },
+    }
+    _write_new(args.output / "manifest.json", canonical_json_bytes(manifest))
+    print(json.dumps(report, sort_keys=True))
 
 
 if __name__ == "__main__":

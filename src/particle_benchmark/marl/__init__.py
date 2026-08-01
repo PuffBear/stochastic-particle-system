@@ -6,3 +6,4 @@ from .commnet import CommNet
 from .vdn import VDN
 
 __all__ = ["IPPO", "MAPPO", "MADDPG", "COMA", "CommNet", "VDN"]
+

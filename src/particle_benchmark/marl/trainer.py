@@ -1,4 +1,4 @@
-"""Training loops for IPPO, MAPPO, MADDPG, COMA, CommNet, and VDN.
+"""Training loops for validated baselines and experimental adaptations.
 
 Usage
 -----
@@ -61,14 +61,25 @@ from .networks import compute_obs_dim, flatten_all_observations
 # Shared utilities
 # ---------------------------------------------------------------------------
 
+def _seed_all(seed: int) -> None:
+    """Seed NumPy and PyTorch before model construction or evaluation."""
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+
 def _eval_policy(
     policy: IPPO | MAPPO,
     env: ParticleCollectorEnv,
     eval_seeds: tuple[int, ...],
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Evaluate policy over several seeds; return mean capture yield statistics."""
+    numpy_state = np.random.get_state()
+    torch_state = torch.random.get_rng_state()
     yields = []
     for seed in eval_seeds:
+        # The policies are stochastic at execution time.  Reset every source of
+        # policy-side randomness so a reported seed is actually reproducible.
+        _seed_all(seed)
         observations, _ = env.reset(seed=seed)
         total_captures = 0
         done = False
@@ -84,23 +95,31 @@ def _eval_policy(
         final_captures = info["captured_total"]
         yield_fraction = final_captures / env.config.particle_count
         yields.append(yield_fraction)
-    return {
+    result = {
         "mean_yield": float(np.mean(yields)),
         "std_yield": float(np.std(yields)),
         "min_yield": float(np.min(yields)),
         "max_yield": float(np.max(yields)),
         "n_seeds": len(eval_seeds),
+        "seeds": list(eval_seeds),
+        "yields": [float(y) for y in yields],
     }
+    np.random.set_state(numpy_state)
+    torch.random.set_rng_state(torch_state)
+    return result
 
 
 def _eval_policy_with_raw(
     policy: Any,
     env: ParticleCollectorEnv,
     eval_seeds: tuple[int, ...],
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Evaluate any on-policy algorithm that exposes _get_actions_with_raw."""
+    numpy_state = np.random.get_state()
+    torch_state = torch.random.get_rng_state()
     yields = []
     for seed in eval_seeds:
+        _seed_all(seed)
         observations, _ = env.reset(seed=seed)
         done = False
         while not done:
@@ -109,23 +128,31 @@ def _eval_policy_with_raw(
             done = terminated or truncated
         yield_fraction = info["captured_total"] / env.config.particle_count
         yields.append(yield_fraction)
-    return {
+    result = {
         "mean_yield": float(np.mean(yields)),
         "std_yield": float(np.std(yields)),
         "min_yield": float(np.min(yields)),
         "max_yield": float(np.max(yields)),
         "n_seeds": len(eval_seeds),
+        "seeds": list(eval_seeds),
+        "yields": [float(y) for y in yields],
     }
+    np.random.set_state(numpy_state)
+    torch.random.set_rng_state(torch_state)
+    return result
 
 
 def _eval_maddpg(
     policy: MADDPG,
     env: ParticleCollectorEnv,
     eval_seeds: tuple[int, ...],
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Evaluate MADDPG in deterministic mode (no exploration noise)."""
+    numpy_state = np.random.get_state()
+    torch_state = torch.random.get_rng_state()
     yields = []
     for seed in eval_seeds:
+        _seed_all(seed)
         observations, _ = env.reset(seed=seed)
         done = False
         while not done:
@@ -134,13 +161,18 @@ def _eval_maddpg(
             done = terminated or truncated
         yield_fraction = info["captured_total"] / env.config.particle_count
         yields.append(yield_fraction)
-    return {
+    result = {
         "mean_yield": float(np.mean(yields)),
         "std_yield": float(np.std(yields)),
         "min_yield": float(np.min(yields)),
         "max_yield": float(np.max(yields)),
         "n_seeds": len(eval_seeds),
+        "seeds": list(eval_seeds),
+        "yields": [float(y) for y in yields],
     }
+    np.random.set_state(numpy_state)
+    torch.random.set_rng_state(torch_state)
+    return result
 
 
 def _run_one_episode(
@@ -181,6 +213,8 @@ def _save_checkpoint_onpolicy(
         "algorithm_class": algorithm_class,
         "episode": episode,
         "init_kwargs": init_kwargs,
+        "numpy_rng_state": np.random.get_state(),
+        "torch_rng_state": torch.random.get_rng_state(),
     }
 
     if algorithm_class == "IPPO":
@@ -235,6 +269,11 @@ def _load_checkpoint_onpolicy(
     elif algorithm_class == "CommNet":
         policy.net.load_state_dict(ckpt["net"])
         policy.optim.load_state_dict(ckpt["optim"])
+
+    if "numpy_rng_state" in ckpt:
+        np.random.set_state(ckpt["numpy_rng_state"])
+    if "torch_rng_state" in ckpt:
+        torch.random.set_rng_state(ckpt["torch_rng_state"])
     elif algorithm_class == "VDN":
         policy.actor.load_state_dict(ckpt["actor"])
         for qnet, sd in zip(policy.q_nets, ckpt["q_nets"]):
@@ -308,6 +347,7 @@ def train_ippo(
     checkpoint_dir   : directory for checkpoints; None disables checkpointing
     resume_from      : path to a checkpoint to resume from; None starts fresh
     """
+    _seed_all(seed)
     env = ParticleCollectorEnv(env_config)
     # Derive obs_dim from one reset.
     init_obs, _ = env.reset(seed=seed)
@@ -414,6 +454,7 @@ def train_ippo(
             f"{final_eval['mean_yield']:.3f} ± {final_eval['std_yield']:.3f}"
         )
 
+    history["_trained_policy"] = ippo
     return history
 
 
@@ -443,6 +484,7 @@ def train_mappo(
 
     See :func:`train_ippo` for parameter documentation.
     """
+    _seed_all(seed)
     env = ParticleCollectorEnv(env_config)
     init_obs, _ = env.reset(seed=seed)
     obs_dim = compute_obs_dim(init_obs)
@@ -539,6 +581,7 @@ def train_mappo(
             f"{final_eval['mean_yield']:.3f} ± {final_eval['std_yield']:.3f}"
         )
 
+    history["_trained_policy"] = mappo
     return history
 
 
@@ -578,6 +621,7 @@ def train_maddpg(
     checkpoint_dir   : directory for checkpoints; None disables checkpointing
     resume_from      : path to a checkpoint to resume from; None starts fresh
     """
+    _seed_all(seed)
     env = ParticleCollectorEnv(env_config)
     init_obs, _ = env.reset(seed=seed)
     obs_dim = compute_obs_dim(init_obs)
@@ -628,6 +672,10 @@ def train_maddpg(
         buf._next_obs[:] = ckpt["buffer_next_obs"]
         buf._dones[:] = ckpt["buffer_dones"]
         maddpg._episode_seed = int(ckpt.get("episode_seed", seed))
+        if "numpy_rng_state" in ckpt:
+            np.random.set_state(ckpt["numpy_rng_state"])
+        if "torch_rng_state" in ckpt:
+            torch.random.set_rng_state(ckpt["torch_rng_state"])
         start_step = int(ckpt["step"])
         resumed_from = str(resume_from)
 
@@ -715,6 +763,8 @@ def train_maddpg(
                     "buffer_next_obs": buf._next_obs.copy(),
                     "buffer_dones": buf._dones.copy(),
                     "episode_seed": maddpg._episode_seed,
+                    "numpy_rng_state": np.random.get_state(),
+                    "torch_rng_state": torch.random.get_rng_state(),
                 },
                 ckpt_path,
             )
@@ -732,6 +782,7 @@ def train_maddpg(
             f"{final_eval['mean_yield']:.3f} ± {final_eval['std_yield']:.3f}"
         )
 
+    history["_trained_policy"] = maddpg
     return history
 
 
@@ -770,6 +821,7 @@ def train_coma(
     checkpoint_dir   : directory for checkpoints; None disables checkpointing
     resume_from      : path to a checkpoint to resume from; None starts fresh
     """
+    _seed_all(seed)
     env = ParticleCollectorEnv(env_config)
     init_obs, _ = env.reset(seed=seed)
     obs_dim = compute_obs_dim(init_obs)
@@ -798,7 +850,7 @@ def train_coma(
     eval_seeds_fixed = tuple(range(seed + 10000, seed + 10008))
 
     history: dict[str, Any] = {
-        "algorithm": "COMA",
+        "algorithm": "continuous-COMA-style (experimental)",
         "obs_dim": obs_dim,
         "episode_yields": [],
         "eval_yields": [],
@@ -830,7 +882,7 @@ def train_coma(
 
         if verbose and len(history["episode_yields"]) % 10 == 0:
             print(
-                f"[COMA] approx episode {episode_count}/{n_episodes}, "
+                f"[continuous-COMA-style] approx episode {episode_count}/{n_episodes}, "
                 f"yield={yield_frac:.3f}, "
                 f"policy_loss={losses['policy_loss']:.4f}"
             )
@@ -841,7 +893,7 @@ def train_coma(
             history["eval_yields"].append(eval_result)
             if verbose:
                 print(
-                    f"[COMA] EVAL ep~{episode_count}: "
+                    f"[continuous-COMA-style] EVAL ep~{episode_count}: "
                     f"mean_yield={eval_result['mean_yield']:.3f} "
                     f"±{eval_result['std_yield']:.3f}"
                 )
@@ -863,10 +915,11 @@ def train_coma(
 
     if verbose:
         print(
-            f"[COMA] Training done. Final eval yield: "
+            f"[continuous-COMA-style] Training done. Final eval yield: "
             f"{final_eval['mean_yield']:.3f} ± {final_eval['std_yield']:.3f}"
         )
 
+    history["_trained_policy"] = coma
     return history
 
 
@@ -907,6 +960,7 @@ def train_commnet(
     checkpoint_dir   : directory for checkpoints; None disables checkpointing
     resume_from      : path to a checkpoint to resume from; None starts fresh
     """
+    _seed_all(seed)
     env = ParticleCollectorEnv(env_config)
     init_obs, _ = env.reset(seed=seed)
     obs_dim = compute_obs_dim(init_obs)
@@ -1005,6 +1059,7 @@ def train_commnet(
             f"{final_eval['mean_yield']:.3f} ± {final_eval['std_yield']:.3f}"
         )
 
+    history["_trained_policy"] = commnet
     return history
 
 
@@ -1041,6 +1096,7 @@ def train_vdn(
     checkpoint_dir   : directory for checkpoints; None disables checkpointing
     resume_from      : path to a checkpoint to resume from; None starts fresh
     """
+    _seed_all(seed)
     env = ParticleCollectorEnv(env_config)
     init_obs, _ = env.reset(seed=seed)
     obs_dim = compute_obs_dim(init_obs)
@@ -1068,7 +1124,7 @@ def train_vdn(
     eval_seeds_fixed = tuple(range(seed + 10000, seed + 10008))
 
     history: dict[str, Any] = {
-        "algorithm": "VDN",
+        "algorithm": "continuous-VD-style (experimental)",
         "obs_dim": obs_dim,
         "episode_yields": [],
         "eval_yields": [],
@@ -1100,7 +1156,7 @@ def train_vdn(
 
         if verbose and len(history["episode_yields"]) % 10 == 0:
             print(
-                f"[VDN] approx episode {episode_count}/{n_episodes}, "
+                f"[continuous-VD-style] approx episode {episode_count}/{n_episodes}, "
                 f"yield={yield_frac:.3f}, "
                 f"policy_loss={losses['policy_loss']:.4f}"
             )
@@ -1111,7 +1167,7 @@ def train_vdn(
             history["eval_yields"].append(eval_result)
             if verbose:
                 print(
-                    f"[VDN] EVAL ep~{episode_count}: "
+                    f"[continuous-VD-style] EVAL ep~{episode_count}: "
                     f"mean_yield={eval_result['mean_yield']:.3f} "
                     f"±{eval_result['std_yield']:.3f}"
                 )
@@ -1133,8 +1189,9 @@ def train_vdn(
 
     if verbose:
         print(
-            f"[VDN] Training done. Final eval yield: "
+            f"[continuous-VD-style] Training done. Final eval yield: "
             f"{final_eval['mean_yield']:.3f} ± {final_eval['std_yield']:.3f}"
         )
 
+    history["_trained_policy"] = vdn
     return history

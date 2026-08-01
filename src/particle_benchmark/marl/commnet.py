@@ -166,21 +166,21 @@ class CommNetModule(nn.Module):
 
         Parameters
         ----------
-        obs     : Tensor (B, obs_dim)   — per-agent observations (flattened T*M)
-        actions : Tensor (B, 2)         — raw pre-clipping actions
+        obs     : Tensor (B, M, obs_dim) — complete teams for B timesteps
+        actions : Tensor (B, M, 2)       — raw pre-clipping actions
 
         Returns
         -------
-        log_prob : Tensor (B,)
-        entropy  : Tensor (B,)
-        value    : Tensor (B,)  — NOTE: independent forward pass (no comm in eval batch)
+        log_prob : Tensor (B, M)
+        entropy  : Tensor (B, M)
+        value    : Tensor (B, M)
         """
-        # For mini-batch training we approximate the comm pass by treating each
-        # row as an independent agent (efficiency trade-off).  The encoder +
-        # decoder still use the shared learned weights.
-        h = self.encoder(obs)             # (B, h_dim)
-        action_mean = self.actor_head(h)  # (B, 2)
-        value = self.value_head(h).squeeze(-1)  # (B,)
+        if obs.ndim != 3 or actions.ndim != 3:
+            raise ValueError(
+                "CommNet PPO evaluation requires complete (time, agent, feature) "
+                "groups; flattening agents would remove the message channel."
+            )
+        action_mean, value = self.forward_batch(obs)
 
         std = self.log_std.exp().expand_as(action_mean)
         dist = Normal(action_mean, std)
@@ -212,6 +212,9 @@ class CommNet:
     n_epochs      : optimisation epochs per update call
     batch_size    : mini-batch size (over time * agents)
     """
+
+    execution_time_communication = True
+    training_time_centralization = False
 
     def __init__(
         self,
@@ -382,15 +385,14 @@ class CommNet:
         advantages = self._compute_advantages(rewards, values, dones)  # (T, M)
         returns = advantages + values  # (T, M)
 
-        # Flatten time and agent dims.
-        obs_flat = obs.reshape(T * M, self.obs_dim)
-        act_flat = raw_actions.reshape(T * M, 2)
+        # Keep complete agent groups together. Flattening agents before the
+        # forward pass would train a different, communication-free policy.
         old_lp_flat = old_log_probs.reshape(T * M)
         adv_flat = advantages.reshape(T * M)
         ret_flat = returns.reshape(T * M)
 
-        obs_t = torch.from_numpy(obs_flat.astype(np.float32))
-        act_t = torch.from_numpy(act_flat.astype(np.float32))
+        obs_t = torch.from_numpy(obs.astype(np.float32))
+        act_t = torch.from_numpy(raw_actions.astype(np.float32))
         old_lp_t = torch.from_numpy(old_lp_flat.astype(np.float32))
         adv_t = torch.from_numpy(adv_flat.astype(np.float32))
         ret_t = torch.from_numpy(ret_flat.astype(np.float32))
@@ -412,13 +414,19 @@ class CommNet:
             for start in range(0, n_steps_flat, self.batch_size):
                 mb_idx = torch.from_numpy(indices[start : start + self.batch_size])
 
-                mb_obs = obs_t[mb_idx]
-                mb_act = act_t[mb_idx]
                 mb_old_lp = old_lp_t[mb_idx]
                 mb_adv = adv_t[mb_idx]
                 mb_ret = ret_t[mb_idx]
 
-                new_lp, entropy, value_pred = self.net.evaluate_actions(mb_obs, mb_act)
+                # Recompute all complete communication groups, then select the
+                # flattened loss entries. This is less memory-efficient but
+                # preserves the policy whose log-probabilities generated data.
+                new_lp_all, entropy_all, value_all = self.net.evaluate_actions(
+                    obs_t, act_t
+                )
+                new_lp = new_lp_all.reshape(-1)[mb_idx]
+                entropy = entropy_all.reshape(-1)[mb_idx]
+                value_pred = value_all.reshape(-1)[mb_idx]
 
                 ratio = torch.exp(new_lp - mb_old_lp)
                 surr1 = ratio * mb_adv

@@ -14,6 +14,7 @@ from particle_benchmark.metrics.coordination import (
     spatial_coverage_metrics,
     split_field_informative,
     upstream_alignment_score,
+    validate_execution_time_ablation,
 )
 
 
@@ -53,12 +54,38 @@ class TestPerSeedCE:
         ce = per_seed_ce(comm, ablated, oracle)
         assert ce[0] < 0.0
 
-    def test_ce_zero_when_oracle_equals_ablated(self):
-        """CE = 0 (not NaN) when oracle == ablated (no headroom)."""
+    def test_ce_undefined_when_oracle_equals_ablated(self):
+        """CE is undefined when the oracle has no positive headroom."""
         val = np.array([0.5, 0.5])
         ce = per_seed_ce(val, val, val)
-        np.testing.assert_allclose(ce, 0.0, atol=1e-10)
-        assert not np.any(np.isnan(ce))
+        assert np.all(np.isnan(ce))
+
+    def test_ce_rejects_shape_mismatch(self):
+        with pytest.raises(ValueError, match="identical shapes"):
+            per_seed_ce(np.ones(2), np.ones(3), np.ones(2))
+
+
+class TestExecutionTimeAblationValidation:
+
+    def test_rejects_ctde_as_communication(self):
+        with pytest.raises(ValueError, match="no execution-time communication"):
+            validate_execution_time_ablation(
+                np.zeros((4, 2)), np.ones((4, 2)),
+                execution_time_communication=False,
+            )
+
+    def test_rejects_identity_ablation(self):
+        actions = np.arange(8, dtype=float).reshape(4, 2)
+        with pytest.raises(ValueError, match="identity operation"):
+            validate_execution_time_ablation(
+                actions, actions.copy(), execution_time_communication=True
+            )
+
+    def test_accepts_genuine_message_intervention(self):
+        validate_execution_time_ablation(
+            np.zeros((4, 2)), np.ones((4, 2)),
+            execution_time_communication=True,
+        )
 
     def test_ce_output_shape(self):
         """Output shape matches input shape."""
@@ -433,3 +460,17 @@ class TestCommNetAblation:
             "Expected ablated and full-comm action means to differ, "
             "but they were identical. Check that _communicate respects comm_ablated."
         )
+
+    def test_training_evaluation_preserves_agent_groups(self):
+        from particle_benchmark.marl.commnet import CommNetModule
+
+        net = CommNetModule(obs_dim=7, h_dim=8, n_comm_rounds=1)
+        obs = torch.randn(3, 4, 7)
+        actions = torch.randn(3, 4, 2)
+        log_prob, entropy, value = net.evaluate_actions(obs, actions)
+        assert log_prob.shape == (3, 4)
+        assert entropy.shape == (3, 4)
+        assert value.shape == (3, 4)
+
+        with pytest.raises(ValueError, match="complete"):
+            net.evaluate_actions(obs.reshape(12, 7), actions.reshape(12, 2))

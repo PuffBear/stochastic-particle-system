@@ -1,10 +1,3 @@
-% AAMAS 2026 submission: convert to acmart class with sigconf option
-% \documentclass[sigconf,anonymous]{acmart}
-% Page limit: 8 pages + unlimited references
-% Remove geometry package; acmart handles margins
-% Add: \acmConference{AAMAS}{2026}
-% CCS concepts required
-% Author keywords required
 \documentclass{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb}
@@ -74,8 +67,10 @@ We do not claim the first mobile particle collector, first locally guided
 capture strategy, or first capture-time analysis. The distinguishing element is
 a matched counterfactual design that pairs each signal episode with a null
 episode sharing initial state, Brownian forcing, and randomness, so that the
-seed-level yield difference is an exact causal estimate of the active
-exploitation effect after subtracting passive advection.
+seed-level yield difference is a matched policy contrast conditional on
+identical recorded stochastic inputs. Stationary and true-field controls are
+reported separately because matching alone does not remove passive advection
+as an explanation.
 
 \paragraph{Multi-agent reinforcement learning and coordination.}
 MADDPG~\cite{lowe2017maddpg} established centralized-training
@@ -129,11 +124,11 @@ multi-agent policy gradients to isolate each agent's marginal contribution by
 comparing actual returns with expected returns under a default action, holding
 other agents' actions fixed. The matched episode design in this work is
 structurally analogous: seed-level outcomes under the shared and independent
-policies are compared on identical stochastic inputs, so the difference is an
-exact counterfactual quantity under the potential-outcomes
-framework~\cite{morgan2015counterfactuals,imbens2015causal}.
-The three defensible novelties that distinguish this work from all cited prior
-art are:
+policies are compared on identical stochastic inputs, producing a paired
+potential-outcome contrast under the recorded simulator intervention
+~\cite{morgan2015counterfactuals,imbens2015causal}.
+The three candidate contributions, conditional on the pending numerical and
+shared-versus-independent diagnostics, are:
 (i)~a matched counterfactual causal framing for multi-collector particle
 capture that subtracts the passive-advection response, so the estimand
 measures action-contingent exploitation rather than passive transport;
@@ -141,10 +136,12 @@ measures action-contingent exploitation rather than passive transport;
 so captured-particle identity is deterministic given the matched random inputs
 and does not depend on entity-array ordering; and
 (iii)~a bounded-statistic mechanism probe that precedes any learning
-experiment, testing whether one specific hand-coded shared scalar shifts the
+experiment, testing whether one specific hand-coded three-number summary shifts the
 yield boundary before introducing the confounds of a learned communication
 protocol.
-These properties together make SPS-C03 a mechanism diagnostic rather than a
+If the diagnostic fails, only the simulator and negative mechanism audit remain;
+no coordination contribution is claimed. If it passes, these properties make
+SPS-C03 a mechanism diagnostic rather than a
 coordination-algorithm contribution; the result, whether positive or null, is
 interpretable without reference to a particular learning algorithm.
 
@@ -508,14 +505,15 @@ calculation, independent confirmation, learned policy, IPPO/MAPPO baseline, or
 MARL experiment exists. Growing-aggregate physics and aggregation analysis
 remain later work.
 
-The implementation currently has 89 passing tests covering deterministic
+The dependency-free implementation currently has 96 passing tests covering deterministic
 reset, causal observations, zero-signal identity, exact specular contacts,
 event-order and event-key invariance, schema validation, immutable writes,
 paired provenance, frozen policies, row-order-invariant inference, bounded
 team-summary invariance, full-state-oracle microcases, and exact Brownian
 aggregation, as well as unique-yield counting, inclusive step-67 evaluation,
 post-contact continuation, and matched yield-run provenance. These are
-engineering checks only. SPS-C01 remains proposed but inactive, SPS-C03 is
+engineering checks only. SPS-C01 was dropped when the first-interception
+endpoint failed its action-feasible oracle gate; SPS-C03 is
 blocked, and \textbf{no detectability boundary is supported by SPS-P01 or
 SPS-P02}.
 
@@ -606,7 +604,7 @@ J. Foerster, Y. Assael, N. de Freitas, and S. Whiteson.
 \newblock \url{https://proceedings.neurips.cc/paper_files/paper/2016/hash/c7635bfd99248a2cdef8249ef7bfbef4-Abstract.html}.
 
 \bibitem{wang2020imac}
-T. Wang, J. Wang, C. Wu, and C. Zhang.
+R. Wang, X. He, R. Yu, W. Qiu, B. An, and Z. Rabinovich.
 \newblock Learning efficient multi-agent communication: An information
 bottleneck approach.
 \newblock In \emph{Proceedings of the 37th International Conference on Machine
@@ -619,7 +617,7 @@ Learning (ICML)}, 2020.
 R. C. L\"offler, E. Panizon, and C. Bechinger.
 \newblock Collective foraging of active particles trained by reinforcement
 learning.
-\newblock \emph{Scientific Reports}, 13:17985, 2023.
+\newblock \emph{Scientific Reports}, 13:17055, 2023.
 \newblock \url{https://doi.org/10.1038/s41598-023-44268-3}.
 
 \bibitem{elgeti2015microswimmers}

@@ -702,3 +702,4 @@ class TestVDN:
         for q1, q2 in zip(vdn.q_nets, vdn2.q_nets):
             for p1, p2 in zip(q1.parameters(), q2.parameters()):
                 assert torch.allclose(p1, p2)
+

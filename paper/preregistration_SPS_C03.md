@@ -14,7 +14,7 @@ Does replacing each collector's independent local velocity estimate with a
 bounded team-mean velocity summary increase the number of unique particles
 captured by a four-collector team through the inclusive end of step 67, at
 field strength α = 0.06, relative to four independent collectors with
-identical observation, action, and speed budgets?
+identical observation-interface dimensions, action, and speed budgets?
 
 This is a single binary-direction diagnostic question. It is not a claim that
 sharing is the mechanism of any yield improvement, not a claim about the
@@ -84,13 +84,16 @@ convergence (SPS-WO-06) has passed.
 
 ### Policy pair
 
-Both policies belong to the **capacity_matched_velocity_controller** class,
-which guarantees that both arms operate under identical observation budgets
-(same sensing radius, same K nearest-particle slots, same teammate-position
-channel), identical action budgets (same unit-ball projection and v_max cap),
-and identical speed limits.
+Both policies belong to the **capacity_matched_velocity_controller** class.
+They have identical observation-interface dimensions (same sensing radius,
+same K nearest-particle slots, same teammate-position channel), identical
+action budgets (same unit-ball projection and v_max cap), and identical speed
+limits. They do **not** have identical information content: pooled evidence
+from other collectors is precisely the treatment in the shared arm. This
+diagnostic therefore estimates the effect of that bounded summary, not a
+generic capacity effect.
 
-**Shared arm:** `capacity_matched_velocity_controller_shared`
+**Shared arm:** `shared_summary`
 The policy computes the local velocity estimate for each visible particle (as
 in the independent arm), then replaces that per-agent estimate with the
 bounded team-mean velocity: the element-wise mean of the individual estimates
@@ -98,7 +101,7 @@ across all M = 4 collectors, clipped to unit norm before the v_max projection.
 The team-mean is computed from the current step's causally valid observations
 and is broadcast to all collectors before the action is selected.
 
-**Independent arm:** `capacity_matched_velocity_controller_independent`
+**Independent arm:** `capacity_matched_independent`
 The policy computes the local velocity estimate for each visible particle and
 acts on that estimate without sharing any summary. The teammate-position
 channel is present in the observation but unused by the policy rule. This arm
@@ -140,18 +143,23 @@ or reinterpreted after any diagnostic seed outcome is observed.
 
 ## 6. If the gate passes
 
-If all five empirical conditions in Section 5 pass (in addition to conditions
-5–6 which are procedural prerequisites):
+If all four empirical conditions in Section 5 pass (in addition to conditions
+5–6, which are procedural prerequisites):
 
-1. **Freeze the minimum relevant effect:** the minimum effect size considered
-   practically relevant for confirmation is frozen at max(2.0, observed
-   mean(Δ_s) × 0.50) unique particles on average across seeds. This value
-   cannot be updated after the diagnostic outcomes are observed.
+1. **Use the ex-ante minimum relevant effect:** the minimum effect considered
+   practically relevant for confirmation is fixed at **2.0 unique team
+   captures** on average (0.5 per collector). This threshold was selected
+   before any seed 4001–4008 outcome was observed because a smaller benefit
+   would not justify a full confirmation battery. It is not estimated from,
+   and cannot be changed in response to, the diagnostic outcomes.
 2. **Run a power analysis:** a simulation-based power study is conducted using
-   the frozen minimum relevant effect, the observed seed-level variance, and a
-   two-sided paired bootstrap with B = 10,000 draws at α = 0.05, over a
-   candidate seed budget of n ∈ {16, 24, 32}. The study targets 80% power at
-   the frozen minimum effect.
+   the frozen minimum relevant effect, an ex-ante sensitivity range of paired
+   seed-level standard deviations from 2.0 to 4.0, and the same one-sided
+   paired studentized-bootstrap lower-bound procedure intended for
+   confirmation (B = 10,000 draws, α = 0.05), over candidate seed budgets
+   n ∈ {16, 24, 32}. The study targets 80% power at the frozen minimum effect.
+   Diagnostic variance may be reported later but cannot replace this frozen
+   sensitivity analysis or alter its candidate counts.
 3. **Authorize confirmation seeds:** confirmation seeds are drawn from the range
    5001–9999. The exact seed block is specified in the power study output and
    must not overlap with any prior pilot, diagnostic, or calibration block.
@@ -192,12 +200,12 @@ All four of the following policy conditions must be run on the same eight
 diagnostic seeds and reported in the same analysis package as the primary
 diagnostic:
 
-1. **capacity_matched_velocity_controller_shared** (shared arm; primary)
-2. **capacity_matched_velocity_controller_independent** (independent arm;
+1. **shared_summary** (shared arm; primary)
+2. **capacity_matched_independent** (independent arm;
    primary comparator)
 3. **stationary** (all four collectors are stationary; passive-advection
    baseline)
-4. **full_state_oracle** (the corrected full-state action-feasible oracle from
+4. **full_state_interception_oracle** (the corrected full-state action-feasible oracle from
    SPS-WO-05; action-contingent headroom reference)
 
 All four policies must use the same matched random streams (identical particle
@@ -217,12 +225,15 @@ team-oracle), but must not alter the matched streams used for the primary pair.
 **SPS-WO-06 must pass before this experiment executes.**
 
 SPS-WO-06 is the coupled-noise timestep convergence diagnostic for unique yield
-(EVALUATION_STEPS = 67). It uses seeds 3001–3008, couples Brownian increments
-across Δt, Δt/2, and Δt/4 by pre-generating the fine-level tensor and summing
-pairs for the coarse levels, and compares stationary-minus-null and
-oracle-minus-stationary yield contrasts at each level. It passes if and only if
-the oracle-minus-stationary contrast at Δt/2 differs from the Δt value by less
-than 1.0 particle on average and changes sign in no more than 1 of 8 seeds.
+over a fixed physical duration of 1.34 time units (67 steps at Δt = 0.02). It
+uses seeds 3001–3008 and levels Δt = 0.02, 0.01, and 0.005. One standard-normal
+tensor is generated at Δt = 0.005; its Brownian increments are summed in blocks
+of two and four for the coarser levels. It reports stationary signal-minus-null
+and oracle-minus-stationary contrasts at every level. The gate passes if and
+only if the absolute difference between the mean oracle-minus-stationary
+contrasts at Δt = 0.02 and Δt = 0.01 is strictly below 1.0 particle and their
+seed-level contrast signs differ in no more than 1 of 8 seeds. The Δt = 0.005
+comparison is mandatory but informational; it cannot rescue a failed gate.
 
 SPS-C03 must not be executed, scheduled, or partially executed before SPS-WO-06
 passes. No outcome from seeds 3001–3008 or seeds 4001–4008 may be examined
@@ -327,3 +338,4 @@ seed block.
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-07-31 | Initial registration; not yet executed |
+| 1.1 | 2026-08-01 | Corrected policy identifiers and information-budget wording; aligned the coupled timestep gate and froze a 2.0-particle one-sided power design ex ante; no diagnostic outcomes observed. |

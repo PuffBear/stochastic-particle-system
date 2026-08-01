@@ -1,0 +1,17 @@
+{
+  "work_order_id": "SPS-WO-07",
+  "role": "experiment-engineer",
+  "paper": "paper-a",
+  "objective": "Run the frozen shared-summary versus independent-controller diagnostic and attribution controls only after SPS-WO-06 passes.",
+  "claim_ids": ["SPS-C03"],
+  "allowed_files": ["analysis/run_attribution_controls.py", "configs/experiments/sps_wo07_attribution_controls.yaml", "results/raw/SPS-WO-07-ATTRIBUTION-CONTROLS/"],
+  "prohibited_files": ["analysis/run_marl_baselines.py", "paper/manuscript/main.tex"],
+  "inputs": {"config": "configs/experiments/sps_wo07_attribution_controls.yaml", "required_gate": "SPS-WO-06 convergence_report.json with convergence_gate_passed=true"},
+  "compute_cap": {"hardware": "CPU only", "episodes": 64, "maximum_environment_steps": 4288, "wall_time_minutes": 20, "memory_gib": 4},
+  "expected_artifacts": ["episode_summaries.jsonl", "capture_events.jsonl", "attribution_gate.json", "manifest.json"],
+  "verification_command": "PYTHONPATH=src:. python -m unittest tests.test_experiment_design -v",
+  "stop_conditions": ["SPS-WO-06 is absent or failed", "any unit-test failure", "any matched-stream mismatch", "immutable output path exists"],
+  "fallback_task": "Advance documentation and provenance checks; never execute seeds 4001-4008 before the upstream gate passes.",
+  "scientific_status": "preregistered and dependency-blocked; not executed"
+}
+

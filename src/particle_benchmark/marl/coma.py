@@ -1,4 +1,4 @@
-"""Counterfactual Multi-Agent Policy Gradients (COMA) for the particle-collector benchmark.
+"""Experimental continuous-action COMA-style method.
 
 Reference: Foerster et al., "Counterfactual Multi-Agent Policy Gradients",
 AAAI 2018.
@@ -72,7 +72,11 @@ class CounterfactualCritic(nn.Module):
 # ---------------------------------------------------------------------------
 
 class COMA:
-    """Counterfactual Multi-Agent Policy Gradients.
+    """Continuous-action COMA-style prototype, not canonical COMA.
+
+    Canonical COMA marginalises a discrete action distribution exactly. This
+    adaptation estimates a continuous-action counterfactual baseline by Monte
+    Carlo sampling. Reports must use ``continuous-COMA-style``.
 
     Parameters
     ----------
@@ -85,6 +89,10 @@ class COMA:
     batch_size   : mini-batch size for SGD
     n_cf_samples : K — number of counterfactual action samples per advantage
     """
+
+    report_label = "continuous-COMA-style (experimental)"
+    execution_time_communication = False
+    training_time_centralization = True
 
     def __init__(
         self,
@@ -162,18 +170,11 @@ class COMA:
         return actions
 
     def ablated_get_actions(self, observations: tuple) -> np.ndarray:
-        """Return clipped actions (M, 2) — ablation is identity for COMA.
-
-        COMA's counterfactual advantage shaping is a critic-side mechanism used
-        only during training to shape the policy gradient. At inference time the
-        actor samples actions from per-agent observations without any critic
-        involvement. Ablating communication (i.e. removing the counterfactual
-        advantage shaping) therefore does not change the actor's output at
-        evaluation time, so this method is identical to get_actions. It is
-        provided to satisfy the common ablation interface for Coordination
-        Efficiency computation.
-        """
-        return self.get_actions(observations)
+        """The counterfactual critic is CTDE, not communication."""
+        raise NotImplementedError(
+            "continuous-COMA-style has no execution-time message channel; an "
+            "identity actor comparison cannot support a communication claim."
+        )
 
     # ------------------------------------------------------------------
     # Rollout collection (on-policy)
