@@ -192,3 +192,45 @@ spacing, together with a causal estimation-gain/action-diversity decomposition.
 ### Immediate literature-led decision
 
 Do **not** launch another broad seed sweep of `local_flow_v1`. First instrument the passive/active decomposition and the privileged interception oracle, then run a small coupled timestep pilot. If the active-minus-stationary effect remains absent even for the oracle, the task or outcome is malformed. If the oracle succeeds but estimated local flow does not, repair observation history and estimator/action alignment. If local flow succeeds but team sharing does not exceed four independent collectors, the current result remains a flow-control benchmark rather than an AAMAS coordination contribution.
+
+## SPS-WO-11 threat-oriented novelty veto (2026-08-01)
+
+**Verdict:** conditional pass at confidence `0.65`. This was a bounded,
+threat-oriented primary-source search, not a systematic database review or a
+proof of absence. The exact residual claim was not found, but nearly every
+broader motivation and mechanism is established.
+
+| Source | Primary URL | Read status | Exact overlap and novelty threat |
+|---|---|---|---|
+| Piro et al., **“Policy heterogeneity improves collective olfactory search in 3-D turbulence”** | https://arxiv.org/abs/2504.11291 ; related DOI https://doi.org/10.1103/6zls-m67c | Full text read | **Strongest mechanism threat.** Spatially correlated detections already cause clustering and redundancy; policy heterogeneity restores movement diversity and coverage. SPS-C04 cannot claim this mechanism as new. |
+| Taylor et al., **“When Should There be a ‘Me’ in ‘Team’?”**, AAMAS 2010 | https://www.ifaamas.org/Proceedings/aamas2010/pdf/01%20Full%20Papers/02_01_FP_0026.pdf | Full text read | Establishes that more teamwork can hurt under uncertainty even when communication and computation costs are ignored, with topology-dependent reversals. |
+| Aust et al., **“The Hidden Benefits of Limited Communication and Slow Sensing”** | https://doi.org/10.1007/978-3-031-20176-9_19 ; author PDF https://heikohamann.de/pub/austANTS22.pdf | Full text read | Limited communication can help when samples are correlated and recruitment is too rapid. Generic correlation-induced harm from global sharing is not new. |
+| Zhang, Martinez, and Masson, **“Multi-Robot Searching with Sparse Binary Cues and Limited Space Perception”** | https://doi.org/10.3389/frobt.2015.00012 | Full article read | Compares independent and shared/fully collaborative search in a particle-cue environment with an explicit source correlation length. It uses a first-source objective and belief/history sharing, not distinct fixed-window captures or the proposed sign law. |
+| Panizon and Celani, **“Seeking and sharing information in collective olfactory search”** | https://doi.org/10.1088/1478-3975/acfd7a | Abstract and bibliographic record read; full text not retrieved | Shared information can partition search space and improve mean search time. Search-space allocation is established adjacent work. |
+| Sung et al., **“Distributed Assignment with Limited Communication for Multi-Robot Multi-Target Tracking”** | https://doi.org/10.1007/s10514-019-09856-1 ; preprint https://arxiv.org/abs/1812.11172 | Full text read | Optimizes a non-additive unique-target objective under limited communication. Unique-target accounting and duplicate avoidance are not new. |
+| Elwin, Freeman, and Lynch, **“Distributed Environmental Monitoring With Finite Element Robots”** | https://doi.org/10.1109/TRO.2019.2936747 ; author PDF https://robotics.northwestern.edu/documents/publications/femrobots.pdf | Full text read | Environmental correlation length already determines distributed estimation and communication requirements. |
+| Mateo, Kuan, and Bouffanais, **“Effect of Correlations in Swarms on Collective Response”** | https://doi.org/10.1038/s41598-017-09830-w | Full article read | Excess connectivity can reduce absolute performance through a correlation span/strength trade-off. A generic connectivity optimum is not new. |
+
+Also rechecked were Li and Guo (2012), Atanasov et al. (2015), Jiang and Lu
+(2018), Du et al. (2021), Nakamura et al. (2022), and Liemhetcharat and
+Veloso (2015). Together these establish all-to-all/limited source seeking,
+distributed noisy-field estimation, harmful indiscriminate sharing, learned
+communication topology, novelty-gated spatial-field samples, and communicated
+duplicate-target avoidance.
+
+### Licensed residual novelty only
+
+Conditional on future evidence, the paper may say it prospectively tests
+whether capacity-matched all-to-all arithmetic aggregation has an ordered,
+benchmark-conditioned sign crossover relative to self-only use as environmental
+correlation length changes relative to collector spacing, under a fixed-horizon
+distinct-capture objective, and quantifies the competing estimator-risk and
+action-diversity pathways.
+
+It may not claim that communication can hurt, teamwork can be worse without
+communication cost, correlation creates redundant sensing, diversity improves
+collective search, correlation-aware fusion is new, all-to-all comparison is
+new, unique-target objectives are new, or the result is a universal phase
+transition. If a future result shows only clustering or diversity loss without
+the preregistered ordered crossing and estimator-side prediction, the paper is
+too close to Piro et al. and must be killed or reframed outside SPS-C04.

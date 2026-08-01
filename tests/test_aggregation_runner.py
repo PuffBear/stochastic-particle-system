@@ -7,6 +7,8 @@ import unittest
 
 from particle_benchmark.aggregation_runner import (
     AggregationPairExperimentConfig,
+    _arm_summary,
+    evaluate_arm_eta_diagnostic_gate,
     load_aggregation_pair_config,
     run_aggregation_pair,
 )
@@ -71,8 +73,9 @@ class TestAggregationRunner(unittest.TestCase):
             self.assertFalse(result.summary["zero_intervention_identity_checked"])
             self.assertEqual(
                 result.summary["endpoint_status"],
-                "unresolved_T_1.34_vs_canonical_8.0_no_scientific_endpoint_selected",
+                "frozen_T_1.34_current_run_nonendpoint_diagnostic",
             )
+            self.assertEqual(result.summary["frozen_physical_endpoint_seconds"], 1.34)
             manifest = json.loads(result.paths.manifest.read_text())
             validate_instance(
                 manifest,
@@ -87,6 +90,14 @@ class TestAggregationRunner(unittest.TestCase):
             self.assertTrue(rows[1]["analytic_eligible"])
             self.assertIsNotNone(rows[1]["conditional_field_covariance"])
             self.assertEqual(rows[1]["outcome_step"], rows[1]["decision_step"] + 1)
+            post = result.summary["all_to_all"]["post_history_diagnostics"]
+            self.assertEqual(post["rows"], 1)
+            self.assertEqual(post["analytic_eligibility"], {
+                "numerator": 1,
+                "denominator": 1,
+                "rate": 1.0,
+            })
+            self.assertEqual(post["action_transitions"], 4)
             with self.assertRaises(FileExistsError):
                 run_aggregation_pair(self._config(), directory)
 
@@ -109,6 +120,109 @@ class TestAggregationRunner(unittest.TestCase):
         self.assertEqual(config.environment.field_family, "periodic_gaussian")
         self.assertFalse(config.environment.include_teammates)
         self.assertEqual(config.arm_modes["self_only"], "independent")
+
+    @staticmethod
+    def _synthetic_row(
+        decision_step: int,
+        *,
+        eligible: bool,
+        captures: int = 0,
+        rescue: tuple[bool, bool, bool, bool] = (False, False, False, False),
+        cancellation: tuple[bool, bool, bool, bool] = (False, False, False, False),
+        own_empty: tuple[bool, bool, bool, bool] = (False, False, False, False),
+        outcome_reflection: tuple[bool, bool, bool, bool] = (False, False, False, False),
+    ) -> dict[str, object]:
+        return {
+            "decision_step": decision_step,
+            "unique_yield_so_far": captures,
+            "transition_unique_captures": captures,
+            "valid_particle_counts": [2, 2, 2, 2],
+            "clipped_components": [[False, False] for _ in range(4)],
+            "reflected_valid_counts": [0, 0, 0, 0],
+            "outcome_particle_reflection_count": 0,
+            "own_empty": list(own_empty),
+            "fallback_used": [False, False, False, False],
+            "cross_agent_rescue": list(rescue),
+            "zero_direction_cancellation": list(cancellation),
+            "outcome_collector_reflected": list(outcome_reflection),
+            "analytic_eligible": eligible,
+        }
+
+    def test_post_history_counts_keep_treatment_events_and_exclude_only_reflected_mediator_units(self) -> None:
+        records = [
+            self._synthetic_row(0, eligible=False, captures=1),
+            self._synthetic_row(
+                1,
+                eligible=False,
+                captures=2,
+                rescue=(True, False, False, False),
+                own_empty=(True, False, False, False),
+            ),
+            self._synthetic_row(
+                2,
+                eligible=True,
+                captures=3,
+                cancellation=(False, True, False, False),
+                outcome_reflection=(False, False, True, False),
+            ),
+        ]
+        summary = _arm_summary(records, nearest_particles_k=2)
+        self.assertEqual(summary["steps"], 3)
+        self.assertEqual(summary["captured_total"], 3)
+        post = summary["post_history_diagnostics"]
+        self.assertEqual(post["rows"], 2)
+        self.assertEqual(post["analytic_eligibility"]["rate"], 0.5)
+        self.assertEqual(
+            post["cross_agent_rescue_own_empty_rows"],
+            {"numerator": 1, "denominator": 1, "rate": 1.0},
+        )
+        self.assertEqual(
+            post["zero_direction_cancellation_nonfallback_agent_rows"],
+            {"numerator": 1, "denominator": 8, "rate": 0.125},
+        )
+        self.assertEqual(
+            post["collector_reflected_action_transitions"],
+            {"numerator": 1, "denominator": 8, "rate": 0.125},
+        )
+        self.assertEqual(
+            post["action_displacement_eligible_transitions"],
+            {"numerator": 7, "denominator": 8, "rate": 0.875},
+        )
+
+    def test_frozen_gate_thresholds_are_inclusive_and_rescue_is_uncapped(self) -> None:
+        rates = {
+            arm: {
+                "analytic_eligibility_rate": 0.80,
+                "clipped_velocity_component_rate": 0.01,
+                "own_empty_agent_row_rate": 0.05,
+                "fallback_agent_row_rate": 0.05,
+                "reflected_valid_slot_rate": 0.05,
+                "collector_reflected_action_transition_rate": 0.05,
+                "cross_agent_rescue_rate": 1.0,
+                "zero_direction_cancellation_rate": 1.0,
+            }
+            for arm in ("self_only", "all_to_all")
+        }
+        rates["self_only"]["analytic_eligibility_rate"] = 0.90
+        report = evaluate_arm_eta_diagnostic_gate(
+            rates,
+            {"self_only": [0.50], "all_to_all": [0.50]},
+        )
+        self.assertTrue(report["gate_passed"])
+        self.assertAlmostEqual(
+            report["analytic_eligibility_absolute_rate_difference"], 0.10
+        )
+        self.assertAlmostEqual(
+            report["analytic_eligibility_arm_gap_percentage_points"], 10.0
+        )
+
+        rates["self_only"]["analytic_eligibility_rate"] = 0.9001
+        report = evaluate_arm_eta_diagnostic_gate(
+            rates,
+            {"self_only": [0.50], "all_to_all": [0.50]},
+        )
+        self.assertFalse(report["gate_passed"])
+        self.assertFalse(report["components"]["analytic_eligibility_arm_gap"])
 
 
 if __name__ == "__main__":

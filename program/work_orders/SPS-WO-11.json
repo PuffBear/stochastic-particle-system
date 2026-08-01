@@ -1,0 +1,62 @@
+{
+  "work_order_id": "SPS-WO-11",
+  "role": "program-director-with-research-lead-literature-scout-experiment-engineer-and-expansionist",
+  "paper": "paper-a",
+  "objective": "Close the primary-literature, physical-endpoint, and nonlinear-row SPS-C04 preregistration blockers without executing scientific seeds.",
+  "claim_ids": ["SPS-C04"],
+  "allowed_files": [
+    "configs/experiments/sps_c04_outcome_blind_design.yaml",
+    "src/particle_benchmark/aggregation_runner.py",
+    "schemas/aggregation_pair_summary.schema.json",
+    "tests/test_aggregation_runner.py",
+    "tests/test_sps_c04_design.py",
+    "paper/redesign_SPS_C04.md",
+    "paper/PROJECT.md",
+    "paper/claims.csv",
+    "paper/literature.md",
+    "program/program_state.json",
+    "program/decision_log.md",
+    "program/future_research_ideas.md",
+    "program/work_orders/SPS-WO-11.json",
+    "program/handoffs/SPS-WO-11-research-lead.md",
+    "program/handoffs/SPS-WO-11-literature.md",
+    "program/handoffs/SPS-WO-11-engineering.md",
+    "program/handoffs/SPS-WO-11-expansionist.md"
+  ],
+  "prohibited_files": ["configs/env/canonical.yaml", "paper/experiments.jsonl", "paper/manuscript/main.tex", "results/raw/", "results/derived/SPS-C04-DIAGNOSTIC/"],
+  "inputs": {
+    "repository_snapshot": "f62b073cf2a5b1e283aff2e27ccd6ec7fae55c3d",
+    "active_question": "one ordered grid-censored all-to-all versus self-only unique-capture crossover across eta",
+    "prior_endpoint_evidence": "SPS-WO-05 action-headroom gate and SPS-WO-06 coupled timestep diagnostic",
+    "data_firewall": "SPS-WO-07 seeds 4001-4008 remain diagnostic-only and cannot select or confirm SPS-C04"
+  },
+  "compute_cap": {"hardware": "CPU only", "scientific_episodes": 0, "deterministic_tests": 250, "wall_time_minutes": 30, "memory_gib": 4},
+  "expected_artifacts": [
+    "threat-oriented primary-literature veto with read status and confidence",
+    "frozen inclusive T=1.34 endpoint and exact coupled timestep mapping",
+    "all-row outcome rule and prospective analytic eligibility/error budget",
+    "versioned summary numerators, denominators, rates, and endpoint metadata",
+    "research, literature, engineering, and expansion handoffs"
+  ],
+  "verification_command": "PYTHONPATH=src:. python -m unittest tests.test_aggregation_runner tests.test_sps_c04_design -v && PYTHONPATH=src:. python -m pytest -q",
+  "stop_conditions": [
+    "any scientific seed, eta outcome, or performance contrast is consumed",
+    "canonical.yaml is changed to make the paper endpoint appear resolved",
+    "any outcome row is removed because of clipping, reflection, fallback, rescue, or cancellation",
+    "a nonlinear threshold is weakened after observing SPS-C04 outcomes",
+    "a novelty pass is described as proof that no prior work exists"
+  ],
+  "fallback_task": "If novelty fails, kill SPS-C04 before seeds; if endpoint or nonlinear accounting cannot be encoded, keep preregistration blocked and repair only deterministic metadata/tests.",
+  "positive_interpretation": "Authorize a separate outcome-blind work order to freeze eta grid, minimum relevant effect, simultaneous inference, fresh seeds, stopping rule, and CPU cap.",
+  "null_interpretation": "Keep SPS-C04 blocked or kill it before scientific execution.",
+  "reversed_interpretation": "If nearest work establishes the same claim, drop the phase-boundary novelty object rather than broadening it.",
+  "gate_outcome": {
+    "literature_veto": "conditional pass at confidence 0.65; residual novelty restricted to the prospectively predicted ordered benchmark-conditioned crossover and quantitative matched decomposition",
+    "endpoint": "pass; inclusive T=1.34 at dt=0.02 horizon 67, with exact coupled mappings 67/134/268; canonical horizon 400 remains generic only",
+    "outcomes": "pass; every transition and unique capture is retained regardless of nonlinear diagnostics",
+    "mechanism_coverage": "pass as prospective design; exact per-arm-by-eta and seed-arm thresholds encoded before outcomes",
+    "engineering": "11 scoped tests and 179 full-suite tests passed; 5 optional PyTorch skips; schema v2; no immutable v1 artifact changed",
+    "scientific_claim": "unsupported; zero SPS-C04 scientific episodes"
+  },
+  "scientific_status": "completed outcome-blind design gate; zero scientific episodes; preregistration variables remain unfrozen"
+}

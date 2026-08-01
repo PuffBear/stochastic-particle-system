@@ -1,0 +1,68 @@
+schema_version: 1
+design_id: SPS-C04-OUTCOME-BLIND-DESIGN
+status: frozen_design_gate_not_a_scientific_execution_config
+outcome:
+  name: distinct_team_capture_yield
+  physical_endpoint_seconds: 1.34
+  primary_dt: 0.02
+  primary_horizon_steps: 67
+  first_included_decision_step: 0
+  last_included_decision_step: 66
+  first_included_outcome_step: 1
+  last_included_outcome_step: 67
+  first_excluded_outcome_step: 68
+  retention_rule: retain_every_transition_and_every_unique_capture_in_the_endpoint_window
+  mechanism_history_rule: retain_decision_step_0_for_yield_but_exclude_it_from_post_history_mechanism_denominators
+timestep_matching:
+  physical_endpoint_seconds: 1.34
+  coupled_mappings:
+    - {dt: 0.02, horizon_steps: 67}
+    - {dt: 0.01, horizon_steps: 134}
+    - {dt: 0.005, horizon_steps: 268}
+  rule: each_mapping_must_satisfy_dt_times_horizon_steps_equals_1.34
+analytic_mechanism:
+  quantities: [B, Omega, D]
+  eligibility_unit: transition_row
+  all_required:
+    - decision_step_is_at_least_1
+    - all_four_collectors_have_nonempty_own_summaries
+    - no_selected_valid_particle_has_a_reflected_apparent_velocity
+    - no_velocity_message_component_is_clipped
+    - no_policy_fallback_is_used
+  treatment_events:
+    cross_agent_rescue: genuine_treatment_mechanism_but_row_is_ineligible_because_the_rescued_agent_has_an_empty_own_summary
+    zero_direction_cancellation: genuine_treatment_mechanism_and_does_not_make_an_otherwise_clean_row_ineligible
+  collector_reflection:
+    analytic_B_Omega_D: does_not_invalidate_the_row
+    action_to_displacement_mediator: exclude_only_the_affected_current_collector_transition_using_outcome_collector_reflected
+    yield: never_exclude_the_transition_or_capture
+diagnostic_thresholds:
+  aggregation_level: separately_for_each_arm_by_eta_across_the_preregistered_seed_block
+  minimum_arm_eta_analytic_eligibility_rate: 0.80
+  maximum_absolute_fraction_difference: 0.10
+  analytic_eligibility_arm_gap_interpretation: an_absolute_fraction_difference_of_0.10_equals_10_percentage_points
+  minimum_individual_seed_arm_analytic_eligibility_rate: 0.50
+  maximum_clipped_velocity_component_rate: 0.01
+  maximum_own_empty_agent_row_rate: 0.05
+  maximum_fallback_agent_row_rate: 0.05
+  maximum_reflected_valid_slot_rate: 0.05
+  maximum_collector_reflected_action_transition_rate: 0.05
+  cross_agent_rescue_rate: report_without_a_cap
+  zero_direction_cancellation_rate: report_without_a_cap
+  comparison_semantics: minimums_and_maximums_are_inclusive
+denominators:
+  analytic_eligibility: post_history_transition_rows
+  clipped_velocity_components: post_history_velocity_message_components
+  own_empty: post_history_agent_rows
+  fallback: post_history_agent_rows
+  reflected_valid: post_history_valid_particle_slots
+  collector_reflection: post_history_collector_action_transitions
+  cross_agent_rescue: post_history_own_empty_agent_rows
+  zero_direction_cancellation: post_history_nonfallback_agent_rows
+execution_firewall:
+  scientific_seeds_authorized: false
+  eta_grid_frozen: false
+  scientific_seed_block_frozen: false
+  effect_threshold_frozen: false
+  canonical_environment_config_changed: false
+  next_gate: freeze_eta_grid_seed_block_effect_threshold_and_inference_before_any_SPS_C04_scientific_seed

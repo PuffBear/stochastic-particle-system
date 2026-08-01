@@ -1,9 +1,9 @@
 # SPS-C04 paper redesign: correlation-scale communication crossover
 
-**Status:** conditional analytic feasibility passed in SPS-WO-09 and
-deterministic runner integration passed in SPS-WO-10; no scientific seed run is
-authorized. Literature, physical-endpoint, and nonlinear-row handling gates
-remain open.
+**Status:** conditional analytic feasibility passed in SPS-WO-09,
+deterministic runner integration passed in SPS-WO-10, and the threat-oriented
+literature, physical-endpoint, and nonlinear-row gates passed prospectively in
+SPS-WO-11. No scientific seed run is authorized.
 
 **Predecessor:** SPS-C03 is permanently dropped after SPS-WO-07 failed its
 frozen continuation gate. Seeds 4001--4008 remain diagnostic-only and cannot be
@@ -76,7 +76,8 @@ held identical and proven behaviorally inert.
 
 For fresh matched scenario seed \(s\), communication arm \(a\in\{G,I\}\), and
 correlation ratio \(\eta\), let \(Y_s^a(\eta)\) be the number of distinct
-particles captured by the team through the inclusive frozen physical endpoint.
+particles captured by the team through inclusive physical time `T=1.34`:
+transition 67 is included at `dt=0.02` and transition 68 is excluded.
 Define
 
 \[
@@ -149,8 +150,20 @@ with per-particle component variance \(\sigma_D^2/\Delta t\) gives
 \]
 
 SPS-WO-09 implements and deterministically tests these two conditional
-matrices. Reflection, clipping, missing local summaries, and fallback are
-nonlinear deviations that must be logged and bounded in the next work order.
+matrices. SPS-WO-11 freezes the nonlinear contract: the primary yield retains
+all rows, while these matrices are computed only after the initial-history row
+when every local set is nonempty, no selected valid particle reflected, no
+velocity component clipped, and no receiver used fallback.
+
+Analytic eligibility must cover at least 80% of emitted post-history rows in
+every arm--eta cell, the between-arm coverage difference must be at most 10
+percentage points, and no seed-arm may fall below 50%. Clipped components may
+be at most 1%; own-empty agent-rows, fallback agent-rows, reflected valid slots,
+and collector reflections may each be at most 5%. The collector-reflection cap
+applies only to realized-displacement mediation. Rescue and zero-direction
+cancellation are genuine treatment mechanisms and have no incidence cap.
+Failure preserves the all-row yield estimate but kills the covariance-supported
+mechanism and blocks confirmation of the current AAMAS claim.
 
 The familiar point-sensor model is only a limiting illustration. Suppose
 
@@ -257,11 +270,13 @@ The following controls protect its interpretation:
    event-key provenance. It validates same-mode identity and keeps latent
    diagnostics outside policy observations.
 
-WO-09 and WO-10 used zero scientific episodes. Their tests support mechanism
-possibility and software correctness only; SPS-C04 remains unsupported. Before
-preregistration, resolve `T=1.34` against canonical `400*0.02=8.0`, close the
-literature veto, and freeze a prospective rule for analytically ineligible
-clipping, particle-reflection, empty-summary, and fallback rows.
+WO-09 through WO-11 used zero scientific SPS-C04 episodes. Their tests and
+audits support mechanism possibility, software correctness, and a prospective
+design only; SPS-C04 remains unsupported. `T=1.34=67*0.02` is the paper
+endpoint. The canonical `400*0.02=8.0` configuration remains a generic simulator
+default. Coupled checks use `(dt,horizon)=(0.02,67),(0.01,134),(0.005,268)`.
+The next work order may freeze the eta grid, minimum relevant effect,
+simultaneous inference, seeds, and CPU cap, but may not run them yet.
 
 ## Kill criteria
 
@@ -276,6 +291,9 @@ following occurs:
   random streams in addition to aggregation;
 - the closest-work audit finds the same unique-capture crossover and causal
   decomposition already established.
+- the result reduces to correlation-driven clustering or a generic diversity
+  benefit without the preregistered ordered sign law and estimator-side
+  prediction already threatened by Piro et al.
 
 After a fresh bounded diagnostic, kill the phase-boundary claim if:
 
@@ -314,13 +332,25 @@ conditional opening is the predicted sign crossover in a non-additive
 multi-agent collection objective and its decomposition into estimation gain and
 action-diversity loss.
 
+The WO-11 threat audit adds stronger boundaries: Piro et al. (2025) already
+connect spatially correlated detections to clustering/redundancy and show that
+policy heterogeneity restores movement diversity; Taylor et al. (AAMAS 2010)
+already show that more teamwork can hurt under uncertainty without charging
+communication cost; Aust et al. (2022) show benefits from limited communication
+under correlated observations; Zhang, Martinez, and Masson (2015) compare
+independent and shared-information particle-cue search with an explicit
+correlation length; and Sung et al. (2020) optimize a non-additive unique-target
+objective under limited communication. The mechanism ingredients themselves
+are therefore not novel.
+
 ## Dependency order
 
-1. close the literature veto and derive the estimator/occupancy propositions;
-2. specify and unit-test the correlation-length field;
-3. implement the pure three-scalar aggregation intervention and diagnostics;
-4. pass deterministic mechanism and matched-stream gates;
-5. freeze the \(\eta\) grid, relevance threshold, inference, seeds, and cap;
+1. **Passed:** close the conditional literature veto and derive the estimator
+   proposition;
+2. **Passed:** specify and unit-test the correlation-length field;
+3. **Passed:** implement the pure three-scalar intervention and diagnostics;
+4. **Passed:** freeze `T=1.34`, matched refinement, and nonlinear handling;
+5. freeze the \(\eta\) grid, relevance threshold, inference, fresh seeds, and cap;
 6. run one fresh CPU diagnostic;
 7. either kill the claim or preregister an independent confirmation;
 8. only then consider manuscript expansion or learned baselines.

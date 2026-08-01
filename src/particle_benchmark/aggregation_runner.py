@@ -11,6 +11,7 @@ from datetime import datetime
 import hashlib
 import itertools
 import json
+import math
 import platform
 from pathlib import Path
 import re
@@ -41,6 +42,22 @@ AggregationMode = Literal["independent", "all_to_all"]
 Arm = Literal["self_only", "all_to_all"]
 ARMS: tuple[Arm, Arm] = ("self_only", "all_to_all")
 EVENT_KEYED_TIE_SCHEME = "event_keyed_seed_step_particle_v1"
+FROZEN_PHYSICAL_ENDPOINT_SECONDS = 1.34
+FROZEN_TIMESTEP_HORIZONS: dict[float, int] = {
+    0.02: 67,
+    0.01: 134,
+    0.005: 268,
+}
+FROZEN_DIAGNOSTIC_THRESHOLDS = {
+    "minimum_arm_eta_analytic_eligibility_rate": 0.80,
+    "maximum_absolute_fraction_difference": 0.10,
+    "minimum_individual_seed_arm_analytic_eligibility_rate": 0.50,
+    "maximum_clipped_velocity_component_rate": 0.01,
+    "maximum_own_empty_agent_row_rate": 0.05,
+    "maximum_fallback_agent_row_rate": 0.05,
+    "maximum_reflected_valid_slot_rate": 0.05,
+    "maximum_collector_reflected_action_transition_rate": 0.05,
+}
 
 
 @dataclass(frozen=True)
@@ -84,8 +101,15 @@ class AggregationPairExperimentConfig:
         env = self.environment
         if env.collector_count != 4:
             raise ValueError("SPS-C04 aggregation runner requires exactly four collectors")
-        if env.horizon > 8:
-            raise ValueError("deterministic integration horizon may not exceed 8")
+        if env.horizon > 8 and not any(
+            math.isclose(env.dt, dt, rel_tol=0.0, abs_tol=1e-12)
+            and env.horizon == horizon
+            for dt, horizon in FROZEN_TIMESTEP_HORIZONS.items()
+        ):
+            raise ValueError(
+                "horizons above 8 are allowed only for the frozen T=1.34 "
+                "timestep mappings"
+            )
         if env.field_family != "periodic_gaussian" or env.signal_strength <= 0:
             raise ValueError("aggregation runner requires the same nonzero periodic Gaussian field")
         if env.capture_geometry != "fixed":
@@ -397,9 +421,128 @@ def _diagnostic_record(
     }
 
 
+def _count_rate(numerator: int, denominator: int) -> dict[str, int | float | None]:
+    if numerator < 0 or denominator < 0 or numerator > denominator:
+        raise ValueError("rate counts must satisfy 0 <= numerator <= denominator")
+    return {
+        "numerator": numerator,
+        "denominator": denominator,
+        "rate": (float(numerator / denominator) if denominator else None),
+    }
+
+
+def _frozen_endpoint_status(*, dt: float, horizon: int) -> str:
+    matched = any(
+        math.isclose(dt, frozen_dt, rel_tol=0.0, abs_tol=1e-12)
+        and horizon == frozen_horizon
+        for frozen_dt, frozen_horizon in FROZEN_TIMESTEP_HORIZONS.items()
+    )
+    return (
+        "frozen_T_1.34_matched_physical_endpoint"
+        if matched
+        else "frozen_T_1.34_current_run_nonendpoint_diagnostic"
+    )
+
+
+def evaluate_arm_eta_diagnostic_gate(
+    arm_rates: Mapping[Arm, Mapping[str, float]],
+    individual_seed_arm_analytic_rates: Mapping[Arm, list[float]],
+) -> dict[str, Any]:
+    """Evaluate the frozen nonlinear-data gate after arm-by-eta aggregation.
+
+    Rescue and zero-direction cancellation are intentionally absent: they are
+    treatment mechanisms, not invalidity conditions.  Inputs are rates in
+    ``[0, 1]``.  The absolute arm-rate gap is also on this fraction scale, so
+    the frozen ``0.10`` bound is exactly 10 percentage points.
+    """
+    required = {
+        "analytic_eligibility_rate",
+        "clipped_velocity_component_rate",
+        "own_empty_agent_row_rate",
+        "fallback_agent_row_rate",
+        "reflected_valid_slot_rate",
+        "collector_reflected_action_transition_rate",
+    }
+    if set(arm_rates) != set(ARMS) or set(individual_seed_arm_analytic_rates) != set(ARMS):
+        raise ValueError("both self_only and all_to_all arms are required")
+    for arm in ARMS:
+        missing = required - set(arm_rates[arm])
+        if missing:
+            raise ValueError(f"missing {arm} diagnostic rates: {sorted(missing)}")
+        if not individual_seed_arm_analytic_rates[arm]:
+            raise ValueError(f"{arm} requires at least one individual seed-arm rate")
+        values = [float(arm_rates[arm][key]) for key in required]
+        values.extend(float(value) for value in individual_seed_arm_analytic_rates[arm])
+        if not values or any(not 0.0 <= value <= 1.0 for value in values):
+            raise ValueError("all diagnostic rates must be finite values in [0, 1]")
+
+    thresholds = FROZEN_DIAGNOSTIC_THRESHOLDS
+    components: dict[str, bool] = {}
+    for arm in ARMS:
+        rates = arm_rates[arm]
+        components[f"{arm}_analytic_eligibility"] = (
+            rates["analytic_eligibility_rate"]
+            >= thresholds["minimum_arm_eta_analytic_eligibility_rate"]
+        )
+        components[f"{arm}_individual_seed_eligibility"] = all(
+            value >= thresholds["minimum_individual_seed_arm_analytic_eligibility_rate"]
+            for value in individual_seed_arm_analytic_rates[arm]
+        )
+        for rate_name, threshold_name in (
+            ("clipped_velocity_component_rate", "maximum_clipped_velocity_component_rate"),
+            ("own_empty_agent_row_rate", "maximum_own_empty_agent_row_rate"),
+            ("fallback_agent_row_rate", "maximum_fallback_agent_row_rate"),
+            ("reflected_valid_slot_rate", "maximum_reflected_valid_slot_rate"),
+            (
+                "collector_reflected_action_transition_rate",
+                "maximum_collector_reflected_action_transition_rate",
+            ),
+        ):
+            components[f"{arm}_{rate_name}"] = rates[rate_name] <= thresholds[threshold_name]
+
+    arm_rate_difference = abs(
+        arm_rates["self_only"]["analytic_eligibility_rate"]
+        - arm_rates["all_to_all"]["analytic_eligibility_rate"]
+    )
+    components["analytic_eligibility_arm_gap"] = (
+        arm_rate_difference
+        <= thresholds["maximum_absolute_fraction_difference"] + 1e-12
+    )
+    return {
+        "gate_passed": all(components.values()),
+        "components": components,
+        "analytic_eligibility_absolute_rate_difference": arm_rate_difference,
+        "analytic_eligibility_arm_gap_percentage_points": 100.0 * arm_rate_difference,
+    }
+
+
 def _arm_summary(
     records: list[dict[str, Any]], *, nearest_particles_k: int
-) -> dict[str, int]:
+) -> dict[str, Any]:
+    post_history = [row for row in records if row["decision_step"] >= 1]
+    rows = len(post_history)
+    agent_rows = 4 * rows
+    velocity_components = 8 * rows
+    valid_slots = sum(sum(row["valid_particle_counts"]) for row in post_history)
+    action_transitions = 4 * rows
+    analytic_eligible = sum(bool(row["analytic_eligible"]) for row in post_history)
+    clipped = sum(
+        sum(sum(agent) for agent in row["clipped_components"])
+        for row in post_history
+    )
+    own_empty = sum(sum(row["own_empty"]) for row in post_history)
+    fallback = sum(sum(row["fallback_used"]) for row in post_history)
+    reflected_valid = sum(
+        sum(row["reflected_valid_counts"]) for row in post_history
+    )
+    collector_reflected = sum(
+        sum(row["outcome_collector_reflected"]) for row in post_history
+    )
+    rescue = sum(sum(row["cross_agent_rescue"]) for row in post_history)
+    cancellation = sum(
+        sum(row["zero_direction_cancellation"]) for row in post_history
+    )
+    nonfallback_agent_rows = agent_rows - fallback
     return {
         "steps": len(records),
         "captured_total": int(records[-1]["unique_yield_so_far"]),
@@ -423,6 +566,29 @@ def _arm_summary(
         ),
         "analytic_eligible_rows": sum(bool(row["analytic_eligible"]) for row in records),
         "pairwise_geometry_rows": 6 * len(records),
+        "post_history_diagnostics": {
+            "rows": rows,
+            "agent_rows": agent_rows,
+            "velocity_components": velocity_components,
+            "valid_slots": valid_slots,
+            "action_transitions": action_transitions,
+            "analytic_eligibility": _count_rate(analytic_eligible, rows),
+            "clipped_velocity_components": _count_rate(clipped, velocity_components),
+            "own_empty_agent_rows": _count_rate(own_empty, agent_rows),
+            "fallback_agent_rows": _count_rate(fallback, agent_rows),
+            "reflected_valid_slots": _count_rate(reflected_valid, valid_slots),
+            "collector_reflected_action_transitions": _count_rate(
+                collector_reflected, action_transitions
+            ),
+            "action_displacement_eligible_transitions": _count_rate(
+                action_transitions - collector_reflected,
+                action_transitions,
+            ),
+            "cross_agent_rescue_own_empty_rows": _count_rate(rescue, own_empty),
+            "zero_direction_cancellation_nonfallback_agent_rows": _count_rate(
+                cancellation, nonfallback_agent_rows
+            ),
+        },
     }
 
 
@@ -550,13 +716,15 @@ def run_aggregation_pair(
     correlation_length = float(config.environment.field_kwargs["correlation_length"])
     spacing = float(np.sqrt(np.prod(config.environment.arena_size) / 4.0))
     summary: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "run_id": run_id,
         "experiment_id": config.experiment_id,
         "scenario_seed": config.scenario_seed,
         "correlation_length": correlation_length,
         "eta": correlation_length / spacing,
         "horizon": config.environment.horizon,
+        "frozen_physical_endpoint_seconds": FROZEN_PHYSICAL_ENDPOINT_SECONDS,
+        "frozen_endpoint_decision_step_semantics": "decision_steps_0_through_66_produce_outcomes_1_through_67;_outcome_68_excluded",
         "arm_modes": dict(config.arm_modes),
         "self_only": _arm_summary(
             records["self_only"],
@@ -570,7 +738,10 @@ def run_aggregation_pair(
         "equal_source_state_checks": equal_source_checks,
         "equal_sent_message_checks": equal_sent_checks,
         "zero_intervention_identity_checked": len(set(config.arm_modes.values())) == 1,
-        "endpoint_status": "unresolved_T_1.34_vs_canonical_8.0_no_scientific_endpoint_selected",
+        "endpoint_status": _frozen_endpoint_status(
+            dt=config.environment.dt,
+            horizon=config.environment.horizon,
+        ),
     }
 
     schemas = _schema_directory()

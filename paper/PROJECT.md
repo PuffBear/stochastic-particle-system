@@ -103,6 +103,12 @@ all-to-all runner, matched stream/field/event-key hashes, same-mode identity,
 and runtime message, covariance, geometry, nonlinear-event, action, and yield
 diagnostics. It does **not** provide scientific performance evidence.
 
+SPS-WO-11 conditionally passes the threat-oriented novelty veto at confidence
+0.65 and freezes the paper endpoint at inclusive `T=1.34` (67 transitions at
+`dt=0.02`). It also freezes an all-row yield rule and a prospective nonlinear
+coverage budget for the covariance-supported mechanism. These are design and
+validity decisions, not scientific evidence.
+
 The existing `vortex_scale` remains ineligible. WO-09 and WO-10 ran zero
 scientific episodes; all scientific claims remain unsupported.
 
@@ -121,15 +127,13 @@ scientific episodes; all scientific claims remain unsupported.
 
 ## Immediate dependency order
 
-1. close the primary-literature veto;
-2. prospectively resolve `T=1.34` versus canonical `horizon*dt=8.0`, including
-   endpoint matching under timestep refinement;
-3. freeze a handling rule and incidence/error budget for analytically
-   ineligible clipping, particle-reflection, empty-summary, and fallback rows;
-4. only then freeze the `eta` grid, effect threshold, inference, seed cap, and stopping
-   rule;
-5. execute one fresh CPU diagnostic;
-6. kill or preregister a separate independent confirmation.
+1. freeze the `eta` grid, minimum relevant effect, simultaneous inference,
+   fresh seed block, seed cap, and stopping rule without reading SPS-C04 outcomes;
+2. encode the independent confirmation firewall before any diagnostic launch;
+3. only then execute one fresh bounded CPU diagnostic;
+4. audit the frozen nonlinear-coverage and timestep gates before interpretation;
+5. either kill the phase claim or preregister an independent confirmation;
+6. consider learned baselines only after the scripted mechanism survives.
 
 No HPC request is justified at the current stage.
 
