@@ -12,16 +12,16 @@
   "report_email": "agriya.yadav_ug2023@ashoka.edu.in",
   "attention_mode": "minimal",
   "no_reply_policy": "continue-safe-default",
-  "active_papers": 1,
+  "active_papers": 0,
   "papers": [
     {
       "id": "paper-a",
       "title": "Weak-field multi-collector benchmark",
-      "status": "active",
-      "current_stage": "fixed-horizon-yield-and-timestep-gates-passed-coordination-unexecuted",
+      "status": "paused",
+      "current_stage": "bounded-sharing-question-closed-after-valid-negative-diagnostic",
       "hypothesis": "Under matched observation and policy-capacity budgets, a bounded shared velocity summary improves fixed-horizon unique team capture yield relative to the identical-shape independent controller.",
       "kill_criterion": "Stop or narrow if coupled-noise timestep validation fails, shared-minus-independent yield is non-positive or below the relevance threshold, shuffled/delayed messages explain the effect, or useful power exceeds the bounded seed cap.",
-      "open_blocker": "SPS-WO-05 establishes diagnostic action-contingent headroom and SPS-WO-06 passes the coupled-noise numerical gate for the step-67 unique-yield endpoint. SPS-WO-07 is authorized but unexecuted, SPS-WO-08 is design-stage only, and all learned MARL work remains downstream. SPS-C03 has no coordination result."
+      "open_blocker": "SPS-WO-07 validly failed both frozen primary continuation thresholds: mean shared-minus-independent yield 1.75 below 2.0 and 4/8 positive seeds below 5/8. SPS-C03 is dropped, SPS-WO-08 is cancelled without execution, and confirmation, further attribution seeds, and learned MARL are not authorized. A new paper question requires a theory-driven work order and fresh seeds."
     },
     {
       "id": "paper-b",
@@ -33,12 +33,12 @@
       "open_blocker": "Intentionally inactive."
     }
   ],
-  "phase": "yield-endpoint-and-numerical-gates-passed-attribution-diagnostic-authorized",
+  "phase": "paper-a-current-question-killed-after-negative-diagnostic",
   "primary_question": "At alpha=0.06 under the canonical four-collector task and a fixed 67-step window, does a bounded three-number shared velocity summary improve unique team capture yield over the identical-shape independent controller?",
   "primary_condition": "shared_summary_vs_capacity_matched_independent",
-  "scientific_results_available": false,
+  "scientific_results_available": true,
   "exploratory_calibration_available": true,
-  "exploratory_result": "SPS-P02 found no first-interception boundary and exposed passive confounding. After that endpoint was killed, SPS-WO-05-R1 passed the preregistered fixed-horizon yield feasibility gate: oracle minus stationary mean 9.375 unique captures with 8/8 positive diagnostic seeds; oracle minus true-field control mean 7.5. SPS-WO-06 then passed the coupled-noise timestep gate: oracle minus stationary mean 8.625 at both dt=0.02 and dt=0.01 with 0/8 sign changes; dt=0.005 mean 8.375. These results authorize SPS-WO-07 only and do not support SPS-C03.",
+  "exploratory_result": "SPS-WO-05 established action headroom and SPS-WO-06 passed timestep stability. SPS-WO-07 then produced a valid negative bounded-sharing diagnostic: shared-minus-independent effects [3,6,4,-3,0,0,5,-1], mean 1.75, 4/8 positive, descriptive interval [-0.375,3.75]. The frozen mean>=2 and positive>=5/8 components failed, although correctness, matched streams, shared-minus-stationary mean 1.875, and signal difference-in-differences mean 2.125 passed. The joint gate failed and SPS-C03 was closed without confirmation.",
   "diagnostic_action_headroom_available": true,
   "pending_diagnostic_scripts": {
     "SPS-WO-06-TIMESTEP-CONVERGENCE": {
@@ -49,12 +49,12 @@
     },
     "SPS-POWER-ANALYSIS-COORDINATION": {
       "script": "analysis/run_power_analysis.py",
-      "status": "preregistered-design-stage-not-run",
+      "status": "cancelled-prerequisite-failed-not-run",
       "purpose": "Ex-ante sensitivity analysis for 80% power at a frozen 2.0-particle minimum relevant effect; it cannot consume diagnostic outcomes"
     },
     "SPS-WO-07-ATTRIBUTION-CONTROLS": {
       "script": "analysis/run_attribution_controls.py",
-      "status": "preregistered-after-pre-outcome-repair-ready-not-run",
+      "status": "complete-valid-negative-diagnostic",
       "purpose": "Test bounded shared-summary versus local-summary headroom with stationary and alpha=0 controls; seeds 4001-4008 permanently ineligible for confirmation",
       "gate": "all six explicitly frozen components pass: correctness, matched streams, mean shared-minus-independent at least 2 particles, at least 5/8 positive seeds, mean shared-minus-stationary above zero, and mean alpha-adjusted shared-independent difference-in-differences above zero; descriptive only"
     }
@@ -65,15 +65,15 @@
     "scope": "89 established simulator and inference tests plus 11 dependency-free experiment-design tests covering dyadic Brownian coupling, fixed physical duration, preregistration/config agreement, supported attribution policy IDs, ex-ante power constants, relevance-threshold failure, null-adjusted difference-in-differences failure, and matched-stream invalidation. PyTorch, Gymnasium, and pytest-dependent MARL tests are not counted because those dependencies are unavailable in this workspace."
   },
   "fresh_review": {
-    "date": "2026-07-31",
-    "verdict": "reject",
+    "date": "2026-08-01",
+    "verdict": "strong reject",
     "score": "2/10",
-    "confidence": "5/5",
-    "snapshot": "post-WO-05-yield-feasibility",
-    "strongest_new_threat": "The positive oracle diagnostic establishes action headroom but the central shared-versus-independent multi-agent treatment remains unexecuted, so there is still no coordination, communication, or MARL result."
+    "confidence": "4/5",
+    "snapshot": "post-WO-07-valid-negative-diagnostic",
+    "strongest_new_threat": "The central bounded-sharing diagnostic failed, no learned or strategic multi-agent method is evaluated, and the negative eight-seed result is not precise enough to become a decisive archival contribution."
   },
   "hpc_status": "not-needed",
-  "report_count": 6,
+  "report_count": 7,
   "inactive_scopes": [
     "baseball-paper-a",
     "baseball-paper-b",
@@ -81,5 +81,5 @@
     "counter-swarm"
   ],
   "last_updated": "2026-08-01",
-  "last_engineering_action": "Repaired SPS-WO-07 before opening seeds: froze the two-particle relevance threshold and all six joint gates, replaced a redundant stationary subtraction with alpha=0 difference-in-differences, added deterministic failure tests, and restricted positive interpretation to further attribution design. No SPS-WO-07, confirmation, or MARL run was executed."
+  "last_engineering_action": "Executed SPS-WO-07 exactly once on seeds 4001-4008: 64 episodes and 4,288 steps. The valid joint gate failed because mean shared-minus-independent yield was 1.75 below 2.0 and only 4/8 seeds were positive. No SPS-WO-08, confirmation, further attribution, or MARL run was executed."
 }

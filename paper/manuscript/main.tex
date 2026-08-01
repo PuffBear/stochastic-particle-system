@@ -41,10 +41,16 @@ of 8.625 particles at both \(\Delta t=0.02\) and \(0.01\), with zero seed-level
 direction changes; the mandatory \(\Delta t=0.005\) result was 8.375. All
 preregistered numerical gate components passed. These results establish
 diagnostic action-contingent headroom and timestep robustness for the redesigned
-endpoint only. They authorize, but do not answer, the bounded shared-summary
-diagnostic. That treatment remains unexecuted and SPS-C03 remains blocked.
-\textbf{No coordination effect, power, confirmation, learning, or MARL result
-is claimed.}
+endpoint only. A final eight-seed diagnostic compared the bounded shared summary
+with a capacity-matched independent controller. The mean paired yield difference
+was 1.75 particles, with four of eight seeds positive and a descriptive
+paired-bootstrap 95\% interval of \([-0.375,3.75]\). Although correctness,
+matched-stream, shared-versus-stationary, and signal-specific
+difference-in-differences checks passed, the result missed both preregistered
+primary requirements: a mean advantage of at least two particles and positive
+differences in at least five of eight seeds. The joint gate therefore failed.
+This valid negative diagnostic does not support coordination, confirmation,
+learning, or MARL, and no downstream experiment is authorized.
 \end{abstract}
 
 \section{Related work}
@@ -132,8 +138,7 @@ structurally analogous: seed-level outcomes under the shared and independent
 policies are compared on identical stochastic inputs, producing a paired
 potential-outcome contrast under the recorded simulator intervention
 ~\cite{morgan2015counterfactuals,imbens2015causal}.
-The three candidate contributions, conditional on the pending numerical and
-shared-versus-independent diagnostics, are:
+The three candidate contributions that motivated the completed diagnostics were:
 (i)~a matched counterfactual causal framing for multi-collector particle
 capture that subtracts the passive-advection response, so the estimand
 measures action-contingent exploitation rather than passive transport;
@@ -144,11 +149,9 @@ and does not depend on entity-array ordering; and
 experiment, testing whether one specific hand-coded three-number summary shifts the
 yield boundary before introducing the confounds of a learned communication
 protocol.
-If the diagnostic fails, only the simulator and negative mechanism audit remain;
-no coordination contribution is claimed. If it passes, these properties make
-SPS-C03 a mechanism diagnostic rather than a
-coordination-algorithm contribution; the result, whether positive or null, is
-interpretable without reference to a particular learning algorithm.
+The shared-summary diagnostic failed its frozen joint gate. Accordingly, only
+the simulator and negative mechanism audit remain; no coordination contribution
+is claimed.
 
 \section{Research question and novelty boundary}
 
@@ -156,10 +159,11 @@ The intended paper asks one question: \emph{with four collectors in the frozen
 unit-square task at \(\alpha=0.06\), does replacing each collector's independent
 local velocity estimate with the same bounded team-mean estimate increase the
 number of unique particles captured through the inclusive end of step 67?}
-This comparison is presently blocked rather than answered: the redesigned
-endpoint has passed its upstream action-sensitivity gate, but coupled-noise
-timestep validation and a separate sharing preregistration must precede any
-shared-versus-independent execution.
+The preregistered diagnostic did not clear its joint gate. The observed mean
+advantage was 1.75 particles rather than the required 2.0, and only four of
+eight paired differences were positive rather than the required five. Thus the
+tested bounded statistic did not provide sufficient diagnostic headroom to
+justify confirmation.
 
 Prior work already studies stationary capture in chaotic flow
 ~\cite{wang2021stationary}, a locally informed mobile collector capturing
@@ -524,7 +528,35 @@ This is a numerical diagnostic of one policy contrast at one field strength,
 horizon, geometry, and seed block. It is not a confirmation, a coordination
 effect, or evidence that the shared summary helps. Passing SPS-WO-06 authorizes
 only the separately preregistered SPS-WO-07 attribution-control diagnostic;
-SPS-WO-07 has not been executed.
+the following section records its valid negative result.
+
+\section{Bounded-sharing attribution diagnostic}
+
+SPS-WO-07 used fresh diagnostic seeds 4001--4008 and compared
+\texttt{shared\_summary} with \texttt{capacity\_matched\_independent} at
+\(\alpha=0.06\). Both controllers had the same action rule and three numeric
+input slots; only the information placed in those slots differed. The paired
+shared-minus-independent contrasts were
+\[
+ (3,6,4,-3,0,0,5,-1),
+\]
+giving a mean of 1.75, median 1.5, and descriptive paired-bootstrap 95\%
+interval \([-0.375,3.75]\). Four of eight contrasts were positive.
+
+The correctness-and-execution and matched-stream checks passed. Shared summary
+also exceeded stationary control by 1.875 particles on average, and the
+signal-specific shared-minus-independent difference-in-differences was positive
+at 2.125. However, the primary mean did not reach the frozen two-particle
+minimum relevant effect, and only four rather than the required five seeds were
+positive. Because every component was required jointly, the attribution gate
+failed. The favorable secondary components cannot rescue the failed primary
+gate.
+
+This diagnostic is neither confirmatory nor an estimate from a power-sized
+sample. It provides no evidence of coordination or MARL performance and does
+not authorize confirmation, message-content attribution, pooled-denoising
+controls, learned policies, IPPO, or MAPPO. The tested bounded summary is closed;
+any redesign requires new assumptions, a new work order, and fresh seeds.
 
 \section{AAMAS relevance failure and blockers}
 
@@ -542,14 +574,14 @@ repaired full-state oracle failed its passive-adjusted first-event gate. The
 fixed-horizon diagnostic establishes action-contingent headroom, and SPS-WO-06
 passes its preregistered coupled-noise timestep gate for the
 oracle-minus-stationary contrast. Neither result is a multi-agent effect.
-SPS-C03 therefore remains blocked and the shared-summary policy, although
-implemented and unit-tested, has not been run as a scientific treatment.
-SPS-WO-07 is authorized but unexecuted. No empirical power calculation,
-independent confirmation, learned policy, IPPO/MAPPO baseline, or MARL
-experiment exists. Growing-aggregate physics and aggregation analysis remain
-later work.
+SPS-C03 is dropped because WO-07 executed validly but failed its frozen joint
+gate. No empirical power calculation, independent confirmation, learned policy,
+IPPO/MAPPO baseline, or MARL experiment is authorized. The current package is
+therefore a simulator and negative mechanism audit, not an AAMAS coordination
+contribution. Growing-aggregate physics and aggregation analysis remain later
+work.
 
-The dependency-free implementation currently has 96 passing tests covering deterministic
+The dependency-free implementation currently has 100 passing tests covering deterministic
 reset, causal observations, zero-signal identity, exact specular contacts,
 event-order and event-key invariance, schema validation, immutable writes,
 paired provenance, frozen policies, row-order-invariant inference, bounded
@@ -558,7 +590,7 @@ aggregation, as well as unique-yield counting, inclusive step-67 evaluation,
 post-contact continuation, and matched yield-run provenance. These are
 engineering checks only. SPS-C01 was dropped when the first-interception
 endpoint failed its action-feasible oracle gate; SPS-C03 is
-blocked, and \textbf{no detectability boundary is supported by SPS-P01 or
+dropped, and \textbf{no detectability boundary is supported by SPS-P01 or
 SPS-P02}.
 
 \section{Limitations}
@@ -570,12 +602,14 @@ within-step specular contact does not by itself establish timestep robustness;
 SPS-WO-06 supplies only a bounded coupled-noise diagnostic for the fixed-horizon
 oracle-minus-stationary contrast at \(\alpha=0.06\). The canonical first-contact
 endpoint remains saturated by initial geometry and passive transport. The
-fixed-horizon endpoint clears its diagnostic oracle and timestep gates, but
-AAMAS fit still requires an isolated multi-agent mechanism, not merely four
-collectors. \pending{Run the separately preregistered SPS-WO-07
-shared-versus-independent attribution-control diagnostic. Do not proceed to
-power, learning, or confirmation unless that diagnostic passes its frozen
-gates.}
+fixed-horizon endpoint clears its diagnostic oracle and timestep gates, but the
+eight-seed attribution diagnostic was intentionally too small for confirmation
+and its bootstrap interval is descriptive. Its failure does not prove that
+every form of sharing is ineffective; it shows only that this specific
+three-number statistic failed the preregistered progression criteria under the
+frozen condition. Redesign must not reuse these diagnostic seeds as confirmation
+evidence. AAMAS fit still requires an isolated multi-agent mechanism, not merely
+four collectors.
 
 \begin{thebibliography}{99}
 \small

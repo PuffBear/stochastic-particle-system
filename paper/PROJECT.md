@@ -114,7 +114,7 @@ Narrow or stop the active claim if:
 
 Correctness tests and scripted pilots run on Codex cloud. No HPC request is justified until the simulator, observation contract, scripted baselines, seed audit, and pilot variance estimate pass. The first confirmatory budget must be derived from measured pilot variance and documented before execution.
 
-## Current stage
+## Current stage and decision
 
 The deterministic simulator, exact fixed-geometry contact, causal observations,
 strict matched runner, immutable artifacts, bounded independent/shared scripted
@@ -128,8 +128,18 @@ oracle-minus-stationary mean was 8.625 particles at both `dt=0.02` and
 `dt=0.005` mean was 8.375. All correctness, coupling, provenance, and artifact
 gates passed. This authorizes SPS-WO-07 only and is not coordination evidence.
 
-SPS-C03 remains blocked. The shared-versus-independent SPS-WO-07 diagnostic has
-not run. No learned baseline, empirical power result, power-sized confirmation,
-or AAMAS coordination result exists. MARL implementations are downstream
-engineering scaffolds and must remain inactive until the scripted mechanism
-gate passes.
+SPS-WO-07 then validly tested the bounded three-number shared summary against
+the identical-shape independent controller. Shared-minus-independent yield
+averaged 1.75 particles, with 4/8 positive diagnostic seeds and a descriptive
+paired-bootstrap interval of `[-0.375, 3.75]`. The frozen continuation rules
+required a mean of at least 2.0 and at least 5/8 positive seeds, so the joint
+gate failed. Correctness, matched streams, shared-minus-stationary, and the
+`alpha=0`-adjusted difference-in-differences checks passed, but they cannot
+rescue the failed primary gate.
+
+SPS-C03 is dropped and the current Paper A question is paused as a complete
+negative diagnostic. No power run, confirmation, further attribution seeds,
+learned baseline, or AAMAS coordination result is authorized. The MARL code
+remains engineering scaffolding only. Any future sharing mechanism requires a
+new theory-driven work order and fresh diagnostic seeds; it may not reinterpret
+or reuse seeds 4001--4008 as confirmation.
