@@ -517,6 +517,95 @@ endpoint failed its action-feasible oracle gate; SPS-C03 is
 blocked, and \textbf{no detectability boundary is supported by SPS-P01 or
 SPS-P02}.
 
+\section{Theoretical analysis}
+
+Three results characterise the experimental design and the specific communication
+message chosen for SPS-C03.  All stated results are conditional on the Gaussian
+observation model described below; their empirical validity depends on diagnostics
+not yet completed.
+
+\subsection*{Setup}
+
+Under the signal model, each valid apparent particle velocity is
+\[
+  v_i \;=\; \alpha\,\hat{b} + \varepsilon_i, \qquad
+  \varepsilon_i \sim \mathcal{N}\!\left(0,\, \sigma_{\mathrm{obs}}^2 I_2\right),
+\]
+where $\alpha$ is the field strength, $\hat{b}$ is the unit field direction, and
+$\sigma_{\mathrm{obs}} = \sigma/\!\sqrt{dt}$ is the per-step apparent-velocity
+noise that arises from one-step finite differences of Brownian positions.  For the
+canonical task ($\sigma=0.06$, $dt=0.02$), $\sigma_{\mathrm{obs}} \approx 0.424$.
+
+\subsection*{Proposition 1 (Matched-counterfactual variance reduction)}
+
+Let $Y_\alpha(s)$ and $Y_0(s)$ denote the per-seed capture yields under signal
+$\alpha$ and null $\alpha=0$, respectively.  The matched estimator
+$\hat{\delta} = n^{-1}\!\sum_s [Y_\alpha(s) - Y_0(s)]$ has variance
+\[
+  \mathrm{Var}(\hat{\delta})
+  \;=\; \frac{1}{n}\Bigl[\mathrm{Var}(Y_\alpha) + \mathrm{Var}(Y_0)
+                         - 2\,\mathrm{Cov}(Y_\alpha,Y_0)\Bigr].
+\]
+An unmatched design (independent seeds per condition) has variance
+$n^{-1}[\mathrm{Var}(Y_\alpha)+\mathrm{Var}(Y_0)]$, so matching reduces variance
+by the fraction
+\[
+  f_{\mathrm{red}} \;=\; \frac{2\,\rho_{YY}\,\sigma_{Y_\alpha}\sigma_{Y_0}}
+                              {\sigma_{Y_\alpha}^2 + \sigma_{Y_0}^2},
+\]
+where $\rho_{YY} = \mathrm{Corr}(Y_\alpha(s), Y_0(s))$ is the within-seed
+correlation.  Under homoskedasticity ($\sigma_{Y_\alpha}=\sigma_{Y_0}$) this
+simplifies to $f_{\mathrm{red}}=\rho_{YY}$.  The matched design is equivalent
+to an unmatched design with $n_{\mathrm{eff}} = n/(1-f_{\mathrm{red}})$ seeds.
+Under the matched counterfactual contract---shared initial state and Brownian
+noise tensor---$\rho_{YY}$ is expected to be positive because hard and easy seeds
+are the same in both conditions.
+
+\subsection*{Proposition 2 (Team-mean sufficiency)}
+
+Let $v_1,\ldots,v_N$ be $N$ iid apparent velocity observations under the Gaussian
+model above.  By the Fisher--Neyman factorisation theorem, the statistic
+$T = (\sum v_x, \sum v_y, N)$ — equivalently $(\bar{v}_x, \bar{v}_y, N)$ — is
+sufficient for $(\alpha\hat{b}_x, \alpha\hat{b}_y)$.  The 3-number bounded
+summary $(\bar{v}_x,\bar{v}_y, f_{\mathrm{valid}})$ used in SPS-C03 is an
+equivalent sufficient statistic (since $N = M K f_{\mathrm{valid}}$ with $M$
+and $K$ known to all agents).
+
+\begin{proof}[Proof sketch]
+The joint density factors as
+$p(\{v_i\}|\alpha\hat{b}) = h(\{v_i\})\cdot g(\bar{v}, N, \alpha\hat{b})$,
+establishing sufficiency by inspection.
+\end{proof}
+
+\textit{Corollary.}  Under isotropic Gaussian noise, no further compression of
+$M\!\cdot\! K$ individual velocity observations can extract more information about
+$\hat{b}$ than the 3-number team-mean summary.  The per-component Fisher
+information is $\mathcal{I} = N/\sigma_{\mathrm{obs}}^2$, and the Cram\'er--Rao
+lower bound on the mean-squared error of $\hat{b}$ is
+$\mathrm{MSE} \geq \sigma_{\mathrm{obs}}^2/N$.
+
+For the canonical task at $\alpha=0.06$ with $M=4$, $K=32$, and a validity
+fraction of 50\%, the shared estimate ($N=M K f=64$ observations) achieves an
+RMSE lower bound of $\sigma_{\mathrm{obs}}/\sqrt{64} \approx 0.053$ per component,
+a $\sqrt{M}=2$-fold improvement over the single-agent bound.
+
+\subsection*{Remark (SNR dilution from independent sensing)}
+
+The dimensionless signal coordinate $\rho = \alpha\sqrt{dt}/\sigma$ represents
+the per-particle, per-step signal-to-noise ratio.  Under the shared summary, all
+$M K f_{\mathrm{valid}}$ valid observations are pooled, yielding a
+field-direction SNR of $\rho\sqrt{MKf}$ per step.  Under independent sensing,
+each agent acts on its own local estimate with SNR $\rho\sqrt{Kf}$.  The shared
+summary therefore achieves a $\sqrt{M}$ SNR gain over any single independent agent.
+
+This is distinct from the spatial overlap dilution.  For the canonical arena
+($r=0.16$, $A=4$, $M=4$), the geometric overlap fraction is only $\approx 3\%$
+and cannot account for the factor-of-6 per-agent yield gap observed in SPS-P02
+at $\rho=2$.  The dominant mechanism is therefore \emph{sample fragmentation}:
+independent agents act on non-pooled noisy estimates of $\hat{b}$, so their
+actions are only weakly aligned with the true field despite adequate total sensing
+budget.
+
 \section{Limitations}
 
 Any eventual boundary is policy-, horizon-, field-, geometry-, grid-, and
@@ -531,6 +620,11 @@ fixed statistic whose empirical effect has not been tested. \pending{Run the
 separately preregistered coupled-noise timestep diagnostic for unique yield;
 only if it passes, freeze and run a bounded shared-versus-independent
 diagnostic before any power, learning, or confirmation experiment.}
+
+The theoretical results in the previous section are conditional on the Gaussian
+observation model and are falsifiable: if empirical apparent-velocity distributions
+are heavy-tailed or multi-modal, the Fisher-information characterisation changes
+and the sufficiency argument no longer applies without modification.
 
 \begin{thebibliography}{99}
 \small
