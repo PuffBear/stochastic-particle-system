@@ -1,0 +1,16 @@
+{
+  "audit_date": "2026-07-31",
+  "work_order_id": "SPS-WO-05",
+  "finding": "The first process was incorrectly classified as ended after its tool session returned without a completed artifact bundle. It continued running and wrote a complete bundle 54 seconds after the invalid-status record. The R1 process had already been launched concurrently under the identical frozen design.",
+  "canonical_evidence": "results/raw/SPS-WO-05-YIELD-GATE-R1",
+  "excluded_duplicate": "results/raw/SPS-WO-05-YIELD-GATE",
+  "invalid_status_record_preserved": "results/raw/SPS-WO-05-YIELD-GATE-INVALID/status.json",
+  "duplicate_equivalence": {
+    "episode_summaries_sha256": "1ae5a80b06b783ad11b044b48ed37e82fda21e7f0eb52f09daaabe4621349b3c",
+    "capture_events_sha256": "6621bc43d4fbd14c7f1f07cacfb5521db999afc90a2fa34d4ab1a966c4e72724",
+    "episode_summaries_bitwise_identical": true,
+    "capture_events_bitwise_identical": true
+  },
+  "scientific_effect": "none; the duplicate is not pooled, counted as replication, used for precision, or interpreted independently",
+  "process_correction": "Future long-running executions must be polled to a terminal process state before they are classified as failed or relaunched."
+}

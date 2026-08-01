@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/PuffBear/stochastic-particle-system/schemas/trajectory_step.schema.json",
+  "title": "Stochastic particle benchmark trajectory step",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "scenario_seed",
+    "condition",
+    "policy_id",
+    "step",
+    "particle_positions",
+    "collector_positions",
+    "collector_actions",
+    "capture_owner",
+    "capture_events",
+    "tie_break_scheme",
+    "tie_provenance",
+    "contact_time_fractions",
+    "contact_model",
+    "guarded_reflection_pairs",
+    "terminated",
+    "truncated"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "scenario_seed": {"type": "integer", "minimum": 0},
+    "condition": {"enum": ["null", "signal"]},
+    "policy_id": {"type": "string", "minLength": 1},
+    "step": {"type": "integer", "minimum": 0},
+    "particle_positions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/point2"}
+    },
+    "collector_positions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/point2"}
+    },
+    "collector_actions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/point2"}
+    },
+    "capture_owner": {
+      "type": "array",
+      "items": {"type": "integer", "minimum": -1}
+    },
+    "capture_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["particle_id", "collector_id"],
+        "properties": {
+          "particle_id": {"type": "integer", "minimum": 0},
+          "collector_id": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "tie_break_scheme": {"const": "event_keyed_seed_step_particle_v1"},
+    "tie_provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["step_index", "particle_id", "candidate_collector_ids", "chosen_collector_id"],
+        "properties": {
+          "step_index": {"type": "integer", "minimum": 1},
+          "particle_id": {"type": "integer", "minimum": 0},
+          "candidate_collector_ids": {
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "integer", "minimum": 0}
+          },
+          "chosen_collector_id": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "contact_time_fractions": {
+      "type": "array",
+      "items": {"type": "number", "minimum": 0.0}
+    },
+    "contact_model": {"type": "string", "minLength": 1},
+    "guarded_reflection_pairs": {"type": "integer", "minimum": 0},
+    "terminated": {"type": "boolean"},
+    "truncated": {"type": "boolean"}
+  },
+  "$defs": {
+    "point2": {
+      "type": "array",
+      "prefixItems": [{"type": "number"}, {"type": "number"}],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    }
+  }
+}

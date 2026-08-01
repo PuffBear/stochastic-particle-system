@@ -1,0 +1,50 @@
+#!/bin/bash
+# PBS job script for one (ARCH, SEED) training run.
+# Called by submit_all.sh via: qsub -v ARCH=ippo,SEED=8001 hpc/job.pbs
+#
+# Resource request: 1 GPU node, 1 GPU, 8 CPUs, 24h walltime.
+# Training is CPU-bottlenecked (NumPy environment simulation); the GPU node
+# is used only because it has more available CPUs for the process.
+#PBS -q gpu
+#PBS -l select=1:ncpus=8:ngpus=1
+#PBS -l walltime=24:00:00
+
+# Output/error logs are set dynamically by submit_all.sh via -o/-e flags.
+
+# --- Environment ---
+module load Anaconda3
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate sps-marl
+
+# --- Working directory ---
+cd "$HOME/sps/stochastic-particle-system"
+
+# --- Validate required vars ---
+: "${ARCH:?Variable ARCH not set}"
+: "${SEED:?Variable SEED not set}"
+
+N_EPISODES="${N_EPISODES:-20000}"
+N_STEPS="${N_STEPS:-500000}"
+COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+
+OUTPUT="results/raw/SPS-WO-08-MARL/${ARCH}_seed${SEED}.json"
+CKPT_DIR="results/raw/SPS-WO-08-MARL/checkpoints/${ARCH}_seed${SEED}"
+
+echo "=== SPS-WO-08 MARL training ==="
+echo "  arch=${ARCH}  seed=${SEED}  n_episodes=${N_EPISODES}"
+echo "  commit=${COMMIT}"
+echo "  output=${OUTPUT}"
+echo "  started: $(date)"
+echo ""
+
+python analysis/train_single_marl.py \
+    --arch "$ARCH" \
+    --train-seed "$SEED" \
+    --n-episodes "$N_EPISODES" \
+    --n-steps "$N_STEPS" \
+    --output "$OUTPUT" \
+    --checkpoint-dir "$CKPT_DIR" \
+    --repository-base-commit "$COMMIT"
+
+echo ""
+echo "  finished: $(date)"

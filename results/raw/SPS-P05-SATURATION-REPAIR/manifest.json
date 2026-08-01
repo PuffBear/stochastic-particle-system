@@ -1,0 +1,36 @@
+{
+  "alphas": [
+    0.0,
+    0.03,
+    0.06,
+    0.12
+  ],
+  "artifacts": {
+    "collector_step_diagnostics.jsonl": "8805bf7415a5fd968c0008084c78ebb7b58c20a8b43b36af26376c6317ca93f0",
+    "episode_summaries.jsonl": "d3c141ac5a8cb279d163d7a8fc4fe07a9505de96dfb303f7522104883cd4c86e",
+    "oracle_gate.json": "7a5490b0f9c549f0a70cc29cef65cb47c11eeed839eaf2f1a00ed5e0d0135f1f"
+  },
+  "command": "PYTHONPATH=src python analysis/run_correction_gates.py --output results/raw/SPS-P05-SATURATION-REPAIR --experiment-id SPS-P05-SATURATION-REPAIR --particle-count 64",
+  "created_at_utc": "2026-07-31T15:47:38.216101+00:00",
+  "experiment_id": "SPS-P05-SATURATION-REPAIR",
+  "numpy": "2.3.5",
+  "particle_count": 64,
+  "policies": [
+    "stationary",
+    "true_field_upstream_control",
+    "full_state_interception_oracle",
+    "local_flow_v1"
+  ],
+  "python": "3.12.13",
+  "runtime_seconds": 74.28805239799999,
+  "seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008
+  ]
+}

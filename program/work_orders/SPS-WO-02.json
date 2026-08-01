@@ -1,0 +1,61 @@
+{
+  "work_order_id": "SPS-WO-02",
+  "role": "experiment-engineer",
+  "paper": "paper-a",
+  "objective": "Complete the bounded end-to-end simulator gate: collector motion, reset, causal local observations, step ordering, smoke policies, trajectory schemas, and limiting-case tests.",
+  "claim_ids": ["SPS-C01"],
+  "allowed_files": [
+    "src/particle_benchmark/**",
+    "tests/**",
+    "configs/**",
+    "schemas/**",
+    "dataset/**",
+    "program/handoffs/SPS-WO-02-*"
+  ],
+  "prohibited_files": [
+    "paper/claims.csv",
+    "paper/experiments.jsonl",
+    "paper/manuscript/**",
+    "program/decision_log.md",
+    "program/reports/**"
+  ],
+  "inputs": {
+    "project_contract": "paper/PROJECT.md@research-autonomy",
+    "canonical_config": "configs/env/canonical.yaml@research-autonomy",
+    "previous_work_order": "program/work_orders/SPS-WO-01.md@research-autonomy",
+    "research_lead_contract_date": "2026-07-31"
+  },
+  "time_compute_cap": {
+    "wall_minutes": 45,
+    "hardware": "Codex cloud CPU",
+    "scientific_episodes": 0,
+    "smoke_episodes": "bounded deterministic microcases only"
+  },
+  "frozen_contract": {
+    "collector_motion": "q_next=reflect(q+dt*v_max*clip_l2(action,1)); holonomic; no action noise or collision force",
+    "reset_collectors": [[0.25,0.25],[0.25,0.75],[0.75,0.25],[0.75,0.75]],
+    "reset_particle_rule": "IID uniform from initialization stream with distance strictly greater than capture_radius+1e-12 from every collector",
+    "observation": "self position; teammate relative positions; K=32 nearest free in-radius particles with relative position, causal apparent velocity, radial distance, particle mask, and velocity-valid mask",
+    "step_order": ["clip and move collectors","move free particles using pre-generated noise","resolve post-motion captures from pre-step aggregate geometry","record one-based events","build causal next observation","truncate at H"],
+    "smoke_policies": ["stationary","pre-generated random","privileged oracle_field"],
+    "primary_prohibition": "No smoke output may be interpreted as evidence for a detectability, coordination, aggregation, or MARL claim."
+  },
+  "expected_artifacts": [
+    "collector dynamics module",
+    "reset and minimal environment module",
+    "causal local observation module",
+    "smoke policy module",
+    "trajectory and manifest schemas",
+    "unit and limiting-case tests",
+    "engineering handoff"
+  ],
+  "verification_command": "PYTHONPATH=src python3 -m unittest discover -s tests -v",
+  "stop_conditions": [
+    "any observation leakage",
+    "any reset capture",
+    "any zero-signal paired mismatch",
+    "non-reproducible random actions",
+    "existing test regression"
+  ],
+  "fallback_task": "Reduce to deterministic microcases and repair the first violated invariant; do not run performance experiments."
+}

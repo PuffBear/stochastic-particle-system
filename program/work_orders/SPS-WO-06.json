@@ -1,0 +1,17 @@
+{
+  "work_order_id": "SPS-WO-06",
+  "role": "experiment-engineer",
+  "paper": "paper-a",
+  "objective": "Test timestep stability of the 1.34-time-unit unique-yield endpoint using genuinely coupled Brownian paths at dt 0.02, 0.01, and 0.005.",
+  "claim_ids": ["SPS-C03"],
+  "allowed_files": ["analysis/run_timestep_convergence.py", "configs/experiments/sps_wo06_timestep_convergence.yaml", "results/raw/SPS-WO-06-TIMESTEP-CONVERGENCE/"],
+  "prohibited_files": ["results/raw/SPS-WO-07-ATTRIBUTION-CONTROLS/", "paper/manuscript/main.tex"],
+  "inputs": {"endpoint": "67 steps at dt=0.02 = 1.34 physical time units", "config": "configs/experiments/sps_wo06_timestep_convergence.yaml"},
+  "compute_cap": {"hardware": "CPU only", "episodes": 96, "maximum_environment_steps": 15008, "wall_time_minutes": 30, "memory_gib": 4},
+  "expected_artifacts": ["episode_summaries.jsonl", "capture_events.jsonl", "convergence_report.json", "manifest.json"],
+  "verification_command": "PYTHONPATH=src:. python -m unittest tests.test_experiment_design -v",
+  "stop_conditions": ["any unit-test failure", "any coupling/provenance mismatch", "immutable output path exists", "compute cap exceeded"],
+  "fallback_task": "Repair only deterministic implementation/provenance defects without inspecting or changing frozen outcomes.",
+  "frozen_gate": "abs(mean contrast dt0.02 - mean contrast dt0.01) < 1.0 and seed-level sign changes <= 1/8; dt0.005 is mandatory informational evidence.",
+  "scientific_status": "preregistered; not executed"
+}

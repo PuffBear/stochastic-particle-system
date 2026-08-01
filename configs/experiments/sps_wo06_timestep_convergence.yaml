@@ -1,0 +1,14 @@
+work_order_id: SPS-WO-06
+experiment_id: SPS-WO-06-TIMESTEP-CONVERGENCE
+diagnostic_seeds: [3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008]
+alphas: [0.0, 0.06]
+policies: [stationary, full_state_interception_oracle]
+dt_values: [0.02, 0.01, 0.005]
+base_evaluation_steps: 67
+physical_duration: 1.34
+coupling: finest_standard_normals_then_sum_brownian_increments
+primary_gate:
+  mean_absolute_difference_strictly_below_particles: 1.0
+  maximum_seed_sign_changes: 1
+confirmation_eligible: false
+

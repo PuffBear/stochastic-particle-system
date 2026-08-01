@@ -1,0 +1,16 @@
+{
+  "work_order_id": "SPS-WO-08",
+  "role": "experiment-engineer",
+  "paper": "paper-a",
+  "objective": "Size a future one-sided paired confirmation test at the ex-ante two-particle minimum relevant effect without consuming SPS-C03 outcomes.",
+  "claim_ids": ["SPS-C03"],
+  "allowed_files": ["analysis/run_power_analysis.py", "configs/experiments/sps_c03_power.yaml", "results/derived/SPS-POWER-ANALYSIS-COORDINATION/"],
+  "prohibited_files": ["results/raw/SPS-WO-07-ATTRIBUTION-CONTROLS/", "paper/manuscript/main.tex"],
+  "inputs": {"config": "configs/experiments/sps_c03_power.yaml", "candidate_seed_counts": [16, 24, 32], "paired_sd_sensitivity_range": [2.0, 4.0]},
+  "compute_cap": {"hardware": "CPU only", "wall_time_minutes": 5, "memory_gib": 2},
+  "expected_artifacts": ["power_report.json", "manifest.json"],
+  "verification_command": "PYTHONPATH=src:. python -m unittest tests.test_experiment_design -v",
+  "stop_conditions": ["any config/constant mismatch", "immutable output path exists", "any SPS-C03 diagnostic outcome is requested as input"],
+  "fallback_task": "Report that the frozen candidate range is insufficient; do not silently add candidate counts.",
+  "scientific_status": "preregistered design analysis; not executed"
+}

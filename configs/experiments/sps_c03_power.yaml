@@ -1,0 +1,15 @@
+work_order_id: SPS-WO-08
+experiment_id: SPS-POWER-ANALYSIS-COORDINATION
+minimum_relevant_effect: 2.0
+minimum_effect_selection: ex_ante_before_sps_c03_diagnostic_outcomes
+assumed_sd_range: [2.0, 4.0]
+assumed_sd_steps: 5
+candidate_seed_counts: [16, 24, 32]
+bootstrap_draws: 10000
+calibration_datasets: 100
+simulation_trials: 2000
+simulation_rng_seed: 8421
+target_power: 0.8
+one_sided_alpha: 0.05
+inference: paired_studentized_bootstrap_lower_bound
+

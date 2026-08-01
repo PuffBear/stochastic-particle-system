@@ -1,0 +1,10 @@
+{
+  "artifact_corrected": "quality_gates.json",
+  "correction": "The exact segmented reflected-path solver was active in SPS-P02. The inherited blocker string stating it was not implemented was stale reporting text; guarded_reflection_pairs=0 and reflected_path_contact_gate_passed=true are the operative recorded diagnostics.",
+  "confirmatory_blockers": [
+    "pilot seeds are calibration-only",
+    "primary policy is four independent replicas and fails the AAMAS multi-agent gate",
+    "timestep convergence for Euler/Brownian chord dynamics remains unmeasured"
+  ],
+  "scientific_status": "exploratory calibration only"
+}

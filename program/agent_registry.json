@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "director": "program-director",
+  "roles": [
+    {"id": "program-director", "state": "active", "persistent_memory": "repository-artifacts"},
+    {"id": "research-lead", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "experiment-engineer", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "literature-scout", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "latex-writer", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "fresh-reviewer", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "reporting-agent", "state": "ready", "persistent_memory": "repository-artifacts"},
+    {"id": "expansionist", "state": "ready", "persistent_memory": "repository-artifacts"}
+  ],
+  "max_concurrent_workers_beside_director": 3,
+  "waves": [
+    ["research-lead", "literature-scout", "fresh-reviewer"],
+    ["experiment-engineer", "latex-writer", "expansionist"],
+    ["reporting-agent"]
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "work_order_id": "SPS-WO-04",
+  "paper": "paper-a",
+  "objective": "Determine whether the canonical catchable task contains action-contingent interception headroom beyond passive transport, then implement but do not claim a capacity-matched bounded-sharing mechanism.",
+  "active_claim": "SPS-C03",
+  "falsifier": "The full-state action-feasible oracle fails to beat stationary transport after one bounded repair, the local policy fails passive/information controls, sharing is non-positive under equal capacity, timestep refinement changes the contrast materially, or 80% simulated power at a 0.01 effect requires more than 64 independent seeds.",
+  "smallest_unresolved_question": "At fixed catchable dynamics, does a bounded shared team velocity summary improve passive-adjusted first-interception time relative to the identical-shape independent controller?",
+  "expected_information_gain": "Separate task infeasibility, estimator failure, coordination failure, numerical instability, and insufficient power before any confirmation or MARL training.",
+  "frozen_diagnostic_grid": {
+    "kappa_alpha_over_collector_speed": [0.0, 0.25, 0.5, 1.0],
+    "alpha": [0.0, 0.03, 0.06, 0.12],
+    "diagnostic_seeds": [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008],
+    "confirmation_eligible": false
+  },
+  "dependency_gates": [
+    "Verify the immutable SPS-P02 checksums and preserve its negative interpretation.",
+    "Add tested policy-use, path-length, valid-track, alignment, wall, absolute-time, and passive-adjusted diagnostics.",
+    "Implement a distinct full-state action-feasible interception oracle and pass deterministic microcases.",
+    "Run the bounded catchable-grid oracle/passive diagnostic; do not proceed scientifically if oracle headroom is absent.",
+    "Implement coupled Brownian refinement and test aggregation exactly before timestep interpretation.",
+    "Implement permutation-invariant bounded sharing and an identical-shape independent policy with leakage/equivariance tests.",
+    "Only after upstream gates pass, run the 8-seed shared-versus-independent diagnostic and simulation-based power analysis."
+  ],
+  "mandatory_controls": [
+    "stationary",
+    "pregenerated_random",
+    "coverage",
+    "density_greedy",
+    "local_flow_v1",
+    "true_field_upstream_control",
+    "full_state_interception_oracle",
+    "action_sign_reversal",
+    "density_fallback",
+    "shared_summary",
+    "capacity_matched_independent",
+    "message_shuffled"
+  ],
+  "oracle_gate": "Positive mean passive-adjusted gain and better absolute restricted first-contact time than stationary and true-field-only controls, with the expected direction in at least 6 of 8 seeds at one nonzero catchable grid point.",
+  "timestep_gate": "For dt 0.02, 0.01, and 0.005 at fixed physical horizon and alpha, use finest-level Brownian increments summed exactly to coarser levels; provisional stability requires no policy-order reversal and a mean contrast difference no larger than 0.0025 between the two finest levels.",
+  "power_gate": "Choose the smallest of 16, 24, 32, 48, or 64 independent seeds with simulated familywise type-I error at most 0.05 and at least 80% power for a 0.01 normalized-horizon coordination effect; otherwise block confirmation.",
+  "compute_cap": "Codex cloud CPU only; eight diagnostic seeds; no learned MARL training; no HPC.",
+  "prohibited_actions": [
+    "Do not run SPS-E01.",
+    "Do not reuse diagnostic seeds for confirmation.",
+    "Do not call the true-field upstream control an interception oracle.",
+    "Do not infer active exploitation from signal versus null alone.",
+    "Do not infer coordination from independent replicas.",
+    "Do not request HPC or train IPPO/MAPPO before every scripted gate passes."
+  ],
+  "no_reply_action": "Continue reversible implementation, diagnostics, timestep utilities, literature, manuscript evidence constraints, and expansion updates; stop downstream scientific runs at the first failed gate."
+}

@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "deadline": "unverified-2026-10-09-planning-horizon",
+  "internal_deadline": "2026-09-29-planning-freeze",
+  "project": "stochastic-particle-system",
+  "repository_full_name": "PuffBear/stochastic-particle-system",
+  "repository_status": "configured",
+  "repository_visibility": "public",
+  "publication_authorized_on": "2026-07-31",
+  "autonomy_branch": "research-autonomy",
+  "timezone": "Asia/Kolkata",
+  "report_email": "agriya.yadav_ug2023@ashoka.edu.in",
+  "attention_mode": "minimal",
+  "no_reply_policy": "continue-safe-default",
+  "active_papers": 1,
+  "papers": [
+    {
+      "id": "paper-a",
+      "title": "Weak-field multi-collector benchmark",
+      "status": "active",
+      "current_stage": "fixed-horizon-yield-feasibility-passed-coordination-unexecuted",
+      "hypothesis": "Under matched observation and policy-capacity budgets, a bounded shared velocity summary improves fixed-horizon unique team capture yield relative to the identical-shape independent controller.",
+      "kill_criterion": "Stop or narrow if coupled-noise timestep validation fails, shared-minus-independent yield is non-positive or below the relevance threshold, shuffled/delayed messages explain the effect, or useful power exceeds the bounded seed cap.",
+      "open_blocker": "SPS-WO-05 establishes diagnostic action-contingent headroom for the step-67 unique-yield endpoint. The repaired SPS-WO-06 numerical implementation is preregistered but not run. SPS-WO-07 remains dependency-blocked, SPS-WO-08 is design-stage only, and all learned MARL work remains downstream. SPS-C03 has no coordination result."
+    },
+    {
+      "id": "paper-b",
+      "title": "Inactive placeholder",
+      "status": "paused",
+      "current_stage": "inactive",
+      "hypothesis": "",
+      "kill_criterion": "No second paper may activate without a genuinely separable question and Program Director decision.",
+      "open_blocker": "Intentionally inactive."
+    }
+  ],
+  "phase": "yield-endpoint-feasibility-passed-repaired-numerical-gate-pending",
+  "primary_question": "At alpha=0.06 under the canonical four-collector task and a fixed 67-step window, does a bounded three-number shared velocity summary improve unique team capture yield over the identical-shape independent controller?",
+  "primary_condition": "shared_summary_vs_capacity_matched_independent",
+  "scientific_results_available": false,
+  "exploratory_calibration_available": true,
+  "exploratory_result": "SPS-P02 found no first-interception boundary and exposed passive confounding. After that endpoint was killed, SPS-WO-05-R1 passed the preregistered fixed-horizon yield feasibility gate: oracle minus stationary mean 9.375 unique captures with 8/8 positive diagnostic seeds; oracle minus true-field control mean 7.5. This authorizes numerical and coordination diagnostics only and does not support SPS-C03.",
+  "diagnostic_action_headroom_available": true,
+  "pending_diagnostic_scripts": {
+    "SPS-WO-06-TIMESTEP-CONVERGENCE": {
+      "script": "analysis/run_timestep_convergence.py",
+      "status": "preregistered-implementation-validated-not-run",
+      "purpose": "Validate that dt=0.02 is a converged discretization; seeds 3001-3008 permanently ineligible for confirmation",
+      "gate": "absolute mean oracle-minus-stationary difference between dt=0.02 and dt=0.01 strictly below 1 particle, with at most 1/8 seed-level sign changes; dt=0.005 mandatory informational"
+    },
+    "SPS-POWER-ANALYSIS-COORDINATION": {
+      "script": "analysis/run_power_analysis.py",
+      "status": "preregistered-design-stage-not-run",
+      "purpose": "Ex-ante sensitivity analysis for 80% power at a frozen 2.0-particle minimum relevant effect; it cannot consume diagnostic outcomes"
+    },
+    "SPS-WO-07-ATTRIBUTION-CONTROLS": {
+      "script": "analysis/run_attribution_controls.py",
+      "status": "preregistered-dependency-blocked-not-run",
+      "purpose": "Attribution control runs alongside SPS-C03; seeds 4001-4008 permanently ineligible for confirmation",
+      "gate": "all six preregistered empirical, implementation, and matched-stream components pass; descriptive only"
+    }
+  },
+  "engineering_tests": {
+    "passed": 199,
+    "failed": 0,
+    "scope": "89 established simulator and inference tests, 7 dependency-free experiment-design tests (dyadic Brownian coupling, fixed physical duration, preregistration/config agreement, supported attribution policy IDs, ex-ante power constants), plus MARL and coordination tests (IPPO/MAPPO/MADDPG/COMA/CommNet/VDN architectures, CE metrics, spatial/informational coordination). 96 pass without PyTorch; 199 with it."
+  },
+  "fresh_review": {
+    "date": "2026-07-31",
+    "verdict": "reject",
+    "score": "2/10",
+    "confidence": "5/5",
+    "snapshot": "post-WO-05-yield-feasibility",
+    "strongest_new_threat": "The positive oracle diagnostic establishes action headroom but the central shared-versus-independent multi-agent treatment remains unexecuted, so there is still no coordination, communication, or MARL result."
+  },
+  "hpc_status": "not-needed",
+  "report_count": 5,
+  "inactive_scopes": [
+    "baseball-paper-a",
+    "baseball-paper-b",
+    "h-sharc",
+    "counter-swarm"
+  ],
+  "last_updated": "2026-08-01",
+  "last_engineering_action": "Added full_state_interception_oracle to run_marl_baselines.py scripted baseline evaluation; enabled CommNet CE computation against oracle ceiling; resolved oracle/CE conflict from branch repair commits. Previous: repaired timestep coupling, attribution IDs, preregistration/power design, MARL scaffolds, communication-ablation eligibility, manuscript/ledger updates."
+}
