@@ -1,0 +1,23 @@
+work_order_id: SPS-C03
+experiment_id: SPS-C03-COORDINATION-CONFIRMATION
+upstream_work_order: SPS-WO-07B
+confirmation_eligible: true
+confirmation_seeds: [6001, 6002, 6003, 6004, 6005, 6006, 6007, 6008,
+                     6009, 6010, 6011, 6012, 6013, 6014, 6015, 6016,
+                     6017, 6018, 6019, 6020, 6021, 6022, 6023, 6024,
+                     6025, 6026, 6027, 6028, 6029, 6030, 6031, 6032]
+alphas: [0.0, 0.06]
+policies:
+  - capacity_matched_independent
+  - shared_summary_v2
+  - stationary
+  - full_state_interception_oracle
+evaluation_steps: 67
+dt: 0.02
+# Pre-registered test: one-sided paired studentized-bootstrap lower bound > 0
+# Critical value pre-calibrated from power analysis at n=32, one_sided_alpha=0.05
+pre_calibrated_critical_value: 1.6883086864450019
+minimum_confirmable_effect: 2.0
+power_analysis_work_order: SPS-WO-08
+bootstrap_draws: 10000
+bootstrap_seed: 99317
