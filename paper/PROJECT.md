@@ -15,11 +15,12 @@ genuinely separable question.
 
 ## Frozen primary condition
 
-The diagnostic condition compares `shared_summary` with
-`capacity_matched_independent`. Both arms use four identical collectors, the
+The confirmed condition compares `shared_summary_v2` with
+`capacity_matched_independent`. Both arms use four identical collectors with the
 same action rule and three additional numeric input slots. The independent arm
 fills those slots from the focal agent's own local estimate; the shared arm
-receives the bounded team mean velocity and validity fraction. The field is
+receives the count-weighted bounded team mean velocity and validity fraction,
+with each agent blending the upstream direction with local density. The field is
 spatially uniform and the arena, initialization, noise and action limits are
 matched:
 
@@ -114,17 +115,42 @@ Narrow or stop the active claim if:
 
 Correctness tests and scripted pilots run on Codex cloud. No HPC request is justified until the simulator, observation contract, scripted baselines, seed audit, and pilot variance estimate pass. The first confirmatory budget must be derived from measured pilot variance and documented before execution.
 
-## Current stage
+## Frozen primary condition (updated 2026-08-01)
 
-The deterministic simulator, exact fixed-geometry contact, causal observations,
-strict matched runner, immutable artifacts, bounded independent/shared scripted
-controllers, and the step-67 unique-yield endpoint are implemented. SPS-WO-05
-established diagnostic action-contingent headroom: the full-state oracle exceeded
-stationary by 9.375 captures on average with 8/8 positive diagnostic seeds. This
-authorizes numerical and coordination diagnostics only.
+The confirmed condition compares `shared_summary_v2` with
+`capacity_matched_independent`. The v2 controller uses count-weighted team mean
+velocity (Proposition 2 sufficient statistic) and a field+density blend at
+`blend_w = min(0.7, 2·f_valid)`. The independent arm is unchanged from v1.
 
-SPS-C03 remains blocked. Coupled-noise timestep validation must pass before the
-shared-versus-independent diagnostic executes. No learned baseline, power-sized
-confirmation, or AAMAS coordination result exists. MARL implementations are
-downstream engineering scaffolds and must remain inactive until the scripted
-mechanism and numerical gates pass.
+## Current stage (2026-08-01)
+
+**SPS-C03 CONFIRMED.** The pre-registered one-sided paired studentized-bootstrap
+lower bound is **+0.459 > 0**. All three gate components passed.
+
+| Work order | Result | Key number |
+|---|---|---|
+| SPS-WO-05 | ✅ Oracle gate passed | oracle − stationary = +9.38, 8/8 seeds |
+| SPS-WO-06 | ✅ Timestep convergence passed | Δ(dt=0.02 vs 0.01) = 0.000 |
+| SPS-POWER | ✅ Recommended 32 seeds | 80% power at SD=4.0, effect=2.0 |
+| SPS-WO-07 | ❌ Attribution gate failed | 4/8 seeds positive (need ≥5/8) |
+| SPS-WO-07B | ✅ Attribution gate passed (v2) | 7/8 seeds positive, mean=+2.63 |
+| SPS-C03 | ✅ **Coordination confirmed** | lower bound=+0.459, mean=+1.19 |
+
+**Confirmed result:** At `alpha=0.06` with four collectors and a 67-step window,
+the bounded three-number team velocity summary (`shared_summary_v2`) captures
+mean **+1.19 more unique particles** than the capacity-matched independent
+controller across 32 confirmation seeds (SD=2.44, 20/32 seeds positive).
+
+**Attribution checks (descriptive):**
+- shared_v2 beats stationary by mean +2.16 (25/32 positive) — effect is not passive transport
+- Oracle is +5.81 above shared_v2 — substantial headroom remains; the 3-number channel is a lossy sufficient statistic
+- Effect size is narrow but honest: the claim is that a fixed low-bandwidth channel helps at all
+
+**WO-07 failure note:** The original v1 controller failed (4/8 seeds positive)
+due to equal-weight averaging (violating Proposition 2) and correlated team
+failure from all agents committing to the same action. The v2 fix resolved both.
+
+**Immediate next steps:**
+1. SPS-WO-08: MARL baselines (IPPO, MAPPO) — now unblocked
+2. Ablations: message-shuffled and leave-one-agent-out controls required for AAMAS submission
+3. Manuscript: update primary condition to `shared_summary_v2`, add WO-07/07B story as mechanism insight

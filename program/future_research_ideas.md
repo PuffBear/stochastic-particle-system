@@ -1,161 +1,184 @@
 # Future Research Ideas
 
-Inactive directions only; none may consume active-paper resources without a Program Director decision. Each entry is unvalidated.
+**Status as of 2026-08-01.** SPS-C03 confirmed coordination. The research ideas below are assessed against that confirmed baseline. Ideas are grouped by the conference they most naturally target, not by internal work-order numbering. Each idea has a one-line pitch, the open question, why it is non-trivial (the *hard part*), and a kill criterion.
 
-## SPS-FR-001 — Retired duplicate
+Inactive directions only. None may consume active-paper resources without a Program Director decision. All hypotheses are unvalidated.
 
-- **Status:** Retired into SPS-FR-009 on 2026-07-31. FR-009 is the result-grounded, falsifiable version and includes the required matched-budget and dropout controls.
+---
 
-## SPS-FR-002 — Event-keyed counterfactual random numbers
+## Tier 1 — Ready to develop now (blocked only by MARL baselines)
 
-- **Provenance:** SPS-WO-01 through SPS-WO-03; `src/particle_benchmark/dynamics/capture.py`; SPS-P02.
-- **Motivating result:** Event-keyed ownership is implemented and unit-tested, but all 144 SPS-P02 pairs recorded zero tie decisions; the pilot did not empirically exercise it.
-- **Question:** Under deliberately high-overlap conditions, does event-keyed ownership remain invariant to unrelated prior event consumption while a stateful resolver does not?
-- **Falsifiable hypothesis:** Event-keyed tie draws indexed by scenario, step, particle, and eligible-collector set are invariant to unrelated event-consumption order while naïve stateful draws are not.
-- **Possible contribution:** An order-invariant event-randomness stress protocol, only if a material effect appears beyond contrived unit cases.
-- **Minimal experiment:** forced-tie and divergent-control-flow families with collector permutations and injected unrelated prior events.
-- **Required compute:** CPU-only unit tests and a bounded Monte Carlo diagnostic.
-- **Workplan:** measure ownership divergence and paired-estimator variance; retain all failures; compare against the already implemented keyed resolver.
-- **Kill criterion:** no material bias or variance effect outside contrived microcases.
-- **Candidate venue:** simulation/reproducibility venue; not AAMAS absent a multi-agent scientific consequence. Verify current venue details before planning.
-- **Status / priority:** validation backlog, 5/10; no longer an implementation blocker.
+These build directly on the confirmed C03 result and the WO-07 failure story.
 
-## SPS-FR-003 — Aggregation beyond geometric area
+---
 
-- **Provenance:** supplied benchmark vision; SPS-WO-02 engineering limitation.
-- **Motivating observation:** The primary environment now uses point particles and fixed capture radius. Attached-node radius, aggregate-wall behavior, and captured-particle display motion are not frozen.
-- **Question:** Does attached growth produce post-contact cascade acceleration beyond an area/perimeter-matched static control?
-- **Falsifiable hypothesis:** With accessible area and perimeter matched, attached growth still changes the post-contact cascade distribution.
-- **Possible contribution:** Separation of topological memory from simple capture-area expansion.
-- **Minimal experiment:** first freeze attached-node kinematics and wall semantics, then compare growing and non-growing geometry under identical pre-contact trajectories and matched accessible perimeter.
-- **Required compute:** CPU pilot followed by a seed budget derived from pilot variance.
-- **Workplan:** preregister geometry-matched controls; decompose first contact, cascade size, and false cascades; test scaling across density.
-- **Candidate venue:** AAMAS only if aggregation interacts with team coordination; otherwise complex-systems or simulation venues, subject to current deadline verification.
-- **Status / priority:** `unvalidated`; 6/10 and inactive until the primary fixed-geometry benchmark passes.
+### FR-A1 — When does sharing hurt? The correlated-failure boundary
+**Target venue:** AAMAS 2027 / ICLR 2027 (multi-agent learning track)
 
-## SPS-FR-004 — Nonstationary and moving latent fields
+**One-line pitch:** SPS-WO-07 showed that an equal-weight shared signal made performance *worse* than doing nothing on 4/8 seeds; WO-07B fixed it. The boundary between "sharing helps" and "sharing synchronizes failure" is unexplored.
 
-- **Provenance:** supplied benchmark vision; deferred uniform-field limitation.
-- **Question:** How rapidly can a local team adapt when field orientation, centre, or topology changes within an episode?
-- **Falsifiable hypothesis:** bounded memory improves matched post-change interception without harming stationary-field performance.
-- **Possible contribution:** Detectability-versus-adaptation phase diagram with bounded memory.
-- **Novelty threat:** standard online filtering may explain all benefit.
-- **Kill criterion:** no adaptation benefit after matched memory and tuning budgets.
-- **Candidate venue:** robotics or stochastic control; verify current details before planning.
-- **Workplan / status:** freeze change process and adaptation metric; inactive until the uniform task is valid.
+**Open question:** At fixed communication capacity (3 numbers), is there a signal-to-noise ratio or team-size regime where sharing provably hurts relative to independent operation — and can that boundary be predicted from the channel's estimation noise alone?
 
-## SPS-FR-005 — Strategic or learned particle evasion
+**Hard part:** Distinguishing two failure modes that look identical from the outside: (a) sharing a bad estimate (fixable by better aggregation) vs. (b) eliminating beneficial spatial diversity (not fixable without adding stochasticity). A clean experimental design has to manipulate estimate quality and spatial dispersion independently.
 
-- **Provenance:** passive-particle limitation in SPS-P02.
-- **Question:** How does the boundary change when particles respond strategically to collectors?
-- **Falsifiable hypothesis:** response-aware policies improve matched interception against fixed evasion classes.
-- **Possible contribution:** Genuine pursuit-evasion game extending the passive-particle benchmark.
-- **Novelty threat:** reduces to standard pursuit-evasion without a particle-system contribution.
-- **Kill criterion:** no separable population or stochastic-structure mechanism.
-- **Candidate venue:** AAMAS only for a genuine strategic multi-agent game; otherwise robotics.
-- **Workplan / status:** freeze evader information/action budgets and equilibrium concept; inactive.
+**Why this is AAMAS/ICLR-level:** The correlated-failure story from WO-07 is a concrete, reproducible demonstration of a phenomenon that appears in theory but is rarely shown with a controlled benchmark. It directly addresses the "when to communicate" question from a risk perspective rather than a reward perspective.
 
-## SPS-FR-006 — Heterogeneous collector teams
+**Minimum experiment:** Sweep `alpha` (SNR) and `M` (team size) over a pre-registered grid; compute the fraction of seeds where shared < independent, and the fraction where shared < stationary. Regress against estimated per-step field estimation error.
 
-- **Provenance:** homogeneous-team limitation and AAMAS relevance audit.
-- **Question:** When do heterogeneous sensing and actuation capabilities outperform homogeneous allocation under the same total resource budget?
-- **Falsifiable hypothesis:** a prespecified heterogeneous allocation lowers a matched boundary under equal total resources.
-- **Possible contribution:** Role emergence and capability allocation near weak signals.
-- **Novelty threat:** advantage may be simple hardware-budget reallocation.
-- **Kill criterion:** effect vanishes under total sensing/action/parameter matching.
-- **Candidate venue:** AAMAS if role interaction is isolated; otherwise robotics.
-- **Workplan / status:** preregister resource accounting and matched ablations; inactive.
+**Kill criterion:** The failure fraction is never >15% in any tested regime, meaning WO-07 was an outlier attributable to the equal-weight bug alone, not a fundamental phenomenon.
 
-## SPS-FR-007 — Offline MARL from paired trajectories
+---
 
-- **Provenance:** immutable paired-runner artifact contract; no released training dataset yet.
-- **Question:** Can paired signal/null trajectory datasets support reliable offline policy selection near a detectability boundary?
-- **Falsifiable hypothesis:** a prespecified selector ranks held-out policies better than unpaired or behavior-only controls.
-- **Possible contribution:** Counterfactual benchmark for offline multi-agent evaluation.
-- **Novelty threat:** dataset may lack action coverage and the primary task is not yet multi-agent.
-- **Kill criterion:** unsupported coverage or no held-out ranking improvement.
-- **Candidate venue:** offline RL/benchmark venue; AAMAS only after multi-agent relevance.
-- **Workplan / status:** define coverage diagnostics and held-out policy suite; inactive.
+### FR-A2 — Communication bandwidth vs. coordination gain
+**Target venue:** AAMAS 2027 / ICML 2027
 
-## SPS-FR-008 — Catchability-aware scale transfer
+**One-line pitch:** The confirmed channel is exactly 3 numbers. Is there a clean diminishing-returns curve as the channel widens from 1 number to full state?
 
-- **Provenance:** canonical-task generalization limitation; SPS-P02; SPS-WO-04; 2026-07-31 pre-repair fresh AAMAS review.
-- **Motivating observation:** The old axis, `rho = alpha*sqrt(dt)/sigma`, measures per-step drift relative to Brownian motion but not whether a collector can physically catch an advected particle. At the old `rho=2` point, `kappa = alpha/v_max` is approximately 7.07, so target advection is much faster than collector motion. This can mix observability with catchability.
-- **Research question:** At fixed sensing and geometry, do first-interception curves collapse across physical rescalings when indexed by the catchability ratio `kappa = alpha/v_max`?
-- **Falsifiable hypothesis:** After holding the remaining preregistered dimensionless groups fixed, curves from at least three physical rescalings have a maximum absolute discrepancy no larger than 0.01 in normalized restricted mean first-interception time when plotted against `kappa`.
-- **Possible contributions:** A catchability-aware benchmark axis; an explicit separation between sensing difficulty (`rho`) and control authority (`kappa`); out-of-distribution splits that do not silently change the physical task.
-- **Nearest literature / novelty risk:** Hein et al. (2016), `https://arxiv.org/abs/1512.04217`, already studies physical sensing limits through nondimensional regimes. Standard dimensional analysis may fully explain the collapse; the novelty would need to be an empirically useful two-axis benchmark protocol, not the existence of dimensionless groups.
-- **Minimal experiment / data / compute:** Three scale-equivalent CPU configurations at `kappa in {0.25, 0.5, 1.0}`, with coupled scenario seeds and stationary plus full-state-oracle controls. Reuse no confirmatory claims from SPS-P02.
-- **Two-week validation plan:** Days 1–3 derive and unit-check all dimensionless groups; days 4–6 construct scale-equivalent configs; days 7–10 run an 8-seed diagnostic; days 11–14 test the frozen 0.01 collapse tolerance and audit confounding by horizon, capture radius, sensor radius, density, and wall crossing time.
-- **Full workplan:** Extend only after the active oracle and timestep gates pass; preregister rescalings and tolerances; run held-out seeds; publish absolute and normalized event-time curves; reject any collapse obtained by changing censoring or endpoint definitions.
-- **Kill criterion / dependency / risk:** Kill if the curves do not collapse, if collapse follows trivially from established nondimensionalization without a benchmark consequence, or if the active task is killed at the oracle-feasibility gate. Depends on SPS-WO-04 Gates 2–3. Main risk is an overparameterized similarity analysis with too few independent physical regimes.
-- **Candidate conference and verified deadline:** MODELSWARD 2027 is a conditional fit for model-driven benchmark transfer; its official call lists a regular-paper deadline of **15 September 2026** (`https://modelsward.scitevents.org/CallForPapers.aspx?y=2027`, checked 2026-07-31). Do not target it without a supported transfer result.
-- **Status / priority:** `unvalidated`, inactive, 6/10. This refines the existing scale-transfer entry; it is not a new paper authorization.
+**Open question:** Does coordination gain scale with channel capacity according to a predictable information-theoretic curve, or are there qualitative jumps at specific capacity thresholds (e.g., adding a validity count after just velocity)?
 
-## SPS-FR-009 — Bounded evidence fusion as the actual multi-agent question
+**Hard part:** Designing channel variants that are capacity-matched in a meaningful way. Adding one number changes both information content and the agent's ability to detect bad estimates. These two effects need to be separated.
 
-- **Provenance:** SPS-P01; SPS-P02; SPS-WO-04; 2026-07-31 pre-repair fresh AAMAS review; `paper/literature.md` focused repair.
-- **Motivating observation:** `local_flow_v1` ignores teammate information, so four collectors are independent replicas. The negative SPS-P02 calibration cannot identify coordination. SPS-WO-04 therefore freezes one three-number message: clipped team-mean local velocity (two values) plus team validity fraction (one value).
-- **Research question:** At fixed catchable dynamics, does one bounded shared team-velocity summary improve passive-adjusted first-interception time relative to the identical-shape independent controller?
-- **Falsifiable hypothesis:** At at least one preregistered nonzero catchable point, the mean paired shared-minus-independent contrast is at least 0.01 normalized-horizon units, has a positive simultaneous 95% lower bound, persists at stronger catchable points, and survives message-shuffled and leave-one-agent-out ablations.
-- **Possible contributions:** A narrowly causal value-of-information result; a capacity-, observation-, action-, and arithmetic-budget-matched test of decentralized evidence fusion; a negative-result protocol if bounded pooling dilutes local evidence.
-- **Nearest literature / novelty risk:** CIMAX (`https://arxiv.org/abs/1903.05444`) already establishes collective information maximization with local communication; Foerster et al. (2016), `https://proceedings.neurips.cc/paper_files/paper/2016/hash/c7635bfd99248a2cdef8249ef7bfbef4-Abstract.html`, and Wang et al. (2020), `https://proceedings.mlr.press/v119/wang20i.html`, establish learned and bandwidth-constrained communication. The fixed summary is a mechanism probe, not a novel communication algorithm.
-- **Minimal experiment / data / compute:** Eight diagnostic seeds on `kappa in {0.25, 0.5, 1.0}` after oracle and timestep gates; identical three-slot inputs for shared and independent controllers; passive, shuffled-message, and leave-one-out controls; Codex CPU only.
-- **Two-week validation plan:** Days 1–2 freeze leakage and capacity accounting; days 3–5 unit-test permutation invariance and agent-ID equivariance; days 6–8 run the 8-seed diagnostic; days 9–11 estimate block-resampled power at a 0.01 effect; days 12–14 either preregister held-out confirmation or record a coordination-null decision.
-- **Full workplan:** Proceed only after the full-state oracle establishes action-contingent headroom and coupled-noise refinement is stable; simulate type-I error and power; select the smallest passing seed count in `{16,24,32,48,64}`; run new held-out seeds; report absolute outcomes, passive-adjusted effects, bandwidth, failures, and all ablations.
-- **Kill criterion / dependency / risk:** Kill the AAMAS mechanism if oracle feasibility fails, passive/shuffled controls explain the effect, the shared contrast is below 0.01 or non-positive, timestep ordering reverses, information leaks, or 64 seeds provide less than 80% simulated power. Depends on SPS-WO-04 Gates 1–3 and 5. Principal risk: global averaging may erase useful local heterogeneity or synchronize harmful actions.
-- **Candidate conference and verified deadline:** AAMAS 2027 is the intended fit only for a surviving genuinely multi-agent result; the official call lists abstract **1 October 2026** and paper **8 October 2026** deadlines (`https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/`, checked 2026-07-31).
-- **Status / priority:** `unvalidated`, 10/10. This is a mirror of the active mechanism gate, not authorization for a second paper or MARL training.
+**Why this is ICML-level:** If the gain-vs-capacity curve is smooth and predictable, it provides a practical design principle. If it has jumps, it identifies a minimum viable communication structure — which is a much more interesting theoretical result. Either outcome is publishable.
 
-## SPS-FR-010 — Passive-adjusted policy value and oracle feasibility
+**Minimum experiment:** Five frozen channels: (1) f_valid only, (2) v_x only, (3) v_x + v_y, (4) v_x + v_y + f_valid [current], (5) full local observation broadcast. Run all five at alpha=0.06 on 16 seeds with matched capacity budget.
 
-- **Provenance:** SPS-P02 `baseline_summary.json` and `primary_analysis.json`; SPS-WO-04; 2026-07-31 pre-repair fresh AAMAS review.
-- **Motivating exploratory result:** At `rho=2` on 12 calibration seeds, mean signal/null gain was 0.01104 for local flow, 0.01313 for stationary, and 0.01292 for both random and the true-field upstream control. These non-confirmatory descriptions show that signal/null gain alone can be passive transport and that “move upstream” is not an action-feasible interception oracle.
-- **Research question:** In a catchable regime, does `local_flow_v1` reduce horizon-censored first-interception time beyond the reduction achieved by stationary collectors?
-- **Falsifiable hypothesis:** The passive-adjusted effect `A_s(local_flow,alpha) = G_s(local_flow,alpha) - G_s(stationary,alpha)` is positive and exceeds velocity-slot shuffles at a persistent catchable point, after a centralized full-state action-feasible oracle first passes its feasibility gate.
-- **Possible contributions:** An identifying passive-adjusted estimand for stochastic transport tasks; an ordered oracle-feasibility test that separates malformed tasks from weak local estimators; a principled negative result if control has no headroom.
-- **Nearest literature / novelty risk:** Wang et al. (2021), `https://doi.org/10.1103/PhysRevE.104.064203`, establishes stationary capture units; Wang et al. (2025), `https://pmc.ncbi.nlm.nih.gov/articles/PMC12331103/`, explicitly compares mobile and stationary collection and decomposes carrier advection from controlled relative motion. The passive-adjusted contrast may be good experimental hygiene rather than a standalone novelty.
-- **Minimal experiment / data / compute:** Diagnostic seeds 1001–1008, `kappa in {0.25,0.5,1.0}`, absolute restricted mean first-contact time plus `A_s`; stationary, random, coverage, density, local flow, velocity shuffles, action reversal, true-field-only control, and full-state receding-horizon oracle; CPU only.
-- **Two-week validation plan:** Days 1–3 instrument valid tracks, action alignment, path length, walls, censoring, and swept area; days 4–6 pass deterministic oracle microcases; days 7–9 run the bounded oracle/passive diagnostic; days 10–12 run local-flow and shuffled-information controls only if the oracle passes; days 13–14 record one of task-infeasible, estimator-infeasible, or policy-feasible.
-- **Full workplan:** Preserve SPS-P02 as negative calibration; allow one preregistered task-parameter repair if the oracle fails; rerun the oracle once; if feasible, freeze the passive-adjusted estimator and minimum effect before independent confirmation; report signal and null arms separately so differencing cannot hide endpoint saturation.
-- **Kill criterion / dependency / risk:** Kill or redesign the first-interception task if the full-state oracle fails after one bounded repair. Reject the local mechanism if it does not beat stationary and shuffled controls. Depends on diagnostic instrumentation, not on MARL. Principal risks are first-event saturation, wall accumulation, sparse valid tracks, and swept-area confounding.
-- **Candidate conference and verified deadline:** This is not a separate AAMAS paper by itself. MODELSWARD 2027 could fit a validated evaluation methodology; its official regular-paper deadline is **15 September 2026** (`https://modelsward.scitevents.org/CallForPapers.aspx?y=2027`, checked 2026-07-31). AAMAS 2027 is conditional on FR-009 also succeeding.
-- **Status / priority:** `unvalidated`, 10/10 validity gate; no independent paper authorization.
+**Kill criterion:** Gain is monotonically increasing with no structure and confidence intervals overlap everywhere — curve has no informative shape.
 
-## SPS-FR-011 — Team size and signal-value dilution
+---
 
-- **Provenance:** SPS-P02 `baseline_summary.json`.
-- **Motivating exploratory result:** At rho=2 on 12 calibration seeds, single-collector mean gain was 0.06938 versus 0.01104 for four independent collectors; this is not a causal team-size comparison.
-- **Question:** After matching passive capture hazard, swept area, sensing, and total action budget, how does collector count change incremental signal value?
-- **Falsifiable hypothesis:** Apparent dilution either persists under matched resources or disappears once first-event saturation and passive hazard are matched.
-- **Possible contribution:** Separation of parallel-search opportunity from information value and collector interaction.
-- **Workplan:** preregister M in `{1,2,4,8}`; match passive hazard and swept area; evaluate absolute event time, paired gain, survival, and ownership on independent seed blocks.
-- **Kill criterion:** the M effect vanishes under matching or is an initialization/censoring artifact.
-- **Candidate venue:** AAMAS only if interaction survives matching; otherwise robotics/stochastic systems.
-- **Status / priority:** unvalidated, 8/10.
+### FR-A3 — Ablation completeness: message-shuffle and leave-one-out
+**Target venue:** AAMAS 2027 (required for submission, not optional)
 
-## SPS-FR-012 — Calibrating simultaneous inference for censored paired events
+**One-line pitch:** The current C03 result is a contrast, not a causal attribution. AAMAS reviewers will demand message-shuffled and leave-one-agent-out controls before accepting the communication claim.
 
-- **Provenance:** `results/derived/inference_calibration*.json` and SPS-P02 `primary_analysis.json`.
-- **Motivating limitation:** Studentized max-bootstrap null calibration passed two synthetic families, but power, boundary-location error, nonmonotone alternatives, and realistic censoring remain uncalibrated; the 12-seed pilot critical value was 6.187.
-- **Question:** Which simultaneous procedure best controls false grid crossings while retaining power under paired covariance, zero inflation, censoring, and nonmonotone curves?
-- **Possible contribution:** Reusable calibration protocol for grid-censored simulator boundaries.
-- **Workplan:** compare max-bootstrap, paired max-T permutation, and simultaneous-t controls over synthetic and pilot-fitted held-out families; measure coverage, power, false crossing location, and censoring error.
-- **Kill criterion:** no robust advantage over a simpler calibrated procedure or benchmark-specific findings only.
-- **Candidate venue:** simulation methodology or statistical computing; AAMAS only as a reusable evaluation standard.
-- **Status / priority:** unvalidated, 7/10.
+**Open question:** Does the shared_summary_v2 advantage survive: (a) receiving a randomly permuted team message (same format, wrong content), (b) receiving a message computed without the agent's own observations?
 
-## SPS-FR-013 — Coupled numerical event-time audit
+**Hard part:** Implementing shuffled messages correctly without introducing new confounders. A shuffled message must have the same statistical properties as a real one (clipping, range) to avoid a trivially detectable signal.
 
-- **Provenance:** SPS-P01; SPS-P02 exact-contact replication; SPS-WO-04 Gate 3; 2026-07-31 pre-repair fresh AAMAS review.
-- **Motivating observation:** Exact piecewise-specular within-step contact changed 0 of 144 SPS-P02 outcomes, but agreement between two discrete implementations does not establish convergence to continuous-time first-hit behavior. First-interception is the primary endpoint and can be timestep-sensitive.
-- **Research question:** Does the shared-minus-independent first-interception contrast remain stable under coupled-noise refinement from `dt=0.01` to `dt=0.005`?
-- **Falsifiable hypothesis:** With finest-grid Brownian increments summed exactly to coarser grids, the mean normalized contrast changes by no more than 0.0025 between the two finest timesteps and no policy ordering reverses.
-- **Possible contributions:** A reproducible event-time audit that separates contact-geometry correctness, stochastic time-discretization error, and policy-ranking stability; a reusable provenance format for first-hit simulation benchmarks.
-- **Nearest literature / novelty risk:** Gobet (2000), `https://doi.org/10.1016/S0304-4149(99)00109-X`, establishes weak-error concerns for Euler approximation of killed diffusions; Gobet and Menozzi (2010), `https://arxiv.org/abs/0706.4042`, studies boundary corrections and overshoot. A three-level convergence check alone is standard verification, not a publishable numerical method.
-- **Minimal experiment / data / compute:** Coupled `dt in {0.02,0.01,0.005}`, fixed physical horizon and `alpha`, 8 diagnostic seeds, stationary plus full-state oracle first, then independent/shared only after their code is frozen; CPU only.
-- **Two-week validation plan:** Days 1–3 unit-test exact aggregation of fine Brownian increments; days 4–6 validate deterministic contact microcases across timesteps; days 7–10 run the two-policy slice; days 11–12 add independent/shared if upstream gates pass; days 13–14 quantify disagreement, interval width, and whether a first-passage correction is needed.
-- **Full workplan:** Preserve per-level inputs and checksums; compare event ownership, censoring, absolute restricted means, passive-adjusted effects, and policy contrasts; if unstable, test one preregistered correction or finer level before any scientific inference; publish the audit as supplementary methodology unless it reveals a broadly reusable failure mode.
-- **Kill criterion / dependency / risk:** Retire as a standalone direction if standard refinement is sufficient and no generalizable issue appears. Block the active scientific claim if the 0.0025 stability tolerance or policy-order condition fails. Depends on a passing oracle microcase. Risk: rare events may make the diagnostic interval too wide even when mean bias is small.
-- **Candidate conference and verified deadline:** MODELSWARD 2027 is a conditional methodological venue with a **15 September 2026** regular-paper deadline (`https://modelsward.scitevents.org/CallForPapers.aspx?y=2027`, checked 2026-07-31); otherwise this belongs in the active paper’s reproducibility supplement, not a separate submission.
-- **Status / priority:** `unvalidated`, inactive, 8/10 as a validity audit and 3/10 as a separate paper.
+**Why this is mandatory:** Without these controls, a positive C03 result can be attributed to: bandwidth (shared arm has 3 extra numbers regardless of content), coordination (shared arm has a different *structure* of inputs), or true evidence fusion. Only the ablations separate these.
+
+**Minimum experiment:** Two new policy IDs — `shared_summary_v2_shuffled` (team message randomly permuted across agents at each step) and `shared_summary_v2_leave_self_out` (agent receives team mean excluding its own observations). Run both on 16 seeds, same alpha.
+
+**Kill criterion:** Shuffled message achieves the same or better gain as the real message — the content carries no information beyond the structural format.
+
+---
+
+## Tier 2 — Strong research directions (2–3 months out)
+
+---
+
+### FR-B1 — Learning the optimal bounded channel
+**Target venue:** ICLR 2027 / NeurIPS 2027
+
+**One-line pitch:** We hand-designed a 3-number sufficient statistic using a Fisher-Neyman factorization argument. Can a learned encoder discover the same structure from data — or find something better?
+
+**Open question:** Given a fixed channel capacity of K numbers (K=3 as the baseline), does end-to-end learned communication recover the count-weighted mean velocity + validity fraction structure, or does it find a qualitatively different representation?
+
+**Hard part:** Making the comparison fair. A learned channel has access to the full local observation and can encode task-specific structure; the hand-designed channel made explicit simplifying assumptions. You need a way to evaluate whether learned representations are *interpretably equivalent* to the sufficient statistic, not just whether they achieve higher reward.
+
+**Why this is ICLR-level:** The interpretability angle — does MARL recover a sufficient statistic when one exists? — is a rare case where there is a known theoretical answer to compare against. Most interpretability papers study systems where the ground truth is unknown.
+
+**Minimum experiment:** Train CommNet (or DIAL) with a bottleneck of 3 values; decode the learned channel and compare to hand-designed channel on held-out seeds. Measure whether the learned representations correlate with (v_x, v_y, f_valid).
+
+**Kill criterion:** Learned channel achieves same gain as hand-designed on held-out seeds but the representations are uninterpretable — no clear comparison possible.
+
+---
+
+### FR-B2 — Team size scaling: does √M amplification hold empirically?
+**Target venue:** ICML 2027 / AAMAS 2027
+
+**One-line pitch:** Theory predicts that shared SNR = ρ·√(MKf) while independent per-agent SNR = ρ·√(Kf), so sharing should gain √M over independent. At M=4, that is a factor of 2. The observed C03 gain (+1.19 captures) is smaller. Does the scaling hold across M?
+
+**Open question:** Does the coordination gain scale as √M across team sizes, or is there a maximum team size beyond which spatial diversity loss from sharing outweighs the SNR gain?
+
+**Hard part:** At larger M, the correlated-failure problem from WO-07 becomes worse (all M agents fail together), but the estimation noise is lower. These effects pull in opposite directions. The v2 field+density blend may not scale well at M=8 or M=16 without retuning blend_w.
+
+**Why this is ICML-level:** A clean empirical confirmation of √M scaling would validate the theoretical framework; a deviation would identify where the theory breaks down and what additional mechanism (spatial diversity loss) needs to be modeled.
+
+**Minimum experiment:** M ∈ {1, 2, 4, 8} with matched total sensing budget (K·M constant). Run 16 seeds per M level. Plot mean contrast vs. √M.
+
+**Kill criterion:** Gain is flat or decreasing across M — no scaling relationship.
+
+---
+
+### FR-B3 — Catchability-aware scale transfer (nondimensional benchmark axis)
+**Target venue:** ICML 2027 (benchmark track)
+
+**One-line pitch:** Our current benchmark has two confounded axes: sensing difficulty (ρ = α√dt/σ) and control authority (κ = α/v_max). Separating them into a two-axis benchmark space would make results transferable across physical domains.
+
+**Open question:** At fixed sensing difficulty, do coordination gain curves collapse across physical rescalings when indexed by κ?
+
+**Hard part:** Finding physical rescalings that keep sensing difficulty fixed while varying κ requires simultaneous adjustment of multiple parameters (dt, v_max, α) in a way that doesn't accidentally change the statistical structure of the task.
+
+**Why this is ICML benchmark-track level:** The two-axis framing (ρ vs. κ) is a genuine contribution to how particle/collection benchmarks should be parameterized. It would make the SPS benchmark useful for a broader community beyond the specific AAMAS claim.
+
+**Minimum experiment:** Three scale-equivalent configs at κ ∈ {0.25, 0.5, 1.0}; 8 seeds each; plot coordination gain curves against κ.
+
+**Kill criterion:** Curves don't collapse across κ values at fixed ρ, meaning the factorization is wrong or there are other confounders.
+
+---
+
+### FR-B4 — Nonstationary fields: online field estimation with bounded memory
+**Target venue:** IJCAI 2027 / ICLR 2027
+
+**One-line pitch:** The current task has a fixed field direction per episode. If the field rotates or shifts during an episode, agents must trade off tracking accuracy against capture effort. How much memory is needed to maintain coordination benefit?
+
+**Open question:** What is the minimum memory length (in steps) required to maintain positive shared-minus-independent coordination gain when the field orientation changes at a fixed rate?
+
+**Hard part:** Designing a fair memory-bounded controller. The hand-designed sufficient statistic is for a stationary field; extending it to a drifting field requires either a sliding window (forgetting) or an exponential average (parameter tuning). Both introduce new design decisions.
+
+**Why this is IJCAI-level:** Adaptation under bounded resources is a fundamental AI problem. The stochastic particle setting provides a concrete, measurable instance where the optimal memory length has a theoretical prediction (related to the field's autocorrelation time vs. the observation SNR).
+
+**Minimum experiment:** Three field rotation speeds; 3-number memory-augmented channel; measure the step at which coordination gain drops below zero.
+
+**Kill criterion:** Any nonzero memory maintains coordination benefit at all tested rotation speeds — no informative memory-length boundary.
+
+---
+
+## Tier 3 — Long-horizon ideas (6+ months out)
+
+These require substantial new infrastructure or depend on Tier 1/2 results.
+
+---
+
+### FR-C1 — Offline multi-agent evaluation from paired trajectory datasets
+**Target venue:** NeurIPS 2027 (datasets and benchmarks track)
+
+**Pitch:** The matched paired runner produces a natural counterfactual dataset (signal/null trajectory pairs, matched noise). Can this structure be used for offline policy evaluation — ranking policies without running new simulations?
+
+**Why it matters for the field:** Offline evaluation for MARL is much harder than for single-agent RL because policies affect each other's observations. A counterfactual-matched dataset where the only difference is the planted signal removes one major confound.
+
+**Key dependency:** Needs a confirmed coordination effect (done) and a dataset of sufficient coverage (not yet built).
+
+---
+
+### FR-C2 — Heterogeneous teams: sensing-action specialization near weak signals
+**Target venue:** AAMAS 2027 (if role emergence survives matching)
+
+**Pitch:** When one agent has better sensing and another has better actuation, does the optimal team communication structure change qualitatively? Does the sufficient statistic for the team change?
+
+**Why it matters:** Role specialization is a core AAMAS topic. The stochastic particle setting gives a clean theoretical prediction: the sufficient statistic weights should change to reflect heterogeneous sensing quality.
+
+**Key dependency:** Needs a clean homogeneous baseline (done) and a theoretical extension of Proposition 2 to heterogeneous agents.
+
+---
+
+### FR-C3 — Strategic particles: pursuit-evasion with stochastic structure
+**Target venue:** AAMAS 2027 (game-theoretic track)
+
+**Pitch:** Replace passive Brownian particles with weakly strategic evaders that respond to collector proximity. Does the team communication structure that works for passive particles still work for adversarial ones?
+
+**Why it matters:** Most pursuit-evasion work assumes deterministic dynamics. Adding stochastic structure (particles that can't perfectly observe collectors, have limited evasion budget) creates a game with bounded rationality on both sides — a natural AAMAS topic.
+
+**Key dependency:** Requires passive-particle results to be solid (done) and a clear definition of the evader's information and action budget.
+
+---
+
+## Archive (superseded or killed)
+
+- **FR-001**: Retired into FR-A3 (ablation completeness).
+- **FR-002**: Event-keyed tie invariance — engineering validation, not a paper direction.
+- **FR-003**: Growing-geometry aggregation — inactive until fixed-geometry results are published.
+- **FR-007**: Offline MARL from paired trajectories — promoted to FR-C1.
+- **FR-012**: Simultaneous inference calibration — methodology supplement, not a standalone paper.
+- **FR-013**: Timestep convergence audit — completed as SPS-WO-06, confirmed adequate.

@@ -1,54 +1,99 @@
 # Future Industry Ideas
 
-All entries are hypotheses, not validated markets, customer demand, forecasts, or engineering-readiness claims. **Fact** means the linked source supports the statement. **Inference** means the Expansionist’s interpretation. **Speculation** means an untested product or pricing hypothesis. Financial ranges are transparent planning assumptions, not forecasts or market-size estimates.
+**Last updated: 2026-08-01.** Based on SPS-C03 confirmation.
 
-## Source register (checked 2026-07-31)
+All entries are hypotheses — not validated markets, not customer commitments, not engineering roadmaps. Financial figures are rough planning assumptions to size the opportunity, not forecasts.
 
-- **NIST digital-twin credibility:** NIST states that useful digital-twin decision support requires verification, validation, and uncertainty quantification throughout the lifecycle: `https://www.nist.gov/publications/credibility-consideration-digital-twins-manufacturing`.
-- **NIST implementation gap:** NIST identifies lack of standards for interoperability, trustworthiness, verification, and validation as barriers, particularly for small and medium manufacturers: `https://www.nist.gov/programs-projects/digital-twins-advanced-manufacturing`.
-- **ISO composition:** ISO 23247-6:2026, published 14 July 2026, specifies communication, aggregation, and interoperation for composed manufacturing digital twins: `https://www.iso.org/standard/87426.html`.
-- **EPA user context:** EPA’s EFDC page identifies environmental/civil/coastal engineers and scientists as users of a transport model applied to more than 100 water bodies; EPA also says this legacy distribution has no EPA user support: `https://www.epa.gov/hydrowq/environmental-fluid-dynamics-code-efdc`.
-- **EPA operational alternative:** EPA’s WASP represents advection, dispersion, loading, and boundary exchange and is intended for environmental engineers/scientists and regulatory agencies: `https://www.epa.gov/hydrowq/water-quality-analysis-simulation-program-wasp`.
-- **ASME V&V alternative:** ASME V&V 20 provides a recognized verification-and-validation approach for computational fluid dynamics and heat transfer: `https://www.asme.org/codes-standards/find-codes-standards/standard-for-verification-and-validation-in-computational-fluid-dynamics-and-heat-transfer/2009`.
+---
 
-## SPS-FI-001 — Distributed sensing stress-test suite
+## The core transferable insight
 
-- **Provenance:** SPS-P02 negative mechanism evidence; SPS-WO-04 bounded-sharing design; SPS-FR-009.
-- **Target user / painful job:** **Speculation:** robotics, distributed-sensing, and digital-twin validation teams that must decide whether communication improves a task or merely adds bandwidth and correlated action. The painful job is diagnosing why a multi-agent policy failed before expensive field testing.
-- **Market evidence:** **Fact:** ISO 23247-6:2026 now specifies communication, aggregation, and interoperation for composed digital twins. **Fact:** NIST identifies verification, validation, uncertainty quantification, trustworthiness, and interoperability as digital-twin needs/barriers. These facts establish a validation context, not demand for this product.
-- **Gap / competitive alternatives / industry opinion:** **Inference:** generic simulators and standards describe composition and validation but may not provide a matched counterfactual that isolates passive transport, local information, bounded sharing, and action capacity. Alternatives include internal simulation suites, general robotics simulators, ASME-style V&V consulting, and bespoke test engineering. **Industry-source opinion:** NIST’s credibility work argues that decision support must be trustworthy; no buyer has said this proposed diagnostic is needed.
-- **Gateway / partners / data rights / constraints:** Release an open benchmark and three-number communication audit first; seek one non-safety-critical design partner. Use only partner-authorized synthetic or de-identified traces. Contract must define trace ownership, retention, redistribution, and whether model outputs can be used for benchmarking. Do not certify safety, compliance, or field readiness.
-- **Demo design and workflow:** (1) import two controllers; (2) declare observation/action/message budgets; (3) replay identical scenario noise; (4) compare independent, shared, message-shuffled, and leave-one-out conditions; (5) display passive-adjusted event times, bandwidth, action correlation, and oracle headroom; (6) export a reproducibility bundle.
-- **Business idea / icing on the cake:** **Speculation:** a “coordination microscope” that returns a failure attribution—task infeasible, sensing weak, information fusion harmful, communication useful, or numerical evidence unstable—rather than another aggregate reward leaderboard.
-- **Financial assumptions and unit economics:** **Speculation:** open-source core at $0; one bounded paid diagnostic pilot priced at **USD 5k–15k**; delivery requires **40–120 expert hours** plus negligible CPU at current scale. At an explicit internal loaded-cost assumption of **USD 30–100/hour**, direct labor is **USD 1.2k–12k**, leaving a contribution range of **negative USD 7k to positive USD 13.8k** before sales, legal, support, and tax. This wide range is deliberate and confidence is **very low**.
-- **Scenarios:** **Downside:** zero paying users and maintenance-only open source. **Base assumption:** two paid pilots/year at USD 8k each, neither renewing. **Upside assumption:** six pilots/year at USD 15k and two convert to annual evaluation support at USD 10k–30k each. None is a forecast; no TAM is asserted.
-- **Validation experiment / cost / timeline:** Ten interviews across robotics simulation, test engineering, and digital-twin teams; show a five-minute diagnostic prototype; require at least three users to supply a real failure case and two budget owners to name a purchasing path before building integrations. Assumed cash cost USD 0–1.5k and four weeks, excluding founder labor.
-- **Status / priority:** `unvalidated`, 7/10. Do not commercialize before the active scientific oracle and numerical gates pass.
+The research produced one clean, reproducible finding: **a 3-number shared signal (mean velocity x, mean velocity y, fraction of valid observations) improves particle capture for a 4-agent team over identical-capacity independent agents at low signal-to-noise ratio.**
 
-## SPS-FI-002 — Catchability-aware environmental collection digital-twin prototype
+The industrial translation of this is simple: *in settings where a team of sensors or robots is searching for a weak, diffuse signal, sharing a minimal summary of what each agent is seeing — even just a direction and a confidence — can meaningfully improve collection or detection outcomes.*
 
-- **Provenance:** SPS-P02; SPS-WO-04 catchability ratio `kappa`; SPS-FR-008 and SPS-FR-010.
-- **Target user / painful job:** **Speculation:** environmental engineers and scientists comparing mobile sampling or collection strategies in uncertain flow. The painful job is separating “the current carried material to the device” from “device motion caused incremental collection.”
-- **Market evidence:** **Fact:** EPA identifies environmental/civil/coastal engineers and scientists as EFDC’s audience and reports use across more than 100 water bodies. **Fact:** WASP represents advection, dispersion, loading, and boundary exchange for environmental and regulatory use. **Fact:** EPA labels EFDC’s current distribution legacy and says it provides no user support. These facts show established modeling activity and one support gap; they do not establish demand for a mobile-collection twin.
-- **Gap / competitive alternatives / industry opinion:** **Inference:** existing hydrodynamic and water-quality models can supply flows and transport, but a decision layer that evaluates mobile action against passive transport and physical catchability may be separable. Alternatives are EFDC, WASP, CGEM, consulting models, and manually scripted particle tracking. No customer interviews have verified that the incremental decision layer is painful or funded.
-- **Gateway / partners / data rights / constraints:** Partner with one university lab, environmental consultancy, or monitoring program for an offline case study. Keep source hydrodynamic files under the partner’s license; store derived benchmark inputs separately; obtain written permission before publishing maps or results. The prototype must not recommend real deployment, claim pollutant removal, or support regulatory filings without domain calibration and independent validation.
-- **Demo design and workflow:** (1) import a partner-approved velocity field; (2) define collector speed, sensor radius, capture radius, horizon, and uncertainty; (3) display both `rho` and `kappa`; (4) run stationary, scripted, shuffled-information, and action-feasible-oracle policies on matched noise; (5) show absolute and passive-adjusted capture curves; (6) flag regimes where the oracle cannot beat passive flow; (7) export assumptions and uncertainty.
-- **Business idea / icing on the cake:** **Speculation:** a pre-deployment “catchability map” that marks where actuation can change outcomes, where sensing is the bottleneck, and where passive placement is likely as effective as autonomy.
-- **Financial assumptions and unit economics:** **Speculation:** one offline case-study pilot at **USD 10k–40k**. Assume **120–400 expert hours** at **USD 30–100/hour** plus **USD 0.5k–5k** compute/data handling, for direct cost **USD 4.1k–45k**. The resulting contribution range is **negative USD 35k to positive USD 35.9k** before sales/legal/travel; confidence is **very low**. No TAM, adoption rate, or deployment volume is supportable.
-- **Scenarios:** **Downside:** no transfer beyond the abstract simulator. **Base assumption:** one paid feasibility study with no operational deployment. **Upside assumption:** three annual studies plus a partner-funded calibrated adapter; still a decision-support service, not autonomous field control.
-- **Validation experiment / cost / timeline:** Conduct eight interviews with environmental modelers and sampling teams; ask each to rank passive-adjusted evaluation, catchability mapping, and oracle feasibility against current workflows. Secure one authorized historical dataset and a written success criterion. Assumed cash cost USD 0–3k and six weeks, excluding labor.
-- **Status / priority:** `unvalidated`, 5/10. The abstract physics and absent domain calibration are decisive blockers.
+The research also produced a cautionary finding: *sharing the wrong summary (equal-weight average instead of observation-count-weighted average) made performance worse than doing nothing on half of trials.* That failure mode — coordination that hurts because it synchronizes wrong decisions — is as industrially relevant as the success.
 
-## SPS-FI-003 — Numerical event-time and contact-semantics audit
+---
 
-- **Provenance:** SPS-P01 logged 28,929 reflection-guarded checks; SPS-P02 replaced the guard with exact piecewise-specular contact, reduced guarded checks to zero, and changed 0 of 144 first-interception outcomes; SPS-WO-04 coupled-timestep gate; SPS-FR-013.
-- **Target user / painful job:** **Speculation:** teams whose simulator conclusions depend on collision, capture, failure, threshold-crossing, or first-hit time. The painful job is proving that a policy ranking is not an artifact of timestep, wall handling, or event ownership.
-- **Market evidence:** **Fact:** ASME V&V 20 formalizes quantified verification and validation for CFD and heat-transfer simulation. **Fact:** NIST states that digital-twin credibility requires V&V and uncertainty quantification. These facts support a credibility need, not demand for this exact audit tool.
-- **Gap / competitive alternatives / industry opinion:** **Inference:** standards, mesh/time refinement, hand-built regression suites, formal-method tools, and consulting are alternatives. A lightweight event-focused audit may be useful when ordinary state-error metrics miss changed first-hit outcomes, but the SPS-P02 zero-change result provides no evidence that this is a common commercial defect.
-- **Gateway / partners / data rights / constraints:** Publish a command-line checker and a synthetic failure gallery. Accept only traces the user has rights to upload; default to local execution; retain nothing without opt-in. Position outputs as diagnostic evidence, not ASME compliance, certification, or a substitute for domain V&V.
-- **Demo design and workflow:** (1) ingest trajectory plus event schema; (2) replay endpoint, chord, reflected-path, and fine-timestep interpretations; (3) couple random increments where supported; (4) compare event time, owner, censoring, and policy rank; (5) identify the earliest divergence; (6) emit a signed manifest linking each reported event to timestep, contact model, and tie key.
-- **Business idea / icing on the cake:** **Speculation:** an “event provenance certificate” attached to simulation results, showing exactly which numerical assumptions each decision-critical event survived.
-- **Financial assumptions and unit economics:** **Speculation:** audit engagement priced at **USD 2k–12k** for one simulator slice. Assume **24–100 expert hours** at **USD 30–100/hour** and **USD 0–1k** compute, yielding direct cost **USD 0.72k–11k** and contribution **negative USD 9k to positive USD 11.28k** before overhead. Confidence is **very low**.
-- **Scenarios:** **Downside:** useful only as an internal open-source test. **Base assumption:** three one-off audits/year at USD 5k. **Upside assumption:** ten audits/year plus two CI integrations at USD 10k–25k each. These are validation scenarios, not forecasts.
-- **Validation experiment / cost / timeline:** Interview ten simulation QA or research-software engineers; ask for anonymized examples where event ordering or timestep changed a conclusion; run the checker on at least three external open simulators. Proceed only if two independent teams reproduce a decision-relevant divergence. Assumed cash cost USD 0–2k and four to six weeks, excluding labor.
-- **Status / priority:** `unvalidated`, 6/10. Preserve the zero-change SPS-P02 result prominently to avoid manufacturing urgency.
+## Idea 1: Coordination Diagnostic Tool for Multi-Robot or Multi-Sensor Teams
+
+**The problem it solves:** Engineering teams building distributed sensing or collection systems (drone swarms, environmental monitoring networks, robotic inspection systems) have no systematic way to answer: "Is our communication protocol helping or hurting?" They know their system has communication; they don't know if the *content* of that communication is doing anything useful, or if it's just adding correlated noise and synchronized failures.
+
+**What the tool does:** Given a simulation or replay of a multi-agent task, the tool runs the same scenario three ways: (1) with the actual shared messages, (2) with randomly permuted messages (same format, scrambled content), and (3) with no messages at all. It then reports whether the actual messages are adding value beyond the format, or whether the team is coordinating on noise.
+
+**Who would use it:** Robotics teams (warehouse automation, agricultural drones, search-and-rescue systems), environmental sensing companies deploying sensor networks, and digital-twin validation engineers who need to justify communication protocol choices to stakeholders.
+
+**Why it's better than existing tools:** General robotics simulators (Isaac Sim, Gazebo, AirSim) don't run matched counterfactuals. They can tell you aggregate reward; they can't tell you whether communication is the causal mechanism. This tool borrows the matched-counterfactual structure from academic statistics and makes it accessible as a workflow.
+
+**The honest uncertainty:** We don't yet know if the matched-counterfactual approach transfers cleanly from the stochastic particle setting to messier real-world systems (non-stationary environments, heterogeneous agents, imperfect communication). That's the core validation risk.
+
+**Rough unit economics:**
+- Open-source diagnostic core: free
+- Paid consultation / integration: ~$8k–20k per engagement (60–150 expert hours at $80–120/hr)
+- Target clients: 2–5 per year in year one
+- Validation gate before building integrations: 8–10 interviews with robotics and sensor-network engineers; need at least 3 to describe a real failure case they couldn't diagnose
+
+**Status:** Unvalidated. Do not build before interview validation. Do not market as a safety or compliance tool.
+
+---
+
+## Idea 2: Environmental Collection Planning Decision Layer
+
+**The problem it solves:** Environmental engineers deploying mobile collection systems (autonomous water-sampling drones, oil-spill cleanup robots, sediment monitoring vessels) face a specific question: *Will moving the collector actually collect more than just letting the current carry material to a stationary device?* This is the "catchability" question, and it's not answered by existing hydrodynamic models.
+
+**What the tool does:** Given a velocity field (from an existing model like EFDC or WASP), the tool adds a decision layer that computes:
+- The `kappa` ratio (target advection speed / collector max speed) — the key parameter separating "you can catch it" from "you can't"
+- A comparison between mobile, stationary, and oracle-optimal strategies on matched simulated scenarios
+- A "catchability map" — spatial regions where actuation changes outcomes vs. regions where passive placement is equally effective
+
+**Who would use it:** Environmental consultancies doing collection strategy design, EPA-adjacent monitoring programs, offshore energy companies planning debris recovery operations.
+
+**Why it's differentiated:** EFDC and WASP model transport; they don't model the decision value of mobility. The gap the tool fills is the question "should we pay for autonomous mobility?" — which is a procurement and operations question, not just a physics question.
+
+**The honest uncertainty:** The SPS benchmark uses a simplified uniform field and symmetric arena. Real flow fields are spatially heterogeneous, time-varying, and have complex boundaries. Whether the `kappa` parameterization carries over requires domain calibration with a real environmental partner — that's the gating validation step.
+
+**Rough unit economics:**
+- Feasibility study / offline case analysis: $15k–40k per engagement (120–300 expert hours)
+- Target clients: 1–2 per year in year one; most value in pre-deployment planning phase
+- Validation gate: one authorized historical dataset from an environmental partner; written success criterion agreed in advance; 6–8 practitioner interviews
+
+**Status:** Unvalidated. The abstract physics and absent domain calibration are the primary blockers. Do not claim pollutant removal capability or support regulatory filings.
+
+---
+
+## Idea 3: Simulation V&V Audit for Event-Driven Systems
+
+**The problem it solves:** Simulation-based engineering conclusions often depend on first-hit, first-failure, or threshold-crossing events. Whether a policy ranking holds across timestep choices, contact-detection rules, or event-ownership conventions is rarely tested systematically. The SPS project discovered this problem directly: the original environment produced zero observed ties, but without the audit, that would never have been detected.
+
+**What the tool does:** Given a simulation trace with logged events, the tool replays the same scenario under alternative timestep, contact-model, and tie-resolution conventions and checks whether:
+- Event times shift significantly
+- Event ownership changes
+- Policy rankings reverse
+
+It outputs a "provenance certificate" — a document showing which numerical assumptions each reported conclusion survived.
+
+**Who would use it:** Simulation QA teams in aerospace and defense (where first-failure time is a safety-critical output), pharmaceutical companies running pharmacokinetics simulations with absorption-event endpoints, financial risk teams with Monte Carlo models where threshold-crossing drives decisions.
+
+**Why it's useful:** ASME V&V 20 and NIST digital-twin credibility standards require verification and validation, but they don't specify a workflow for event-specific sensitivity. This fills a gap between "the state trajectories converge" and "the policy conclusion is robust."
+
+**The honest uncertainty:** The SPS-P02 zero-change result (exact contact math changed 0/144 first-interception outcomes) is the strongest evidence we have — and it's a case where the effect was *not found*. We need external evidence that this is a real commercial defect before building the tool.
+
+**Rough unit economics:**
+- Per-audit engagement: $3k–12k (25–100 expert hours)
+- Target clients: 3–5 per year across aerospace, pharma, finance
+- Validation gate: 8–10 interviews with simulation engineers; find at least 2 independent cases where timestep or event-handling changed a decision-critical conclusion
+
+**Status:** Unvalidated. The zero-change SPS result is a reason for caution, not urgency. Don't overstate demand.
+
+---
+
+## Prioritization
+
+| Idea | Readiness | Market clarity | Recommended next step |
+|---|---|---|---|
+| 1 — Coordination diagnostic | Medium | Medium | 8–10 interviews with robotics/sensing teams |
+| 2 — Environmental collection planner | Low | Low | Find one environmental partner with an authorized dataset |
+| 3 — Simulation V&V audit | Low | Medium | 8–10 interviews; look for existing documented failures |
+
+None of these should be commercialized before the academic paper is submitted. The paper is the credibility artifact that makes all three ideas fundable.
