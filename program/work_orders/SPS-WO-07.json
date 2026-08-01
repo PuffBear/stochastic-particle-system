@@ -2,7 +2,7 @@
   "work_order_id": "SPS-WO-07",
   "role": "experiment-engineer",
   "paper": "paper-a",
-  "objective": "Run the frozen shared-summary versus independent-controller diagnostic and attribution controls only after SPS-WO-06 passes.",
+  "objective": "Run the frozen shared-summary versus independent-controller bounded-sharing diagnostic and passive-transport controls only after SPS-WO-06 passes.",
   "claim_ids": ["SPS-C03"],
   "allowed_files": ["analysis/run_attribution_controls.py", "configs/experiments/sps_wo07_attribution_controls.yaml", "results/raw/SPS-WO-07-ATTRIBUTION-CONTROLS/"],
   "prohibited_files": ["analysis/run_marl_baselines.py", "paper/manuscript/main.tex"],
@@ -10,8 +10,18 @@
   "compute_cap": {"hardware": "CPU only", "episodes": 64, "maximum_environment_steps": 4288, "wall_time_minutes": 20, "memory_gib": 4},
   "expected_artifacts": ["episode_summaries.jsonl", "capture_events.jsonl", "attribution_gate.json", "manifest.json"],
   "verification_command": "PYTHONPATH=src:. python -m unittest tests.test_experiment_design -v",
+  "frozen_joint_gate": {
+    "correctness_and_execution": true,
+    "matched_streams": true,
+    "minimum_mean_shared_minus_independent_at_alpha_0.06_particles": 2.0,
+    "minimum_positive_shared_minus_independent_seeds": 5,
+    "mean_shared_minus_stationary_strictly_above": 0.0,
+    "mean_signal_difference_in_differences_strictly_above": 0.0
+  },
   "stop_conditions": ["SPS-WO-06 is absent or failed", "any unit-test failure", "any matched-stream mismatch", "immutable output path exists"],
   "fallback_task": "Advance documentation and provenance checks; never execute seeds 4001-4008 before the upstream gate passes.",
-  "scientific_status": "preregistered and dependency-blocked; not executed"
+  "positive_interpretation": "Evidence of diagnostic headroom for the bounded shared statistic; authorize only ex-ante power design and a separately preregistered message-content or pooled-denoising attribution control. Do not call this coordination or authorize confirmation/MARL yet.",
+  "null_interpretation": "Close or redesign the current bounded shared statistic without using these seeds for confirmation.",
+  "reversed_interpretation": "Sharing or pooling harms yield; no confirmation, message-mechanism, or MARL activation.",
+  "scientific_status": "preregistered after pre-outcome gate repair; SPS-WO-06 dependency passed; not executed"
 }
-

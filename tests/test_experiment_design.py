@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 import unittest
 
 import numpy as np
+import yaml
 
 from analysis import run_attribution_controls as attribution
 from analysis import run_power_analysis as power
@@ -68,6 +70,46 @@ class CoupledTimestepTests(unittest.TestCase):
 
 
 class AttributionGateTests(unittest.TestCase):
+    @staticmethod
+    def _summaries(
+        *, alpha0_shared_advantage: int = 0, favorable_signal_gain: int = 4
+    ) -> list[dict[str, object]]:
+        rows: list[dict[str, object]] = []
+        for index, seed in enumerate(attribution.FROZEN_SEEDS):
+            checks = {
+                "initial_state_sha256": f"initial-{seed}",
+                "brownian_sha256": f"brownian-{seed}",
+                "field_nuisance_sha256": f"field-{seed}",
+                "tie_key_provenance_sha256": f"tie-{seed}",
+            }
+            for alpha in attribution.FROZEN_ALPHAS:
+                for policy in attribution.FROZEN_POLICIES:
+                    if alpha == 0.0:
+                        value = {
+                            "stationary": 4,
+                            "capacity_matched_independent": 6,
+                            "shared_summary": 6 + alpha0_shared_advantage,
+                            "full_state_interception_oracle": 10,
+                        }[policy]
+                    else:
+                        value = {
+                            "stationary": 4,
+                            "capacity_matched_independent": 5,
+                            "shared_summary": 5 + favorable_signal_gain if index < 5 else 5,
+                            "full_state_interception_oracle": 10,
+                        }[policy]
+                    rows.append(
+                        {
+                            "seed": seed,
+                            "alpha": alpha,
+                            "policy_id": policy,
+                            "unique_team_capture_yield": value,
+                            "executed_steps": attribution.EVALUATION_STEPS,
+                            "stream_checksums": checks,
+                        }
+                    )
+        return rows
+
     def test_policy_ids_are_runner_supported(self) -> None:
         self.assertEqual(
             attribution.FROZEN_POLICIES,
@@ -79,36 +121,61 @@ class AttributionGateTests(unittest.TestCase):
             ),
         )
 
+    def test_joint_gate_matches_frozen_config(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        frozen = yaml.safe_load(
+            (root / "configs/experiments/sps_wo07_attribution_controls.yaml").read_text()
+        )
+        self.assertEqual(
+            frozen["joint_gate"],
+            {
+                "minimum_mean_shared_minus_independent_particles": 2.0,
+                "minimum_positive_shared_minus_independent_seeds": 5,
+                "mean_shared_minus_stationary_strictly_above": 0.0,
+                "mean_signal_difference_in_differences_strictly_above": 0.0,
+                "require_correctness_and_execution": True,
+                "require_matched_streams": True,
+            },
+        )
+
     def test_all_preregistered_gate_components_are_enforced(self) -> None:
-        rows: list[dict[str, object]] = []
-        for index, seed in enumerate(attribution.FROZEN_SEEDS):
-            checks = {
-                "initial_state_sha256": f"initial-{seed}",
-                "brownian_sha256": f"brownian-{seed}",
-                "field_nuisance_sha256": f"field-{seed}",
-                "tie_key_provenance_sha256": f"tie-{seed}",
-            }
-            for alpha in attribution.FROZEN_ALPHAS:
-                for policy in attribution.FROZEN_POLICIES:
-                    value = {
-                        "stationary": 4,
-                        "capacity_matched_independent": 5,
-                        "shared_summary": 8 if index < 5 else 5,
-                        "full_state_interception_oracle": 10,
-                    }[policy]
-                    rows.append(
-                        {
-                            "seed": seed,
-                            "alpha": alpha,
-                            "policy_id": policy,
-                            "unique_team_capture_yield": value,
-                            "executed_steps": attribution.EVALUATION_STEPS,
-                            "stream_checksums": checks,
-                        }
-                    )
-        report = attribution.evaluate_gate(rows)
+        report = attribution.evaluate_gate(self._summaries())
         self.assertTrue(report["attribution_gate_passed"])
         self.assertTrue(all(report["gate_components"].values()))
+
+    def test_raw_contrast_cannot_rescue_failed_signal_difference_in_differences(self) -> None:
+        report = attribution.evaluate_gate(self._summaries(alpha0_shared_advantage=3))
+        self.assertGreater(report["primary_contrast"]["mean"], 0.0)
+        self.assertFalse(
+            report["gate_components"]["mean_signal_difference_in_differences_positive"]
+        )
+        self.assertFalse(report["attribution_gate_passed"])
+        self.assertFalse(report["full_confirmation_run_warranted"])
+
+    def test_substantively_small_mean_fails_relevance_gate(self) -> None:
+        report = attribution.evaluate_gate(self._summaries(favorable_signal_gain=3))
+        self.assertGreater(report["primary_contrast"]["mean"], 0.0)
+        self.assertLess(report["primary_contrast"]["mean"], 2.0)
+        self.assertFalse(
+            report["gate_components"]["mean_shared_minus_independent_at_least_2_particles"]
+        )
+        self.assertFalse(report["attribution_gate_passed"])
+
+    def test_matched_stream_failure_is_invalid(self) -> None:
+        rows = self._summaries()
+        rows[1] = {
+            **rows[1],
+            "stream_checksums": {
+                **dict(rows[1]["stream_checksums"]),
+                "brownian_sha256": "mismatch",
+            },
+        }
+        report = attribution.evaluate_gate(rows)
+        self.assertFalse(report["gate_components"]["matched_streams_verified"])
+        self.assertEqual(
+            report["interpretation"], "invalid_correctness_or_provenance_failure"
+        )
+        self.assertFalse(report["attribution_gate_passed"])
 
 
 class PowerDesignTests(unittest.TestCase):

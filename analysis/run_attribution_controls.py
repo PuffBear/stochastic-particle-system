@@ -6,16 +6,19 @@ diagnostic. The stationary and oracle arms quantify passive transport and
 action-contingent headroom. They do not identify the communication mechanism;
 that would require a separately registered message-content ablation.
 
-Three attribution comparisons are computed at alpha=0.06:
-  - Primary: shared minus independent  (the coordination effect)
+Four attribution comparisons are computed:
+  - Primary: shared minus independent at alpha=0.06 (bounded-sharing contrast)
   - Context check 1: oracle minus shared  (headroom above sharing)
   - Context check 2: shared minus stationary  (does sharing beat doing nothing)
+  - Signal difference-in-differences: the alpha=0.06 shared-independent
+    contrast minus the alpha=0 shared-independent contrast.
 
 The diagnostic gate implements all frozen SPS-C03 components: positive mean,
 positive direction in at least five of eight seeds, shared above stationary,
 passive-adjusted ordering, correctness, and matched provenance. This remains a
 descriptive pre-confirmation diagnostic; the seeds are permanently ineligible
-for confirmation.
+for confirmation. It cannot distinguish pooled denoising or synchronized common
+motion from a communication mechanism.
 """
 
 from __future__ import annotations
@@ -57,6 +60,10 @@ FROZEN_POLICIES = (
 BOOTSTRAP_DRAWS = 10_000
 BOOTSTRAP_SEED = 73_031
 EXPERIMENT_ID = "SPS-WO-07-ATTRIBUTION-CONTROLS"
+MINIMUM_RELEVANT_MEAN_PARTICLES = 2.0
+MINIMUM_POSITIVE_SEEDS = 5
+SHARED_MINUS_STATIONARY_THRESHOLD = 0.0
+SIGNAL_DIFFERENCE_IN_DIFFERENCES_THRESHOLD = 0.0
 
 
 def unique_capture_yield_through_step(
@@ -264,7 +271,7 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
     def outcome(seed: int, policy: str, alpha: float = FROZEN_ALPHA) -> float:
         return float(by_key[(seed, alpha, policy)]["unique_team_capture_yield"])
 
-    # Primary: shared minus independent (coordination effect)
+    # Primary: shared minus independent bounded-sharing contrast.
     shared_minus_independent = np.asarray(
         [
             outcome(seed, "shared_summary")
@@ -296,6 +303,18 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
             for seed in FROZEN_SEEDS
         ]
     )
+    # Remove policy-specific alpha=0 behavior before comparing the signal gain.
+    # This is not algebraically identical to the primary contrast unless the
+    # two policies happen to have equal alpha=0 yield.
+    signal_difference_in_differences = np.asarray(
+        [
+            (outcome(seed, "shared_summary", FROZEN_ALPHA)
+             - outcome(seed, "capacity_matched_independent", FROZEN_ALPHA))
+            - (outcome(seed, "shared_summary", 0.0)
+               - outcome(seed, "capacity_matched_independent", 0.0))
+            for seed in FROZEN_SEEDS
+        ]
+    )
 
     primary_contrast = _descriptive_contrast(
         shared_minus_independent,
@@ -313,43 +332,48 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
         oracle_minus_independent,
         name="oracle_minus_independent_at_alpha_0.06",
     )
+    signal_did_contrast = _descriptive_contrast(
+        signal_difference_in_differences,
+        name="shared_minus_independent_signal_difference_in_differences",
+    )
 
     correctness_passed = all(
         int(row["executed_steps"]) == EVALUATION_STEPS
         or int(row["unique_team_capture_yield"]) == 256
         for row in summaries
     )
-    coordination_direction_passed = float(primary_contrast["mean"]) > 0.0
-    positive_seed_count_passed = int(primary_contrast["positive_seed_count"]) >= 5
-    shared_mean = float(np.mean([outcome(seed, "shared_summary") for seed in FROZEN_SEEDS]))
-    independent_mean = float(
-        np.mean([outcome(seed, "capacity_matched_independent") for seed in FROZEN_SEEDS])
+    minimum_relevant_effect_passed = (
+        float(primary_contrast["mean"]) >= MINIMUM_RELEVANT_MEAN_PARTICLES
     )
-    stationary_mean = float(np.mean([outcome(seed, "stationary") for seed in FROZEN_SEEDS]))
-    shared_exceeds_stationary = shared_mean > stationary_mean
-    passive_adjusted_ordering = (
-        float(np.mean([outcome(seed, "shared_summary") - outcome(seed, "stationary") for seed in FROZEN_SEEDS]))
-        > float(np.mean([outcome(seed, "capacity_matched_independent") - outcome(seed, "stationary") for seed in FROZEN_SEEDS]))
+    positive_seed_count_passed = (
+        int(primary_contrast["positive_seed_count"]) >= MINIMUM_POSITIVE_SEEDS
+    )
+    shared_minus_stationary_passed = (
+        float(attr_check_2["mean"]) > SHARED_MINUS_STATIONARY_THRESHOLD
+    )
+    signal_did_passed = (
+        float(signal_did_contrast["mean"])
+        > SIGNAL_DIFFERENCE_IN_DIFFERENCES_THRESHOLD
     )
     passed = all(
         (
             correctness_passed,
             matched_streams_verified,
-            coordination_direction_passed,
+            minimum_relevant_effect_passed,
             positive_seed_count_passed,
-            shared_exceeds_stationary,
-            passive_adjusted_ordering,
+            shared_minus_stationary_passed,
+            signal_did_passed,
         )
     )
 
     if not correctness_passed or not matched_streams_verified:
         interpretation = "invalid_correctness_or_provenance_failure"
-    elif not coordination_direction_passed or not positive_seed_count_passed:
+    elif not minimum_relevant_effect_passed or not positive_seed_count_passed:
         interpretation = "sharing_does_not_help"
-    elif not shared_exceeds_stationary or not passive_adjusted_ordering:
+    elif not shared_minus_stationary_passed or not signal_did_passed:
         interpretation = "sharing_effect_fails_attribution_controls"
     else:
-        interpretation = "sharing_helps_confirmation_warranted"
+        interpretation = "bounded_sharing_headroom_further_attribution_warranted"
 
     return {
         "work_order_id": "SPS-WO-07",
@@ -361,6 +385,7 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
         "attribution_check_1_oracle_minus_shared": attr_check_1,
         "attribution_check_2_shared_minus_stationary": attr_check_2,
         "reference_oracle_minus_independent": reference_contrast,
+        "shared_minus_independent_signal_difference_in_differences": signal_did_contrast,
         "null_alpha_yields": [
             {
                 "seed": seed,
@@ -373,17 +398,19 @@ def evaluate_gate(summaries: list[dict[str, object]]) -> dict[str, object]:
         "gate_components": {
             "correctness_and_execution": correctness_passed,
             "matched_streams_verified": matched_streams_verified,
-            "mean_shared_minus_independent_positive": coordination_direction_passed,
+            "mean_shared_minus_independent_at_least_2_particles": minimum_relevant_effect_passed,
             "positive_shared_minus_independent_in_at_least_5_of_8": positive_seed_count_passed,
-            "mean_shared_exceeds_mean_stationary": shared_exceeds_stationary,
-            "passive_adjusted_ordering": passive_adjusted_ordering,
+            "mean_shared_minus_stationary_positive": shared_minus_stationary_passed,
+            "mean_signal_difference_in_differences_positive": signal_did_passed,
         },
         "attribution_gate_passed": passed,
-        "full_confirmation_run_warranted": passed,
+        "full_confirmation_run_warranted": False,
+        "further_message_or_pooling_attribution_warranted": passed,
         "interpretation": interpretation,
         "claim_effect": (
-            "SPS-C03 confirmation run is authorized if gate passes; "
-            "this diagnostic is not itself confirmatory"
+            "A pass authorizes ex-ante power design and separately preregistered "
+            "message-content or pooled-denoising attribution controls only; this "
+            "diagnostic is neither confirmatory nor proof of coordination"
         ),
     }
 
@@ -425,6 +452,17 @@ def main() -> None:
         raise RuntimeError("frozen config bootstrap_draws differ from SPS-WO-07 constants")
     if frozen["bootstrap_seed"] != BOOTSTRAP_SEED:
         raise RuntimeError("frozen config bootstrap_seed differs from SPS-WO-07 constants")
+    joint_gate = frozen.get("joint_gate", {})
+    expected_joint_gate = {
+        "minimum_mean_shared_minus_independent_particles": MINIMUM_RELEVANT_MEAN_PARTICLES,
+        "minimum_positive_shared_minus_independent_seeds": MINIMUM_POSITIVE_SEEDS,
+        "mean_shared_minus_stationary_strictly_above": SHARED_MINUS_STATIONARY_THRESHOLD,
+        "mean_signal_difference_in_differences_strictly_above": SIGNAL_DIFFERENCE_IN_DIFFERENCES_THRESHOLD,
+        "require_correctness_and_execution": True,
+        "require_matched_streams": True,
+    }
+    if joint_gate != expected_joint_gate:
+        raise RuntimeError("frozen config joint_gate differs from SPS-WO-07 constants")
     if frozen.get("upstream_work_order") != "SPS-WO-06":
         raise RuntimeError("frozen config must require SPS-WO-06")
     upstream = json.loads(args.upstream_gate.read_text(encoding="utf-8"))

@@ -54,15 +54,15 @@
     },
     "SPS-WO-07-ATTRIBUTION-CONTROLS": {
       "script": "analysis/run_attribution_controls.py",
-      "status": "preregistered-dependency-blocked-not-run",
-      "purpose": "Attribution control runs alongside SPS-C03; seeds 4001-4008 permanently ineligible for confirmation",
-      "gate": "all six preregistered empirical, implementation, and matched-stream components pass; descriptive only"
+      "status": "preregistered-after-pre-outcome-repair-ready-not-run",
+      "purpose": "Test bounded shared-summary versus local-summary headroom with stationary and alpha=0 controls; seeds 4001-4008 permanently ineligible for confirmation",
+      "gate": "all six explicitly frozen components pass: correctness, matched streams, mean shared-minus-independent at least 2 particles, at least 5/8 positive seeds, mean shared-minus-stationary above zero, and mean alpha-adjusted shared-independent difference-in-differences above zero; descriptive only"
     }
   },
   "engineering_tests": {
-    "passed": 96,
+    "passed": 100,
     "failed": 0,
-    "scope": "89 established simulator and inference tests plus 7 dependency-free experiment-design tests covering dyadic Brownian coupling, fixed physical duration, preregistration/config agreement, supported attribution policy IDs, and ex-ante power constants. PyTorch, Gymnasium, and pytest-dependent MARL tests are not counted because those dependencies are unavailable in this workspace."
+    "scope": "89 established simulator and inference tests plus 11 dependency-free experiment-design tests covering dyadic Brownian coupling, fixed physical duration, preregistration/config agreement, supported attribution policy IDs, ex-ante power constants, relevance-threshold failure, null-adjusted difference-in-differences failure, and matched-stream invalidation. PyTorch, Gymnasium, and pytest-dependent MARL tests are not counted because those dependencies are unavailable in this workspace."
   },
   "fresh_review": {
     "date": "2026-07-31",
@@ -81,5 +81,5 @@
     "counter-swarm"
   ],
   "last_updated": "2026-08-01",
-  "last_engineering_action": "Executed and independently verified SPS-WO-06 on its frozen diagnostic seed block: 96 episodes and 15,008 environment steps; the coupled timestep gate passed with all correctness and provenance components true. No SPS-WO-07, confirmation, or MARL run was executed."
+  "last_engineering_action": "Repaired SPS-WO-07 before opening seeds: froze the two-particle relevance threshold and all six joint gates, replaced a redundant stationary subtraction with alpha=0 difference-in-differences, added deterministic failure tests, and restricted positive interpretation to further attribution design. No SPS-WO-07, confirmation, or MARL run was executed."
 }
