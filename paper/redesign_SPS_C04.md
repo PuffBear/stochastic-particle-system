@@ -1,8 +1,9 @@
 # SPS-C04 paper redesign: correlation-scale communication crossover
 
-**Status:** conditional analytic and deterministic feasibility passed in
-SPS-WO-09; no scientific seed run is authorized by this document. Standard
-environment/config/runner integration remains incomplete.
+**Status:** conditional analytic feasibility passed in SPS-WO-09 and
+deterministic runner integration passed in SPS-WO-10; no scientific seed run is
+authorized. Literature, physical-endpoint, and nonlinear-row handling gates
+remain open.
 
 **Predecessor:** SPS-C03 is permanently dropped after SPS-WO-07 failed its
 frozen continuation gate. Seeds 4001--4008 remain diagnostic-only and cannot be
@@ -248,16 +249,19 @@ The following controls protect its interpretation:
    variance reduction.
 5. **Passed in WO-09:** the communication primitive is permutation equivariant
    and processes exactly three scalars per sender per step.
-6. **Schema passed; runtime logging open:** message, adjacency, received-summary, estimator-error, action-similarity,
+6. **Passed in WO-10:** message, adjacency, received-summary, estimator-error, action-similarity,
    pursuit-overlap, and unique-yield diagnostics are logged in a new schema;
    immutable trajectory schema v1 is not silently changed.
-7. **Open:** a matched-topology runner must prove identical initialization,
-   Brownian tensor, field realization, and tie stream across arms. The new field
-   is callable but not yet wired through standard environment/config/runner
-   reset paths.
+7. **Passed deterministically in WO-10:** a separate aggregation runner proves
+   identical initialization, complete Brownian tensor, field realization, and
+   event-key provenance. It validates same-mode identity and keeps latent
+   diagnostics outside policy observations.
 
-WO-09 used zero scientific episodes. Its deterministic tests support mechanism
-possibility and software correctness only; SPS-C04 remains unsupported.
+WO-09 and WO-10 used zero scientific episodes. Their tests support mechanism
+possibility and software correctness only; SPS-C04 remains unsupported. Before
+preregistration, resolve `T=1.34` against canonical `400*0.02=8.0`, close the
+literature veto, and freeze a prospective rule for analytically ineligible
+clipping, particle-reflection, empty-summary, and fallback rows.
 
 ## Kill criteria
 

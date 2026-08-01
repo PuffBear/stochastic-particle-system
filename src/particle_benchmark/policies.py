@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
@@ -141,14 +143,80 @@ def full_state_interception_oracle(
 
 def local_velocity_summary(observation: LocalObservation) -> NDArray[np.float64]:
     """Return clipped mean apparent velocity and validity fraction."""
+    raw = raw_local_velocity_summary(observation)
+    raw[:2] = np.clip(raw[:2], -1.0, 1.0)
+    return raw
+
+
+def raw_local_velocity_summary(
+    observation: LocalObservation,
+) -> NDArray[np.float64]:
+    """Return the preclip apparent-velocity mean and valid-slot fraction."""
     present = np.asarray(observation["particle_mask"], dtype=np.bool_)
     velocity_valid = np.asarray(observation["velocity_valid_mask"], dtype=np.bool_)
     valid = present & velocity_valid
     slots = np.asarray(observation["particles"], dtype=np.float64)
     velocity = np.mean(slots[valid, 2:4], axis=0) if np.any(valid) else np.zeros(2)
-    velocity = np.clip(velocity, -1.0, 1.0)
+    # The denominator is the fixed top-K message capacity, not the number of
+    # currently visible particles.
     fraction = float(np.mean(valid)) if valid.size else 0.0
     return np.array([velocity[0], velocity[1], fraction], dtype=np.float64)
+
+
+@dataclass(frozen=True)
+class CapacityMatchedDecision:
+    """Actual encoder, aggregation, decoder, and fallback trace for one step."""
+
+    raw_summaries: NDArray[np.float64]
+    sent_messages: NDArray[np.float64]
+    received_messages: NDArray[np.float64]
+    clipped_components: NDArray[np.bool_]
+    own_empty: NDArray[np.bool_]
+    fallback_used: NDArray[np.bool_]
+    cross_agent_rescue: NDArray[np.bool_]
+    zero_direction_cancellation: NDArray[np.bool_]
+    actions: NDArray[np.float64]
+
+
+def capacity_matched_velocity_decision(
+    observations: tuple[LocalObservation, ...], *, shared: bool
+) -> CapacityMatchedDecision:
+    """Return the exact decision trace; only aggregation changes by arm."""
+    if len(observations) == 0:
+        raise ValueError("at least one observation is required")
+    raw = np.stack([raw_local_velocity_summary(obs) for obs in observations])
+    sent = raw.copy()
+    sent[:, :2] = np.clip(sent[:, :2], -1.0, 1.0)
+    clipped = np.abs(raw[:, :2]) > 1.0
+    received = aggregate_three_scalar_messages(
+        sent, mode="all_to_all" if shared else "independent"
+    )
+    own_empty = sent[:, 2] <= 0.0
+    fallback = received[:, 2] <= 0.0
+    rescue = own_empty & ~fallback
+    cancellation = (
+        ~fallback & (np.linalg.norm(received[:, :2], axis=1) <= 1e-12)
+    )
+    actions = np.zeros((len(observations), 2), dtype=np.float64)
+    for agent_id, observation in enumerate(observations):
+        if not fallback[agent_id]:
+            actions[agent_id] = _unit(-received[agent_id, :2])
+        else:
+            mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
+            slots = np.asarray(observation["particles"], dtype=np.float64)
+            if np.any(mask):
+                actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+    return CapacityMatchedDecision(
+        raw_summaries=raw,
+        sent_messages=sent,
+        received_messages=received,
+        clipped_components=clipped,
+        own_empty=own_empty,
+        fallback_used=fallback,
+        cross_agent_rescue=rescue,
+        zero_direction_cancellation=cancellation,
+        actions=actions,
+    )
 
 
 def bounded_team_velocity_summary(
@@ -175,24 +243,9 @@ def capacity_matched_velocity_controller(
     only the pure aggregation map in :mod:`particle_benchmark.communication`
     changes between arms.
     """
-    if len(observations) == 0:
-        raise ValueError("at least one observation is required")
-    sent = np.stack([local_velocity_summary(obs) for obs in observations])
-    received = aggregate_three_scalar_messages(
-        sent, mode="all_to_all" if shared else "independent"
-    )
-    actions = np.zeros((len(observations), 2), dtype=np.float64)
-    for agent_id, observation in enumerate(observations):
-        message = received[agent_id]
-        if message[2] > 0.0:
-            actions[agent_id] = _unit(-message[:2])
-        else:
-            # Identical deterministic density fallback in both controllers.
-            mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
-            slots = np.asarray(observation["particles"], dtype=np.float64)
-            if np.any(mask):
-                actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
-    return actions
+    return capacity_matched_velocity_decision(
+        observations, shared=shared
+    ).actions
 
 
 def density_greedy_policy(

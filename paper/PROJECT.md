@@ -98,17 +98,13 @@ SPS-WO-09 now provides:
   tests; and
 - a strict message-diagnostic schema.
 
-It does **not** yet provide:
+SPS-WO-10 now additionally provides a strict deterministic self-only versus
+all-to-all runner, matched stream/field/event-key hashes, same-mode identity,
+and runtime message, covariance, geometry, nonlinear-event, action, and yield
+diagnostics. It does **not** provide scientific performance evidence.
 
-- receiver-specific graph communication;
-- runtime message-level estimation and action-diversity logs; or
-- a matched topology runner.
-
-The existing `vortex_scale` remains ineligible. The new field is callable but
-is not yet integrated through the standard config/environment/runner reset
-path. No scientific performance seed is authorized until that integration and
-matched-stream audit pass. WO-09 ran zero scientific episodes; all scientific
-claims remain unsupported.
+The existing `vortex_scale` remains ineligible. WO-09 and WO-10 ran zero
+scientific episodes; all scientific claims remain unsupported.
 
 ## Mandatory controls
 
@@ -126,14 +122,14 @@ claims remain unsupported.
 ## Immediate dependency order
 
 1. close the primary-literature veto;
-2. wire the tested frozen field through config/environment/reset paths;
-3. implement runtime message diagnostics and matched-stream provenance;
-4. deterministically audit clipping, reflection, missing-summary fallback, and
-   moving-geometry effects;
-5. only then freeze the `eta` grid, effect threshold, inference, seed cap, and stopping
+2. prospectively resolve `T=1.34` versus canonical `horizon*dt=8.0`, including
+   endpoint matching under timestep refinement;
+3. freeze a handling rule and incidence/error budget for analytically
+   ineligible clipping, particle-reflection, empty-summary, and fallback rows;
+4. only then freeze the `eta` grid, effect threshold, inference, seed cap, and stopping
    rule;
-6. execute one fresh CPU diagnostic;
-7. kill or preregister a separate independent confirmation.
+5. execute one fresh CPU diagnostic;
+6. kill or preregister a separate independent confirmation.
 
 No HPC request is justified at the current stage.
 

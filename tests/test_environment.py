@@ -117,6 +117,51 @@ class TestInitialization(unittest.TestCase):
 
 
 class TestInformationBoundary(unittest.TestCase):
+    def test_periodic_field_reset_is_pair_identical_and_diagnostics_stay_hidden(self) -> None:
+        config = ParticleEnvConfig(
+            particle_count=4,
+            collector_count=4,
+            horizon=2,
+            nearest_particles_k=2,
+            field_family="periodic_gaussian",
+            signal_strength=0.1,
+            field_kwargs={
+                "correlation_length": 0.2,
+                "component_variance": 0.5,
+                "max_frequency": 3,
+            },
+            include_teammates=False,
+        )
+        left = ParticleCollectorEnv(config)
+        right = ParticleCollectorEnv(config)
+        left_observations, left_info = left.reset(seed=9100)
+        right_observations, right_info = right.reset(seed=9100)
+        self.assertEqual(left.field_seed, right.field_seed)
+        self.assertEqual(
+            left.field_realization_sha256, right.field_realization_sha256
+        )
+        self.assertEqual(
+            left_info["field_realization_sha256"],
+            right_info["field_realization_sha256"],
+        )
+        _assert_observations_equal(self, left_observations, right_observations)
+        for observation in left_observations:
+            self.assertNotIn("particle_ids", observation)
+            self.assertNotIn("latent_field_velocity", observation)
+        snapshot = left.local_flow_diagnostic_snapshot()
+        self.assertEqual(snapshot.valid_mask.shape, (4, 4))
+        self.assertFalse(np.any(snapshot.valid_mask))
+        self.assertFalse(snapshot.valid_mask.flags.writeable)
+
+    def test_periodic_field_config_is_strictly_serializable(self) -> None:
+        with self.assertRaisesRegex(ValueError, "exactly"):
+            ParticleEnvConfig(
+                field_family="periodic_gaussian",
+                field_kwargs={"correlation_length": 0.2},
+            )
+        with self.assertRaisesRegex(ValueError, "serializable"):
+            ParticleEnvConfig(field_kwargs={"frozen_field": object()})
+
     def test_far_particle_cannot_change_local_observation(self) -> None:
         collector = np.array([[0.1, 0.1]])
         common = np.array([[0.15, 0.1], [0.9, 0.9]])

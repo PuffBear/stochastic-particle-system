@@ -18,10 +18,10 @@
       "id": "paper-a",
       "title": "When Shared Estimates Hurt: A Correlation-Scale Phase Boundary in Multi-Agent Collection",
       "status": "active",
-      "current_stage": "SPS-C04 conditional theory/engineering gate passed; deterministic runner integration next",
+      "current_stage": "SPS-C04 deterministic runner integration passed; literature, endpoint, and nonlinear-row design gates next",
       "hypothesis": "All-to-all three-scalar averaging has one ordered crossover from harming to helping unique team capture as the field correlation length increases relative to nominal collector spacing.",
       "kill_criterion": "Stop before seeds if the analytic crossover, declared-covariance field, or deterministic mechanism tests fail; stop after a bounded fresh diagnostic if no ordered negative-to-positive yield crossing is supported or a non-multi-agent confound explains it.",
-      "open_blocker": "The tested periodic Gaussian field is not yet wired through standard config/environment/reset paths; matched topology provenance and runtime diagnostics are absent. No scientific seed or MARL run is authorized."
+      "open_blocker": "Before preregistration: close the literature veto, resolve T=1.34 versus canonical horizon*dt=8.0 prospectively, and freeze a handling/incidence rule for clipping, particle reflection, empty summaries, and fallback. No scientific seed or MARL run is authorized."
     },
     {
       "id": "paper-b",
@@ -33,8 +33,8 @@
       "open_blocker": "Intentionally inactive."
     }
   ],
-  "phase": "paper-a-SPS-C04-deterministic-runner-integration-required",
-  "primary_question": "For four decentralized collectors exchanging one three-scalar local-velocity summary per step, at what field-correlation-length to nominal-spacing ratio does all-to-all averaging change the sign of its effect on unique team captures by physical time T=1.34 relative to capacity-matched independent estimation?",
+  "phase": "paper-a-SPS-C04-outcome-blind-design-blockers",
+  "primary_question": "On a prospectively frozen grid, for four collectors with canonical square initialization and identical three-scalar encoders and action decoders, where—if anywhere—does all-to-all averaging change from decreasing to increasing fixed-horizon unique team captures relative to self-only use of each collector's message?",
   "primary_condition": "all_to_all_vs_independent_across_eta",
   "scientific_results_available": true,
   "exploratory_calibration_available": true,
@@ -60,10 +60,10 @@
     }
   },
   "engineering_tests": {
-    "passed": 162,
+    "passed": 171,
     "failed": 0,
     "skipped": 5,
-    "scope": "Full available pytest suite after SPS-WO-09. New coverage includes finite-basis field covariance/marginal invariance/provenance, pure three-scalar aggregation, general and sensing-kernel estimator covariance, overlap-correlated errors, mechanism microcases, schema, and permutation equivariance. Five optional PyTorch tests skipped; no WO-09 primitive is skipped."
+    "scope": "Full available pytest suite after SPS-WO-10. New coverage includes serializable frozen-field reset, hidden source-time diagnostics, exact decision traces, separate aggregation pairing, matched streams, same-mode identity, runtime schemas, numeric bounds, and immutable collision rejection. Five optional PyTorch tests skipped; no WO-09 or WO-10 primitive is skipped."
   },
   "fresh_review": {
     "date": "2026-08-01",
@@ -82,5 +82,5 @@
     "counter-swarm"
   ],
   "last_updated": "2026-08-01",
-  "last_engineering_action": "Completed SPS-WO-09 conditional analytic and deterministic gate: 162 tests passed, 5 optional PyTorch tests skipped, and zero scientific episodes ran. Runtime field/config/reset integration and matched-stream diagnostic writing remain blocked for a successor work order; no MARL or HPC request was executed."
+  "last_engineering_action": "Completed SPS-WO-10 deterministic aggregation integration: frozen command 74 tests passed; full available suite 171 passed with 5 optional PyTorch skips; zero scientific episodes ran. Literature, endpoint, and nonlinear-row handling remain blocked before preregistration; no MARL or HPC request was executed."
 }

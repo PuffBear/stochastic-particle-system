@@ -161,6 +161,18 @@ def _validate(instance: object, schema: Mapping[str, Any], root: Mapping[str, An
     if isinstance(instance, (int, float)) and not isinstance(instance, bool):
         if "minimum" in schema and float(instance) < float(schema["minimum"]):
             raise SchemaValidationError(f"{path}: below minimum")
+        if "maximum" in schema and float(instance) > float(schema["maximum"]):
+            raise SchemaValidationError(f"{path}: above maximum")
+        if (
+            "exclusiveMinimum" in schema
+            and float(instance) <= float(schema["exclusiveMinimum"])
+        ):
+            raise SchemaValidationError(f"{path}: not above exclusive minimum")
+        if (
+            "exclusiveMaximum" in schema
+            and float(instance) >= float(schema["exclusiveMaximum"])
+        ):
+            raise SchemaValidationError(f"{path}: not below exclusive maximum")
 
 
 def validate_instance(instance: object, schema: Mapping[str, Any]) -> None:

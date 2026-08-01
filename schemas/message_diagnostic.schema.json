@@ -1,137 +1,157 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/PuffBear/stochastic-particle-system/schemas/message_diagnostic.schema.json",
-  "title": "SPS-C04 per-step communication and coordination diagnostic",
+  "title": "SPS-C04 per-transition aggregation diagnostic",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schema_version",
-    "run_id",
-    "scenario_seed",
-    "field_seed",
-    "correlation_length",
-    "eta",
-    "step",
-    "aggregation_mode",
-    "adjacency",
-    "sent_messages",
-    "received_messages",
-    "true_local_velocities",
-    "estimator_squared_errors",
-    "collector_actions",
-    "pairwise_action_cosines",
-    "pursuit_target_ids",
+    "schema_version", "run_id", "arm", "scenario_seed", "field_seed",
+    "correlation_length", "eta", "decision_step", "outcome_step",
+    "aggregation_mode", "adjacency", "source_state_sha256",
+    "raw_summaries", "sent_messages", "received_messages",
+    "valid_particle_ids", "valid_particle_counts", "valid_source_positions",
+    "true_local_velocities", "conditional_field_covariance",
+    "conditional_noise_covariance", "global_minus_local_estimator_risk",
+    "analytic_eligible", "analytic_ineligibility_reasons",
+    "estimator_squared_errors", "clipped_components", "own_empty",
+    "fallback_used", "cross_agent_rescue", "zero_direction_cancellation",
+    "reflected_valid_counts", "collector_reflected",
+    "source_collector_positions", "pairwise_collector_distances",
+    "outcome_collector_positions", "realized_collector_displacements",
+    "outcome_pairwise_collector_distances", "outcome_particle_reflection_count",
+    "outcome_collector_reflected", "pairwise_valid_set_jaccards",
+    "collector_actions", "action_implied_target_ids", "pursuit_target_ids",
     "pursuit_overlap_fraction",
-    "unique_yield_so_far",
-    "provenance"
+    "pairwise_action_cosines", "transition_unique_captures",
+    "capture_events", "tie_provenance", "unique_yield_so_far", "provenance"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"const": 2},
     "run_id": {"type": "string", "minLength": 1},
+    "arm": {"enum": ["self_only", "all_to_all"]},
     "scenario_seed": {"type": "integer", "minimum": 0},
     "field_seed": {"type": "integer", "minimum": 0},
     "correlation_length": {"type": "number", "exclusiveMinimum": 0.0},
     "eta": {"type": "number", "exclusiveMinimum": 0.0},
-    "step": {"type": "integer", "minimum": 0},
+    "decision_step": {"type": "integer", "minimum": 0},
+    "outcome_step": {"type": "integer", "minimum": 1},
     "aggregation_mode": {"enum": ["independent", "all_to_all"]},
     "adjacency": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
-      "items": {
-        "type": "array",
-        "minItems": 4,
-        "maxItems": 4,
-        "items": {"type": "boolean"}
-      }
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "boolean"}}
     },
-    "sent_messages": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
-      "items": {"$ref": "#/$defs/message3"}
+    "source_state_sha256": {"$ref": "#/$defs/sha256"},
+    "raw_summaries": {"$ref": "#/$defs/raw_messages4"},
+    "sent_messages": {"$ref": "#/$defs/messages4", "minItems": 4, "maxItems": 4},
+    "received_messages": {"$ref": "#/$defs/messages4", "minItems": 4, "maxItems": 4},
+    "valid_particle_ids": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"type": "array", "items": {"type": "integer", "minimum": 0}}
     },
-    "received_messages": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
-      "items": {"$ref": "#/$defs/message3"}
+    "valid_particle_counts": {"$ref": "#/$defs/nonnegative_int4"},
+    "valid_source_positions": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"type": "array", "items": {"$ref": "#/$defs/point2"}}
     },
-    "true_local_velocities": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
-      "items": {"$ref": "#/$defs/point2"}
+    "true_local_velocities": {"$ref": "#/$defs/points4", "minItems": 4, "maxItems": 4},
+    "conditional_field_covariance": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/number_matrix4"}]},
+    "conditional_noise_covariance": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/number_matrix4"}]},
+    "global_minus_local_estimator_risk": {"type": ["number", "null"]},
+    "analytic_eligible": {"type": "boolean"},
+    "analytic_ineligibility_reasons": {
+      "type": "array", "uniqueItems": true,
+      "items": {"enum": ["initial_no_history", "empty_summary", "reflection", "clipping", "fallback"]}
     },
     "estimator_squared_errors": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
+      "type": "array", "minItems": 4, "maxItems": 4,
       "items": {"type": "number", "minimum": 0.0}
     },
-    "collector_actions": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
-      "items": {"$ref": "#/$defs/point2"}
+    "clipped_components": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "boolean"}}
     },
-    "pairwise_action_cosines": {
-      "type": "array",
-      "minItems": 6,
-      "maxItems": 6,
-      "items": {"type": "number", "minimum": -1.0, "maximum": 1.0}
+    "own_empty": {"$ref": "#/$defs/bool4"},
+    "fallback_used": {"$ref": "#/$defs/bool4"},
+    "cross_agent_rescue": {"$ref": "#/$defs/bool4"},
+    "zero_direction_cancellation": {"$ref": "#/$defs/bool4"},
+    "reflected_valid_counts": {"$ref": "#/$defs/nonnegative_int4"},
+    "collector_reflected": {"$ref": "#/$defs/bool4"},
+    "source_collector_positions": {"$ref": "#/$defs/points4"},
+    "pairwise_collector_distances": {"$ref": "#/$defs/nonnegative_number6"},
+    "outcome_collector_positions": {"$ref": "#/$defs/points4"},
+    "realized_collector_displacements": {"$ref": "#/$defs/points4"},
+    "outcome_pairwise_collector_distances": {"$ref": "#/$defs/nonnegative_number6"},
+    "outcome_particle_reflection_count": {"type": "integer", "minimum": 0},
+    "outcome_collector_reflected": {"$ref": "#/$defs/bool4"},
+    "pairwise_valid_set_jaccards": {
+      "type": "array", "minItems": 6, "maxItems": 6,
+      "items": {"type": ["number", "null"], "minimum": 0.0, "maximum": 1.0}
+    },
+    "collector_actions": {"$ref": "#/$defs/points4", "minItems": 4, "maxItems": 4},
+    "action_implied_target_ids": {
+      "type": "array", "minItems": 4, "maxItems": 4,
+      "items": {"type": "integer", "minimum": -1}
     },
     "pursuit_target_ids": {
-      "type": "array",
-      "minItems": 4,
-      "maxItems": 4,
+      "description": "Deprecated compatibility alias of action_implied_target_ids; not an explicit controller target.",
+      "type": "array", "minItems": 4, "maxItems": 4,
       "items": {"type": "integer", "minimum": -1}
     },
     "pursuit_overlap_fraction": {
-      "type": "number",
-      "minimum": 0.0,
-      "maximum": 1.0
+      "description": "Fraction of unordered agent pairs sharing a nonnegative action-implied target proxy.",
+      "type": "number", "minimum": 0.0, "maximum": 1.0
+    },
+    "pairwise_action_cosines": {
+      "type": "array", "minItems": 6, "maxItems": 6,
+      "items": {"type": ["number", "null"], "minimum": -1.0, "maximum": 1.0}
+    },
+    "transition_unique_captures": {"type": "integer", "minimum": 0},
+    "capture_events": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["particle_id", "collector_id"],
+        "properties": {"particle_id": {"type": "integer", "minimum": 0}, "collector_id": {"type": "integer", "minimum": 0, "maximum": 3}}
+      }
+    },
+    "tie_provenance": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["step_index", "particle_id", "candidate_collector_ids", "chosen_collector_id"],
+        "properties": {
+          "step_index": {"type": "integer", "minimum": 1},
+          "particle_id": {"type": "integer", "minimum": 0},
+          "candidate_collector_ids": {"type": "array", "minItems": 2, "items": {"type": "integer", "minimum": 0, "maximum": 3}},
+          "chosen_collector_id": {"type": "integer", "minimum": 0, "maximum": 3}
+        }
+      }
     },
     "unique_yield_so_far": {"type": "integer", "minimum": 0},
     "provenance": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "initial_state_sha256",
-        "brownian_tensor_sha256",
-        "field_realization_sha256",
-        "tie_stream_sha256"
-      ],
+      "type": "object", "additionalProperties": false,
+      "required": ["initial_state_sha256", "brownian_tensor_sha256", "field_realization_sha256", "policy_randomness_sha256", "tie_key_provenance_sha256"],
       "properties": {
         "initial_state_sha256": {"$ref": "#/$defs/sha256"},
         "brownian_tensor_sha256": {"$ref": "#/$defs/sha256"},
         "field_realization_sha256": {"$ref": "#/$defs/sha256"},
-        "tie_stream_sha256": {"$ref": "#/$defs/sha256"}
+        "policy_randomness_sha256": {"$ref": "#/$defs/sha256"},
+        "tie_key_provenance_sha256": {"$ref": "#/$defs/sha256"}
       }
     }
   },
   "$defs": {
-    "point2": {
-      "type": "array",
-      "prefixItems": [{"type": "number"}, {"type": "number"}],
-      "items": false,
-      "minItems": 2,
-      "maxItems": 2
-    },
-    "message3": {
-      "type": "array",
-      "prefixItems": [
-        {"type": "number", "minimum": -1.0, "maximum": 1.0},
-        {"type": "number", "minimum": -1.0, "maximum": 1.0},
-        {"type": "number", "minimum": 0.0, "maximum": 1.0}
-      ],
-      "items": false,
-      "minItems": 3,
-      "maxItems": 3
-    },
-    "sha256": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{64}$"
-    }
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "point2": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}], "items": false, "minItems": 2, "maxItems": 2},
+    "points4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/point2"}},
+    "message3": {"type": "array", "prefixItems": [{"type": "number", "minimum": -1.0, "maximum": 1.0}, {"type": "number", "minimum": -1.0, "maximum": 1.0}, {"type": "number", "minimum": 0.0, "maximum": 1.0}], "items": false, "minItems": 3, "maxItems": 3},
+    "raw_message3": {"type": "array", "prefixItems": [{"type": "number"}, {"type": "number"}, {"type": "number", "minimum": 0.0, "maximum": 1.0}], "items": false, "minItems": 3, "maxItems": 3},
+    "messages4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/message3"}},
+    "raw_messages4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/raw_message3"}},
+    "bool4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "boolean"}},
+    "nonnegative_int4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "integer", "minimum": 0}},
+    "nonnegative_number6": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "number", "minimum": 0.0}},
+    "bool_matrix4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "boolean"}}},
+    "number_matrix4": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}}}
   }
 }

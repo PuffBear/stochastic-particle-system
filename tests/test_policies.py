@@ -7,6 +7,7 @@ import numpy as np
 from particle_benchmark.policies import (
     bounded_team_velocity_summary,
     capacity_matched_velocity_controller,
+    capacity_matched_velocity_decision,
     coverage_policy,
     density_greedy_policy,
     full_state_interception_oracle,
@@ -30,6 +31,38 @@ def _observation(
 
 
 class TestFrozenPolicies(unittest.TestCase):
+    def test_decision_trace_is_the_actual_controller_path(self) -> None:
+        a = _observation(
+            relative=[[1, 0]], velocities=[[2.0, 0.0]], valid=[True]
+        )
+        b = _observation(
+            relative=[[0, 1]], velocities=[[0.0, 0.0]], valid=[False]
+        )
+        decision = capacity_matched_velocity_decision((a, b), shared=True)
+        np.testing.assert_array_equal(decision.clipped_components[0], [True, False])
+        np.testing.assert_array_equal(decision.own_empty, [False, True])
+        np.testing.assert_array_equal(decision.fallback_used, [False, False])
+        np.testing.assert_array_equal(decision.cross_agent_rescue, [False, True])
+        np.testing.assert_array_equal(
+            decision.actions,
+            capacity_matched_velocity_controller((a, b), shared=True),
+        )
+        self.assertAlmostEqual(decision.sent_messages[0, 2], 1.0)
+
+    def test_global_cancellation_is_not_misreported_as_fallback(self) -> None:
+        positive = _observation(
+            relative=[[1, 0]], velocities=[[1.0, 0.0]], valid=[True]
+        )
+        negative = _observation(
+            relative=[[-1, 0]], velocities=[[-1.0, 0.0]], valid=[True]
+        )
+        decision = capacity_matched_velocity_decision(
+            (positive, positive, negative, negative), shared=True
+        )
+        self.assertTrue(np.all(decision.zero_direction_cancellation))
+        self.assertFalse(np.any(decision.fallback_used))
+        np.testing.assert_array_equal(decision.actions, 0.0)
+
     def test_full_state_oracle_intercepts_and_rejects_impossible_target(self) -> None:
         intercept = full_state_interception_oracle(
             [[0.0, 0.0]], [[0.3, 0.0]], [[0.02, 0.0]], [True],

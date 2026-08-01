@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/PuffBear/stochastic-particle-system/schemas/aggregation_pair_summary.schema.json",
+  "title": "SPS-C04 deterministic aggregation-pair summary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "experiment_id", "scenario_seed", "correlation_length", "eta", "horizon", "arm_modes", "self_only", "all_to_all", "matched_streams", "equal_source_state_checks", "equal_sent_message_checks", "zero_intervention_identity_checked", "endpoint_status"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "experiment_id": {"type": "string", "minLength": 1},
+    "scenario_seed": {"type": "integer", "minimum": 0},
+    "correlation_length": {"type": "number", "exclusiveMinimum": 0.0},
+    "eta": {"type": "number", "exclusiveMinimum": 0.0},
+    "horizon": {"type": "integer", "minimum": 1, "maximum": 8},
+    "arm_modes": {
+      "type": "object", "additionalProperties": false,
+      "required": ["self_only", "all_to_all"],
+      "properties": {"self_only": {"enum": ["independent", "all_to_all"]}, "all_to_all": {"enum": ["independent", "all_to_all"]}}
+    },
+    "self_only": {"$ref": "#/$defs/arm_summary"},
+    "all_to_all": {"$ref": "#/$defs/arm_summary"},
+    "matched_streams": {"$ref": "#/$defs/provenance"},
+    "equal_source_state_checks": {"type": "integer", "minimum": 1},
+    "equal_sent_message_checks": {"type": "integer", "minimum": 1},
+    "zero_intervention_identity_checked": {"type": "boolean"},
+    "endpoint_status": {"const": "unresolved_T_1.34_vs_canonical_8.0_no_scientific_endpoint_selected"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["initial_state_sha256", "brownian_tensor_sha256", "field_realization_sha256", "policy_randomness_sha256", "tie_key_provenance_sha256"],
+      "properties": {
+        "initial_state_sha256": {"$ref": "#/$defs/sha256"},
+        "brownian_tensor_sha256": {"$ref": "#/$defs/sha256"},
+        "field_realization_sha256": {"$ref": "#/$defs/sha256"},
+        "policy_randomness_sha256": {"$ref": "#/$defs/sha256"},
+        "tie_key_provenance_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "arm_summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["steps", "captured_total", "agent_steps", "message_components", "particle_transition_slots", "valid_slots", "clipped_components", "reflected_valid_slots", "outcome_particle_reflections", "own_empty", "fallback_used", "cross_agent_rescue", "zero_direction_cancellation", "collector_reflections", "analytic_eligible_rows", "pairwise_geometry_rows"],
+      "properties": {
+        "steps": {"type": "integer", "minimum": 1, "maximum": 8},
+        "captured_total": {"type": "integer", "minimum": 0},
+        "agent_steps": {"type": "integer", "minimum": 4},
+        "message_components": {"type": "integer", "minimum": 8},
+        "particle_transition_slots": {"type": "integer", "minimum": 1},
+        "valid_slots": {"type": "integer", "minimum": 0},
+        "clipped_components": {"type": "integer", "minimum": 0},
+        "reflected_valid_slots": {"type": "integer", "minimum": 0},
+        "outcome_particle_reflections": {"type": "integer", "minimum": 0},
+        "own_empty": {"type": "integer", "minimum": 0},
+        "fallback_used": {"type": "integer", "minimum": 0},
+        "cross_agent_rescue": {"type": "integer", "minimum": 0},
+        "zero_direction_cancellation": {"type": "integer", "minimum": 0},
+        "collector_reflections": {"type": "integer", "minimum": 0},
+        "analytic_eligible_rows": {"type": "integer", "minimum": 0},
+        "pairwise_geometry_rows": {"type": "integer", "minimum": 6}
+      }
+    }
+  }
+}
