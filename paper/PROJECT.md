@@ -1,145 +1,130 @@
-# Detecting and Exploiting Weak Structure in Stochastic Particle Systems
+# When Shared Estimates Hurt: A Correlation-Scale Phase Boundary in Multi-Agent Collection
 
-## Research question
+## Active research question
 
-At `alpha=0.06`, with four collectors and a fixed physical window equal to 67
-steps at `dt=0.02`, does one bounded three-number team velocity summary increase
-unique team capture yield relative to an identical-shape controller whose three
-message slots contain only the agent's own local estimate?
+For four decentralized collectors that each broadcast one three-scalar local
+velocity summary per control step, at what ratio
 
-This is the only active research question. The earlier first-interception
-boundary question was killed after the action-feasible oracle failed its frozen
-gate. Aggregation, learned communication, field families, and scale remain
-inactive directions unless a later Program Director decision establishes a
-genuinely separable question.
+`eta = field correlation length / nominal collector spacing`
 
-## Frozen primary condition
+does all-to-all arithmetic averaging change the sign of its effect on distinct
+team captures by physical time `T=1.34`, relative to capacity-matched
+independent estimation?
 
-The diagnostic condition compares `shared_summary` with
-`capacity_matched_independent`. Both arms use four identical collectors, the
-same action rule and three additional numeric input slots. The independent arm
-fills those slots from the focal agent's own local estimate; the shared arm
-receives the bounded team mean velocity and validity fraction. The field is
-spatially uniform and the arena, initialization, noise and action limits are
-matched:
+This is the only active paper question. It asks for one grid-censored sign-change
+boundary in one primary outcome. Estimator error, action alignment, and pursuit
+overlap are mechanism diagnostics, not additional questions. Learned
+communication, adaptive topology, target-intention messages, growing geometry,
+and MARL remain inactive unless this scripted mechanism survives.
 
-`M=4, N=256, alpha=0.06, dt=0.02, evaluation_steps=67, sigma=0.06`.
+The complete design is in `paper/redesign_SPS_C04.md`.
 
-Collector dynamics, sensing radius, action bounds, and initialization must be frozen in the environment contract before any performance sweep.
+## Why the paper changed
 
-## Primary estimand
+SPS-WO-07 validly tested the previous uniform-field three-number team mean. Its
+shared-minus-independent effects were `[3,6,4,-3,0,0,5,-1]`, with mean `1.75`
+and `4/8` positive seeds. That failed both frozen continuation thresholds. The
+old claim SPS-C03 is dropped, not weakened or reinterpreted.
 
-For matched seed `s`, let `Y_s(shared)` and `Y_s(independent)` be the numbers of
-distinct particles captured by the four-collector team through the inclusive
-fixed physical endpoint. The diagnostic paired contrast is
+The mixed signs may motivate a new theory but do not establish hidden regimes.
+Seeds 4001--4008 remain diagnostic-only and are permanently ineligible for the
+new claim. The redesign uses a fresh field family, new work order, and future
+fresh seed block.
 
-`Delta_s = Y_s(shared) - Y_s(independent)`.
+## Frozen conceptual formalism
 
-The diagnostic gate is descriptive and cannot support the paper claim. If the
-gate passes, a separately frozen confirmation uses a one-sided paired 95% lower
-confidence bound for `E[Delta_s]`; a positive claim requires that bound to be
-strictly above zero and the prespecified minimum relevant effect to be met.
+Let arena area be `A`, collector count be `M=4`, nominal spacing be
+`d0=sqrt(A/M)`, and field correlation length be `ell_c`. The treatment axis is
 
-## Matched counterfactual contract
+`eta = ell_c / d0`.
 
-Signal and null episodes must share the same initial state, pre-generated Brownian-noise tensor, field nuisance variables, and dedicated tie-breaking randomness. The only allowed causal difference is the planted field strength. Stateful random-number consumption after trajectory divergence is prohibited for the primary comparison.
+Each agent forms the same message
 
-## Central hypothesis
+`z_i = (local mean vx, local mean vy, valid-velocity fraction)`.
 
-At the frozen `alpha=0.06` condition, the bounded team summary produces a
-positive matched fixed-window yield contrast relative to the capacity-matched
-independent controller. This is a mechanism-specific value-of-information
-claim, not a claim that communication or MARL is generally beneficial.
+- Independent agents act from their own `z_i`.
+- Globally sharing agents all act from the arithmetic mean of the four `z_i`.
 
-## Closest prior work and novelty boundary
+The controller, three message slots, fallback, observation history, action
+limits, initial state, Brownian tensor, field realization, tie randomness, and
+physical horizon are matched. The only causal intervention is aggregation.
 
-- Wang et al. (2025), *Mobile-collector capture of particles in a chaotic flow*, studies one mobile collector using local particle information in prescribed flows. We cannot claim the first mobile particle collector, first locally guided capture, or first vortex-flow collection benchmark.
-- Löffler et al. (2023), *Collective foraging of active particles trained by reinforcement learning*, studies locally perceiving active particles trained with PPO. We cannot claim the first local-sensing RL particle-foraging task.
+For fresh matched seed `s`, define
 
-The defensible target is narrower: a reproducible matched intervention testing
-whether one fixed, bounded team statistic has actionable value beyond an
-identical-shape independent controller in a stochastic multi-collector task.
+`Delta_s(eta) = Y_s(global, eta) - Y_s(independent, eta)`,
 
-## Mandatory baselines
+where `Y` is fixed-window unique team captures. The primary estimand is the
+grid-censored zero crossing of `E[Delta_s(eta)]`. A positive paper requires
+simultaneous evidence of a harmful low-correlation region and a beneficial
+high-correlation region in the predicted order. Otherwise the primary result is
+“no supported crossover on the frozen grid.”
 
-Before learned policies:
+## Theory target
 
-1. stationary collectors / passive flux;
-2. random motion;
-3. area-coverage motion;
-4. density-greedy motion;
-5. local-flow scripted policy;
-6. published-strategy adaptations from the closest mobile-collector work when implementable;
-7. centralized full-state oracle.
+For a stationary field and independent homoskedastic local-estimation errors,
+global averaging reduces noise but introduces spatial-mismatch error. If
+`S=sum_jk c_jk` is the sum of normalized cross-agent field correlations, the
+agent-average one-component estimator-risk difference is
 
-For the AAMAS coordination claim:
+`R_global - R_independent = sigma_v^2 (1 - S/M^2) - tau^2 (1 - 1/M)`.
 
-1. one collector;
-2. `M` independent collectors with no shared summary;
-3. the same policy class with and without a bounded shared summary;
-4. centralized full-state control;
-5. shared-parameter IPPO;
-6. one standard MAPPO implementation.
+The theory work must derive the corresponding estimation crossover and connect
+it to the non-additive unique-capture objective. Shared actions can increase
+duplicated pursuit, so the yield crossover need not equal the estimator
+crossover. This estimation-gain/action-diversity gap is the intended multi-agent
+mechanism.
 
-Growing-capture analysis additionally requires an area/perimeter-matched non-growing control.
+## Current implementation boundary
 
-## Validity gates
+The repository already provides fixed-geometry capture, four collectors, causal
+local velocity histories, the three-scalar summary, unique-yield outcomes,
+event-keyed ties, and matched Brownian streams.
 
-- deterministic named seed streams;
-- pre-generated or event-keyed stochastic disturbances;
-- exact matched signal/null initialization and Brownian noise;
-- Brownian scaling by `sqrt(dt)`;
-- correct reflecting boundaries, including arbitrary overshoot;
-- permanent single-owner capture with dedicated tie-breaking randomness;
-- attached-node growth active only from the next step;
-- no field, future-noise, or global-state leakage into local observations;
-- one-based first-contact semantics and explicit no-contact censoring;
-- stationary and zero-signal limiting cases;
-- trajectory, manifest, and analysis validation;
-- fixed confirmatory signal grid and simultaneous inference rule.
+It does **not** yet provide:
+
+- a field with a formally defined correlation length;
+- receiver-specific graph communication;
+- explicit message/link accounting;
+- message-level estimation and action-diversity logs; or
+- a matched topology runner.
+
+The existing `vortex_scale` is an envelope width and may not be relabelled as a
+correlation length. No scientific performance seed is authorized until the new
+field, covariance recovery, communication intervention, diagnostics, and matched
+stream microcases pass.
+
+## Mandatory controls
+
+1. capacity-matched independent estimation and all-to-all averaging;
+2. stationary, pregenerated random, coverage, and density-greedy policies;
+3. privileged true-local-field control and full-state assignment oracle;
+4. shuffled messages and own-estimate duplication;
+5. one collector and four independent collectors;
+6. exact matching of message dimension, cadence, arithmetic, observations,
+   actions, and stochastic streams;
+7. coupled timestep validation at low, boundary, and high `eta` conditions;
+8. learned baselines only after the scripted phase mechanism passes.
+
+## Immediate dependency order
+
+1. finish the primary-literature veto and formal derivation;
+2. implement and validate an episode-frozen field with declared `ell_c`;
+3. implement the pure three-scalar aggregation channel and diagnostics;
+4. pass deterministic constant-field, opposing-region, denoising,
+   permutation, bandwidth, and matched-stream tests;
+5. freeze the `eta` grid, effect threshold, inference, seed cap, and stopping
+   rule;
+6. execute one fresh CPU diagnostic;
+7. kill or preregister a separate independent confirmation.
+
+No HPC request is justified at the current stage.
 
 ## Kill criteria
 
-Narrow or stop the active claim if:
-
-- the oracle cannot exploit the planted field under the frozen task;
-- exact null/signal counterfactual pairing fails;
-- stationary or passive-flux controls explain the apparent improvement;
-- the boundary changes materially under defensible metric encodings;
-- `local_flow_v1` never crosses below the oracle reference across the frozen grid;
-- a claimed team advantage vanishes when collector count, swept area, information, and policy capacity are matched;
-- the task remains a replicated single-agent collection problem with no isolated multi-agent mechanism.
-
-## Compute policy
-
-Correctness tests and scripted pilots run on Codex cloud. No HPC request is justified until the simulator, observation contract, scripted baselines, seed audit, and pilot variance estimate pass. The first confirmatory budget must be derived from measured pilot variance and documented before execution.
-
-## Current stage and decision
-
-The deterministic simulator, exact fixed-geometry contact, causal observations,
-strict matched runner, immutable artifacts, bounded independent/shared scripted
-controllers, and the step-67 unique-yield endpoint are implemented. SPS-WO-05
-established diagnostic action-contingent headroom: the full-state oracle exceeded
-stationary by 9.375 captures on average with 8/8 positive diagnostic seeds.
-
-SPS-WO-06 then passed its preregistered coupled-noise timestep gate. The
-oracle-minus-stationary mean was 8.625 particles at both `dt=0.02` and
-`dt=0.01`, with 0/8 seed-level sign changes; the mandatory informational
-`dt=0.005` mean was 8.375. All correctness, coupling, provenance, and artifact
-gates passed. This authorizes SPS-WO-07 only and is not coordination evidence.
-
-SPS-WO-07 then validly tested the bounded three-number shared summary against
-the identical-shape independent controller. Shared-minus-independent yield
-averaged 1.75 particles, with 4/8 positive diagnostic seeds and a descriptive
-paired-bootstrap interval of `[-0.375, 3.75]`. The frozen continuation rules
-required a mean of at least 2.0 and at least 5/8 positive seeds, so the joint
-gate failed. Correctness, matched streams, shared-minus-stationary, and the
-`alpha=0`-adjusted difference-in-differences checks passed, but they cannot
-rescue the failed primary gate.
-
-SPS-C03 is dropped and the current Paper A question is paused as a complete
-negative diagnostic. No power run, confirmation, further attribution seeds,
-learned baseline, or AAMAS coordination result is authorized. The MARL code
-remains engineering scaffolding only. Any future sharing mechanism requires a
-new theory-driven work order and fresh diagnostic seeds; it may not reinterpret
-or reuse seeds 4001--4008 as confirmation.
+Stop the AAMAS redesign if the analytic crossover is absent in defensible
+regimes; the field does not recover its declared covariance; deterministic
+mechanism tests fail; communication changes anything besides aggregation; the
+same correlation-scale/unique-yield crossover is already established; or a
+fresh bounded diagnostic does not support one ordered negative-to-positive
+crossing. Do not respond by adding seeds, learning a larger network, changing
+the grid, or reusing WO-07 outcomes.

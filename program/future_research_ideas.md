@@ -32,6 +32,7 @@ Inactive directions only; none may consume active-paper resources without a Prog
 - **Workplan:** preregister geometry-matched controls; decompose first contact, cascade size, and false cascades; test scaling across density.
 - **Candidate venue:** AAMAS only if aggregation interacts with team coordination; otherwise complex-systems or simulation venues, subject to current deadline verification.
 - **Status / priority:** `unvalidated`; 6/10 and inactive until the primary fixed-geometry benchmark passes.
+- **Dependency boundary:** Attached growth is not part of SPS-C04. Revisit it only after the fixed-geometry correlation-scale result closes; any later test must ask whether growth changes that boundary under area/perimeter-matched controls rather than silently broadening the active paper.
 
 ## SPS-FR-004 — Nonstationary and moving latent fields
 
@@ -92,21 +93,21 @@ Inactive directions only; none may consume active-paper resources without a Prog
 - **Candidate conference and verified deadline:** MODELSWARD 2027 is a conditional fit for model-driven benchmark transfer; its official call lists a regular-paper deadline of **15 September 2026** (`https://modelsward.scitevents.org/CallForPapers.aspx?y=2027`, checked 2026-07-31). Do not target it without a supported transfer result.
 - **Status / priority:** `unvalidated`, inactive, 6/10. This refines the existing scale-transfer entry; it is not a new paper authorization.
 
-## SPS-FR-009 — Bounded evidence fusion as the actual multi-agent question
+## SPS-FR-009 — Post-boundary localized fusion (downstream of active SPS-C04)
 
 - **Provenance:** SPS-P01; SPS-P02; SPS-WO-04; SPS-WO-07 `attribution_gate.json` (2026-08-01); 2026-07-31 pre-repair fresh AAMAS review; `paper/literature.md` focused repair.
 - **Motivating observation:** `local_flow_v1` ignores teammate information, so four collectors are independent replicas. SPS-WO-07 tested one three-number message: clipped team-mean local velocity (two values) plus team validity fraction (one value).
-- **Research question:** The tested fixed-window three-number summary is closed. **Post-WO-07 hypothesis-generation only:** does locality- or reliability-preserving aggregation exploit remaining oracle headroom without the seed-level reversals produced by global averaging?
-- **Falsifiable hypothesis:** Unvalidated future redesign; it requires a new theoretical mechanism, fresh work order, new diagnostic seeds, and independently frozen relevance and attribution gates before execution.
-- **Possible contributions:** A narrowly causal value-of-information result; a capacity-, observation-, action-, and arithmetic-budget-matched test of decentralized evidence fusion; a negative-result protocol if bounded pooling dilutes local evidence.
+- **Research question:** If the active SPS-C04 phase-boundary study first establishes that all-to-all averaging fails below a correlation-scale threshold, can a covariance-localized three-scalar fusion rule remove that low-correlation loss without sacrificing high-correlation denoising benefit?
+- **Falsifiable hypothesis:** Inactive follow-on only. It becomes eligible only if SPS-C04 supports one ordered unique-yield crossover and the predicted estimator-error/action-diversity mechanism. Otherwise there is no identified failure mode for the method to repair.
+- **Possible contributions:** A theory-derived mitigation of a demonstrated communication failure mode; a capacity-, observation-, action-, and arithmetic-budget-matched comparison against independent and all-to-all execution.
 - **Nearest literature / novelty risk:** CIMAX (`https://arxiv.org/abs/1903.05444`) already establishes collective information maximization with local communication; Foerster et al. (2016), `https://proceedings.neurips.cc/paper_files/paper/2016/hash/c7635bfd99248a2cdef8249ef7bfbef4-Abstract.html`, and Wang et al. (2020), `https://proceedings.mlr.press/v119/wang20i.html`, establish learned and bandwidth-constrained communication. The fixed summary is a mechanism probe, not a novel communication algorithm.
-- **Minimal experiment / data / compute:** Eight diagnostic seeds on `kappa in {0.25, 0.5, 1.0}` after oracle and timestep gates; identical three-slot inputs for shared and independent controllers; passive, shuffled-message, and leave-one-out controls; Codex CPU only.
+- **Minimal experiment / data / compute:** No experiment is authorized. If activated later, use fresh seeds and representative low/near/high SPS-C04 `eta` conditions; compare independent, all-to-all, and one prospectively derived localized rule under the same three-scalar budget; Codex CPU first.
 - **Observed diagnostic:** The frozen three-number summary failed its joint gate. Shared minus capacity-matched independent yield averaged 1.75 particles (descriptive paired-bootstrap 95% interval `[-0.375,3.75]`) and was strictly positive in 4/8 seeds, below the preregistered two-particle and 5/8 thresholds. Seed effects were `[3,6,4,-3,0,0,5,-1]`. The oracle exceeded shared by 7.5 particles on average and in 8/8 seeds, so task/action headroom remains, but the present summary did not reliably exploit it. Heterogeneous signs indicate instability, not established latent regimes.
-- **Two-week validation plan:** Days 1–2 freeze leakage and capacity accounting; days 3–5 unit-test permutation invariance and agent-ID equivariance; days 6–8 run the 8-seed diagnostic; days 9–11 estimate block-resampled power at a 0.01 effect; days 12–14 either preregister held-out confirmation or record a coordination-null decision.
-- **Full workplan:** Proceed only after the full-state oracle establishes action-contingent headroom and coupled-noise refinement is stable; simulate type-I error and power; select the smallest passing seed count in `{16,24,32,48,64}`; run new held-out seeds; report absolute outcomes, passive-adjusted effects, bandwidth, failures, and all ablations.
-- **Kill criterion / dependency / risk:** Kill the AAMAS mechanism if oracle feasibility fails, passive/shuffled controls explain the effect, the shared contrast is below 0.01 or non-positive, timestep ordering reverses, information leaks, or 64 seeds provide less than 80% simulated power. Depends on SPS-WO-04 Gates 1–3 and 5. Principal risk: global averaging may erase useful local heterogeneity or synchronize harmful actions.
+- **Two-week validation plan:** Deferred. First complete SPS-WO-09 and the fresh SPS-C04 diagnostic. If the phase law survives, derive exactly one localized rule before inspecting new outcomes, unit-test graph and bandwidth equivalence, then preregister its own seed block.
+- **Full workplan:** Never use WO-07 or SPS-C04 diagnostic seeds for method selection and confirmation in the same claim. Compare against Nakamura et al. (2022), Elwin et al. (2020), and targeted/graph communication baselines before claiming method novelty.
+- **Kill criterion / dependency / risk:** Kill this method direction if SPS-C04 has no ordered crossover, if a privileged localized diagnostic does not repair the low-correlation regime deterministically, or if existing correlation-aware distributed monitoring methods subsume the proposed rule. Main risk is rediscovering established kernel/Voronoi weighting.
 - **Candidate conference and verified deadline:** AAMAS 2027 is the intended fit only for a surviving genuinely multi-agent result; the official call lists abstract **1 October 2026** and paper **8 October 2026** deadlines (`https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/`, checked 2026-07-31).
-- **Status / priority:** current three-number mechanism closed after a preregistered negative diagnostic; no confirmation, message attribution, or MARL activation. Broader locality- or reliability-preserving fusion remains inactive and unvalidated; 3/10.
+- **Status / priority:** inactive and explicitly downstream of SPS-C04; no method implementation, seeds, confirmation, or MARL activation; 4/10 conditional priority.
 
 ## SPS-FR-010 — Passive-adjusted policy value and oracle feasibility
 
@@ -161,3 +162,18 @@ Inactive directions only; none may consume active-paper resources without a Prog
 - **Kill criterion / dependency / risk:** Retire as a standalone direction if standard refinement is sufficient and no generalizable issue appears. Block the active scientific claim if the 0.0025 stability tolerance or policy-order condition fails. Depends on a passing oracle microcase. Risk: rare events may make the diagnostic interval too wide even when mean bias is small.
 - **Candidate conference and verified deadline:** MODELSWARD 2027 is a conditional methodological venue with a **15 September 2026** regular-paper deadline (`https://modelsward.scitevents.org/CallForPapers.aspx?y=2027`, checked 2026-07-31); otherwise this belongs in the active paper’s reproducibility supplement, not a separate submission.
 - **Status / priority:** partially validated validity audit; active shared/independent extension remains untested; 8/10 as a validity audit and 3/10 as a separate paper.
+
+## SPS-FR-014 — Action-diversity mechanism behind harmful global sharing
+
+- **Provenance:** SPS-WO-07 negative diagnostic; active SPS-C04 correlation-scale redesign.
+- **Motivating observation:** Global averaging can improve estimation while synchronizing collectors. WO-07's heterogeneous seed effects do not establish that action homogenization caused any loss.
+- **Research question:** Within a correlation-scale regime where global averaging underperforms independent estimates, does restoring action diversity while holding the shared message fixed recover fixed-horizon unique capture yield?
+- **Falsifiable hypothesis:** A preregistered diversity-preserving action map exceeds the unchanged shared controller on fresh seeds after matching message, action magnitude, path length, and swept area; recovery must co-occur with lower trajectory overlap rather than extra motion.
+- **Possible contributions:** A causal separation of information gain from coordination-induced redundancy; a matched intervention for diagnosing when communication hurts decentralized collection.
+- **Nearest literature / novelty risk:** `unsearched`; likely threats are standard repulsion/coverage control, role diversity, and communication-induced homogenization. No novelty claim is permitted before a primary-source audit.
+- **Minimal experiment / compute:** Deterministic mechanism microcases, then a bounded CPU diagnostic in one SPS-C04-frozen harmful regime; compare shared, shared-plus-diversity, sham-intervention, and independent policies; record pairwise action cosine, path overlap, unique captures, and duplicate pursuit.
+- **Two-week validation plan:** Days 1--3 formalize the intervention and matching; 4--6 microcases and invariance tests; 7--9 bounded diagnostic; 10--12 mundane-explanation controls; 13--14 fresh-review decision.
+- **Full workplan:** Activate only after SPS-C04 establishes a stable harmful-sharing regime; freeze one intervention before fresh seeds; use a separate held-out confirmation only if attribution gates pass.
+- **Kill criterion / dependency / risk:** Kill if recovery vanishes under motion/coverage matching, overlap does not change, or the SPS-C04 regime is not reproducible. Never merge this intervention into the active phase-boundary question.
+- **Candidate venue:** AAMAS only if the causal multi-agent mechanism survives; otherwise a robotics or simulation venue, with its deadline checked at activation.
+- **Status / priority:** `unvalidated`, inactive, 5/10.

@@ -12,16 +12,16 @@
   "report_email": "agriya.yadav_ug2023@ashoka.edu.in",
   "attention_mode": "minimal",
   "no_reply_policy": "continue-safe-default",
-  "active_papers": 0,
+  "active_papers": 1,
   "papers": [
     {
       "id": "paper-a",
-      "title": "Weak-field multi-collector benchmark",
-      "status": "paused",
-      "current_stage": "bounded-sharing-question-closed-after-valid-negative-diagnostic",
-      "hypothesis": "Under matched observation and policy-capacity budgets, a bounded shared velocity summary improves fixed-horizon unique team capture yield relative to the identical-shape independent controller.",
-      "kill_criterion": "Stop or narrow if coupled-noise timestep validation fails, shared-minus-independent yield is non-positive or below the relevance threshold, shuffled/delayed messages explain the effect, or useful power exceeds the bounded seed cap.",
-      "open_blocker": "SPS-WO-07 validly failed both frozen primary continuation thresholds: mean shared-minus-independent yield 1.75 below 2.0 and 4/8 positive seeds below 5/8. SPS-C03 is dropped, SPS-WO-08 is cancelled without execution, and confirmation, further attribution seeds, and learned MARL are not authorized. A new paper question requires a theory-driven work order and fresh seeds."
+      "title": "When Shared Estimates Hurt: A Correlation-Scale Phase Boundary in Multi-Agent Collection",
+      "status": "active",
+      "current_stage": "SPS-C04 theory-first redesign; deterministic feasibility only",
+      "hypothesis": "All-to-all three-scalar averaging has one ordered crossover from harming to helping unique team capture as the field correlation length increases relative to nominal collector spacing.",
+      "kill_criterion": "Stop before seeds if the analytic crossover, declared-covariance field, or deterministic mechanism tests fail; stop after a bounded fresh diagnostic if no ordered negative-to-positive yield crossing is supported or a non-multi-agent confound explains it.",
+      "open_blocker": "The current simulator lacks a field with a defensible correlation-length parameter, receiver-specific message diagnostics, and a matched topology runner. SPS-WO-09 authorizes theory and deterministic engineering only; no scientific seed or MARL run is authorized."
     },
     {
       "id": "paper-b",
@@ -33,9 +33,9 @@
       "open_blocker": "Intentionally inactive."
     }
   ],
-  "phase": "paper-a-current-question-killed-after-negative-diagnostic",
-  "primary_question": "At alpha=0.06 under the canonical four-collector task and a fixed 67-step window, does a bounded three-number shared velocity summary improve unique team capture yield over the identical-shape independent controller?",
-  "primary_condition": "shared_summary_vs_capacity_matched_independent",
+  "phase": "paper-a-SPS-C04-theory-first-correlation-scale-redesign",
+  "primary_question": "For four decentralized collectors exchanging one three-scalar local-velocity summary per step, at what field-correlation-length to nominal-spacing ratio does all-to-all averaging change the sign of its effect on unique team captures by physical time T=1.34 relative to capacity-matched independent estimation?",
+  "primary_condition": "all_to_all_vs_independent_across_eta",
   "scientific_results_available": true,
   "exploratory_calibration_available": true,
   "exploratory_result": "SPS-WO-05 established action headroom and SPS-WO-06 passed timestep stability. SPS-WO-07 then produced a valid negative bounded-sharing diagnostic: shared-minus-independent effects [3,6,4,-3,0,0,5,-1], mean 1.75, 4/8 positive, descriptive interval [-0.375,3.75]. The frozen mean>=2 and positive>=5/8 components failed, although correctness, matched streams, shared-minus-stationary mean 1.875, and signal difference-in-differences mean 2.125 passed. The joint gate failed and SPS-C03 was closed without confirmation.",
@@ -81,5 +81,5 @@
     "counter-swarm"
   ],
   "last_updated": "2026-08-01",
-  "last_engineering_action": "Executed SPS-WO-07 exactly once on seeds 4001-4008: 64 episodes and 4,288 steps. The valid joint gate failed because mean shared-minus-independent yield was 1.75 below 2.0 and only 4/8 seeds were positive. No SPS-WO-08, confirmation, further attribution, or MARL run was executed."
+  "last_engineering_action": "Selected SPS-C04 after independent research-lead, literature, and feasibility audits. Created a theory-first redesign and SPS-WO-09; no scientific seed, MARL run, or HPC request was executed."
 }

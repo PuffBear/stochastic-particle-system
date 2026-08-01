@@ -1,0 +1,75 @@
+{
+  "work_order_id": "SPS-WO-09",
+  "role": "research-lead-and-experiment-engineer",
+  "paper": "paper-a",
+  "objective": "Establish the analytic and deterministic feasibility of the SPS-C04 correlation-scale communication crossover without executing any scientific seed experiment.",
+  "claim_ids": ["SPS-C04"],
+  "allowed_files": [
+    "paper/redesign_SPS_C04.md",
+    "paper/PROJECT.md",
+    "paper/literature.md",
+    "src/particle_benchmark/dynamics/fields.py",
+    "src/particle_benchmark/communication.py",
+    "src/particle_benchmark/policies.py",
+    "src/particle_benchmark/metrics/coordination.py",
+    "schemas/message_diagnostic.schema.json",
+    "tests/test_fields.py",
+    "tests/test_communication.py",
+    "tests/test_policies.py",
+    "tests/test_coordination.py",
+    "program/handoffs/SPS-WO-09-research-lead.md",
+    "program/handoffs/SPS-WO-09-engineering.md"
+  ],
+  "prohibited_files": [
+    "results/raw/",
+    "results/derived/SPS-C04-DIAGNOSTIC/",
+    "analysis/run_marl_baselines.py",
+    "paper/manuscript/main.tex"
+  ],
+  "inputs": {
+    "design": "paper/redesign_SPS_C04.md",
+    "predecessor_status": "SPS-C03 dropped; WO-07 seeds 4001-4008 motivation-only and permanently barred from SPS-C04 inference",
+    "field_requirement": "episode-frozen stationary vector field with an explicit ensemble covariance and declared ell_c; vortex_scale is ineligible",
+    "message_contract": "exactly three bounded scalars per sender per control step"
+  },
+  "compute_cap": {
+    "hardware": "CPU only",
+    "scientific_episodes": 0,
+    "deterministic_microcases": 64,
+    "wall_time_minutes": 20,
+    "memory_gib": 4
+  },
+  "expected_artifacts": [
+    "analytic estimator-risk derivation with assumptions",
+    "field covariance and marginal-invariance tests",
+    "constant-field equivalence microcase",
+    "opposing-region cancellation microcase",
+    "homogeneous denoising microcase",
+    "permutation-equivariant exact-bandwidth communication tests",
+    "message diagnostic schema",
+    "matched-stream intervention design",
+    "engineering and research-lead handoffs"
+  ],
+  "verification_command": "PYTHONPATH=src:. python -m unittest tests.test_fields tests.test_communication tests.test_policies tests.test_coordination -v",
+  "required_gates": {
+    "literature_veto": "no primary source already establishes the same unique-capture sign crossover and estimation-diversity decomposition",
+    "theory": "derive a plausible single estimator-side crossover in eta under explicit assumptions",
+    "field": "recover declared covariance and constant marginal velocity variance across ell_c within prospectively frozen tolerances",
+    "communication": "independent and all-to-all arms differ only in aggregation; exactly three scalars per sender; permutation equivariant",
+    "mechanism_microcases": "constant, opposing-region, and homogeneous-noise cases have their predicted ordering",
+    "provenance": "future arms can share exact initial state, Brownian tensor, field realization, and tie stream"
+  },
+  "stop_conditions": [
+    "any attempt to use vortex_scale as ell_c",
+    "any scientific seed or performance sweep is requested",
+    "any WO-07 outcome is used to select a grid or numerical threshold",
+    "analytic crossover is absent in defensible parameter regimes",
+    "field covariance or deterministic mechanism tests fail",
+    "the communication intervention changes observation access, capacity, or stochastic streams"
+  ],
+  "fallback_task": "Record the failed theory or feasibility gate, keep SPS-C04 unsupported, and advance literature or alternative-question analysis without running seeds.",
+  "positive_interpretation": "Authorize a separate preregistration work order to freeze eta grid, practical threshold, simultaneous inference, fresh seeds, and a bounded CPU diagnostic. This work order itself cannot support SPS-C04.",
+  "null_interpretation": "Kill or redesign the phase-boundary question before scientific compute.",
+  "reversed_interpretation": "Reject the one-boundary theory; do not fit a post-hoc non-monotone story.",
+  "scientific_status": "authorized theory and deterministic engineering only; no scientific seeds"
+}

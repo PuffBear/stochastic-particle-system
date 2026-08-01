@@ -159,6 +159,36 @@ The next empirical package should contain the following before a positive coordi
 6. **Timestep convergence:** use one coupled Brownian path across at least Δt, Δt/2, and Δt/4, with coarse increments equal to sums of their fine increments. Compare first-capture indicator, censored first-capture time, policy-minus-stationary difference-in-differences, and contact identity. Predefine a tolerance before using the finest level as evidence.
 7. **Regime choice:** retain a uniform-drift diagnostic for identifiability, but do not rely only on a fully chaotic/high-control-speed regime in which published work says strategy differences can collapse. A structured low-mixing or vortex regime is needed only after the mechanism works in the diagnostic setting.
 
+## SPS-C04 redesign audit: correlation scale and communication value (2026-08-01)
+
+This pass was completed before any SPS-C04 field implementation or seed choice.
+It asks whether the proposed paper can claim a new communication method. The
+answer is no. The remaining conditional opening is a predicted sign crossover
+in *unique team capture* as field correlation length changes relative to team
+spacing, together with a causal estimation-gain/action-diversity decomposition.
+
+| Source | Verified primary URL | What is already established | Consequence for SPS-C04 |
+|---|---|---|---|
+| Li and Guo, **“Distributed Source Seeking by Cooperative Robots: All-to-All and Limited Communications”**, ICRA 2012 | https://ieeexplore.ieee.org/document/6224713/ ; author PDF https://personal.stevens.edu/~yguo1/paper/ICRA12_ShuaiLi.pdf | All-to-all and limited-communication distributed source-seeking controllers from local concentration measurements. | A plain all-to-all-versus-neighbor topology comparison is not novel. The residual object must be the sign of task-level communication value under a non-additive unique-capture objective. |
+| Atanasov, Le Ny, and Pappas, **“Distributed Algorithms for Stochastic Source Seeking with Mobile Robot Networks”** | https://arxiv.org/abs/1402.0051 | Distributed model-free and model-based stochastic source seeking under noisy measurements. | Do not claim the first decentralized noisy-field search or estimator. |
+| Elwin, Freeman, and Lynch, **“Distributed Environmental Monitoring With Finite Element Robots”**, IEEE T-RO 2020 | https://ieeexplore.ieee.org/document/8850212/ ; author PDF https://robotics.northwestern.edu/documents/publications/femrobots.pdf | Distributed spatial-field estimation and explicit treatment of environmental correlation and communication/measurement radius. | **Strong threat.** Correlation-aware communication radius is not itself a contribution. SPS-C04 must target the unique-yield crossover and its multi-agent utility mechanism. |
+| Nakamura, Santos, and Leonard, **“Decentralized Learning With Limited Communications for Multi-robot Coverage of Unknown Spatial Fields”**, IROS 2022 | https://ieeexplore.ieee.org/document/9981665 ; author preprint https://arxiv.org/abs/2208.01800 | Local Gaussian processes, Voronoi-neighbor communication, and inclusion of sufficiently novel teammate samples. | Reliability-, novelty-, or neighbor-weighted fusion is a follow-on mitigation, not the primary paper novelty. |
+| Jiang and Lu, **“Learning Attentional Communication for Multi-Agent Cooperation”**, NeurIPS 2018 | https://proceedings.neurips.cc/paper/2018/hash/6a8018b3a00b69c008601b8becae392b-Abstract.html | Shows that indiscriminate global information sharing can be problematic and learns when/how to communicate. | “Communication can hurt” is not new. SPS-C04 needs a formal, measurable correlation-scale cause and a frozen phase prediction. |
+| Du et al., **“Learning Correlated Communication Topology in Multi-Agent Reinforcement Learning”**, AAMAS 2021 | https://www.ifaamas.org/Proceedings/aamas2021/pdfs/p456.pdf | Learns correlated, directed communication topologies jointly with decentralized policies. | A learned-topology redesign would enter a crowded baseline space without a distinctive mechanism. It remains downstream of a successful scripted phase result. |
+| Niu, Paleja, and Gombolay, **“Multi-Agent Graph-Attention Communication and Teaming”**, AAMAS 2021 | https://www.ifaamas.org/Proceedings/aamas2021/pdfs/p964.pdf | Dynamic directed communication for deciding when and with whom to communicate, including physical-robot evaluation. | Targeted graph attention cannot be presented as the paper's novel answer. |
+
+### Literature-led selection
+
+1. **Keep:** one phase-boundary question in the dimensionless ratio
+   `eta = ell_c / d0`.
+2. **Hold as a diagnostic/future method:** covariance-localized or reliability-
+   weighted fusion.
+3. **Drop as the primary paper:** target-intention broadcasting, generic local
+   communication, and learned dynamic graphs.
+4. **Novelty kill:** if a closer primary source already establishes a controlled
+   correlation-length crossover in unique multi-agent collection and decomposes
+   estimation gain from pursuit redundancy, SPS-C04 stops before seeds.
+
 ### Immediate literature-led decision
 
 Do **not** launch another broad seed sweep of `local_flow_v1`. First instrument the passive/active decomposition and the privileged interception oracle, then run a small coupled timestep pilot. If the active-minus-stationary effect remains absent even for the oracle, the task or outcome is malformed. If the oracle succeeds but estimated local flow does not, repair observation history and estimator/action alignment. If local flow succeeds but team sharing does not exceed four independent collectors, the current result remains a flow-control benchmark rather than an AAMAS coordination contribution.
