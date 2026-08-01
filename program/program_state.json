@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "deadline": "unverified-2026-10-09-planning-horizon",
+  "internal_deadline": "2026-09-29-planning-freeze",
+  "project": "stochastic-particle-system",
+  "repository_full_name": "PuffBear/stochastic-particle-system",
+  "repository_status": "configured",
+  "repository_visibility": "public",
+  "publication_authorized_on": "2026-07-31",
+  "autonomy_branch": "research-autonomy",
+  "timezone": "Asia/Kolkata",
+  "report_email": "agriya.yadav_ug2023@ashoka.edu.in",
+  "attention_mode": "minimal",
+  "no_reply_policy": "continue-safe-default",
+  "active_papers": 1,
+  "papers": [
+    {
+      "id": "paper-a",
+      "title": "When Shared Estimates Hurt: A Correlation-Scale Phase Boundary in Multi-Agent Collection",
+      "status": "active",
+      "current_stage": "SPS-C04 outcome-blind literature, T=1.34 endpoint, and nonlinear-row design gates passed; preregistration design next",
+      "hypothesis": "All-to-all three-scalar averaging has one ordered crossover from harming to helping unique team capture as the field correlation length increases relative to nominal collector spacing.",
+      "kill_criterion": "Stop before seeds if the analytic crossover, declared-covariance field, or deterministic mechanism tests fail; stop after a bounded fresh diagnostic if no ordered negative-to-positive yield crossing is supported or a non-multi-agent confound explains it.",
+      "open_blocker": "Before any scientific run: freeze the eta grid, minimum relevant effect, simultaneous inference, fresh seed block, stopping rule, and CPU cap. The conditional novelty confidence is 0.65; no scientific seed or MARL run is authorized."
+    },
+    {
+      "id": "paper-b",
+      "title": "Inactive placeholder",
+      "status": "paused",
+      "current_stage": "inactive",
+      "hypothesis": "",
+      "kill_criterion": "No second paper may activate without a genuinely separable question and Program Director decision.",
+      "open_blocker": "Intentionally inactive."
+    }
+  ],
+  "phase": "paper-a-SPS-C04-preregistration-design",
+  "primary_question": "On a prospectively frozen grid, for four collectors with canonical square initialization and identical three-scalar encoders and action decoders, where—if anywhere—does all-to-all averaging change from decreasing to increasing fixed-horizon unique team captures relative to self-only use of each collector's message?",
+  "primary_condition": "all_to_all_vs_independent_across_eta",
+  "scientific_results_available": true,
+  "exploratory_calibration_available": true,
+  "exploratory_result": "SPS-WO-05 established action headroom and SPS-WO-06 passed timestep stability. SPS-WO-07 then produced a valid negative bounded-sharing diagnostic: shared-minus-independent effects [3,6,4,-3,0,0,5,-1], mean 1.75, 4/8 positive, descriptive interval [-0.375,3.75]. The frozen mean>=2 and positive>=5/8 components failed, although correctness, matched streams, shared-minus-stationary mean 1.875, and signal difference-in-differences mean 2.125 passed. The joint gate failed and SPS-C03 was closed without confirmation.",
+  "diagnostic_action_headroom_available": true,
+  "pending_diagnostic_scripts": {
+    "SPS-WO-06-TIMESTEP-CONVERGENCE": {
+      "script": "analysis/run_timestep_convergence.py",
+      "status": "complete-passed-diagnostic-only",
+      "purpose": "Validate that dt=0.02 is a converged discretization; seeds 3001-3008 permanently ineligible for confirmation",
+      "gate": "absolute mean oracle-minus-stationary difference between dt=0.02 and dt=0.01 strictly below 1 particle, with at most 1/8 seed-level sign changes; dt=0.005 mandatory informational"
+    },
+    "SPS-POWER-ANALYSIS-COORDINATION": {
+      "script": "analysis/run_power_analysis.py",
+      "status": "cancelled-prerequisite-failed-not-run",
+      "purpose": "Ex-ante sensitivity analysis for 80% power at a frozen 2.0-particle minimum relevant effect; it cannot consume diagnostic outcomes"
+    },
+    "SPS-WO-07-ATTRIBUTION-CONTROLS": {
+      "script": "analysis/run_attribution_controls.py",
+      "status": "complete-valid-negative-diagnostic",
+      "purpose": "Test bounded shared-summary versus local-summary headroom with stationary and alpha=0 controls; seeds 4001-4008 permanently ineligible for confirmation",
+      "gate": "all six explicitly frozen components pass: correctness, matched streams, mean shared-minus-independent at least 2 particles, at least 5/8 positive seeds, mean shared-minus-stationary above zero, and mean alpha-adjusted shared-independent difference-in-differences above zero; descriptive only"
+    }
+  },
+  "engineering_tests": {
+    "passed": 179,
+    "failed": 0,
+    "skipped": 5,
+    "scope": "Full available pytest suite after SPS-WO-11. New coverage includes the inclusive T=1.34 endpoint, exact 67/134/268 timestep mappings, all-row outcome retention, post-history nonlinear numerators/denominators/rates, threshold boundaries, and collector-only displacement-mediator exclusion. Five optional PyTorch tests skipped; no WO-09 through WO-11 primitive is skipped."
+  },
+  "fresh_review": {
+    "date": "2026-08-01",
+    "verdict": "strong reject",
+    "score": "2/10",
+    "confidence": "4/5",
+    "snapshot": "post-WO-07-valid-negative-diagnostic",
+    "strongest_new_threat": "The central bounded-sharing diagnostic failed, no learned or strategic multi-agent method is evaluated, and the negative eight-seed result is not precise enough to become a decisive archival contribution."
+  },
+  "hpc_status": "not-needed",
+  "report_count": 7,
+  "inactive_scopes": [
+    "baseball-paper-a",
+    "baseball-paper-b",
+    "h-sharc",
+    "counter-swarm"
+  ],
+  "last_updated": "2026-08-01",
+  "last_engineering_action": "Completed SPS-WO-11 outcome-blind design gate: conditional literature veto pass at confidence 0.65; T=1.34 frozen as inclusive step 67 at dt=0.02; nonlinear eligibility/error budget encoded in summary schema v2; 179 tests passed with 5 optional PyTorch skips; zero scientific episodes ran. The eta grid, effect threshold, inference, fresh seeds, and stopping rule remain unfrozen; no MARL or HPC request was executed."
+}

@@ -1,0 +1,35 @@
+{
+  "alphas": [
+    0.0,
+    0.03,
+    0.06,
+    0.12
+  ],
+  "artifacts": {
+    "collector_step_diagnostics.jsonl": "6b1ef73339939cde688af582f81f344da5725206e3fc407706c1da2027223e9f",
+    "episode_summaries.jsonl": "590cbbfbc1648a3d7a6a9945c8d2132f2ab1237e9cd1bd3aef3cf2d8742498e6",
+    "oracle_gate.json": "eb4b3d26324d48b8124c41610cede3a19907a3c2976f3e7640edd92c93b96793"
+  },
+  "command": "PYTHONPATH=src python analysis/run_correction_gates.py --output results/raw/SPS-P03-CORRECTION-GATES",
+  "created_at_utc": "2026-07-31T15:44:17.266267+00:00",
+  "experiment_id": "SPS-P03-CORRECTION-GATES",
+  "numpy": "2.3.5",
+  "policies": [
+    "stationary",
+    "true_field_upstream_control",
+    "full_state_interception_oracle",
+    "local_flow_v1"
+  ],
+  "python": "3.12.13",
+  "runtime_seconds": 34.668845831,
+  "seeds": [
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008
+  ]
+}

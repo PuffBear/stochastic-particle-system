@@ -1,0 +1,16 @@
+experiment_id: SPS-P01
+purpose: scripted-policy calibration after end-to-end environment correctness gate
+field_families: [null, uniform]
+rho_grid: [0.0, 0.10, 0.25, 0.50, 1.00, 2.00]
+signal_strength_formula: rho * diffusion_sigma / sqrt(dt)
+capture_geometries: [fixed]
+policies: [stationary, pregenerated_random, coverage, density_greedy, local_flow_v1, privileged_upstream_oracle]
+scenario_seeds: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010, 1011, 1012]
+capture_free_reset_seed_range: [0, 99]
+collector_count: 4
+particle_count: 256
+save_trajectories: true
+performance_inference_authorized: false
+scientific_claim_update_authorized: false
+verification_command: PYTHONPATH=src python3 -m unittest discover -s tests -v
+evidence_interpretation: calibration only until all gates pass and a fixed seed budget is recorded
