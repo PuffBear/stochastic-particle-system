@@ -6,7 +6,9 @@ import numpy as np
 
 from particle_benchmark.policies import (
     bounded_team_velocity_summary,
+    bounded_team_velocity_summary_v2,
     capacity_matched_velocity_controller,
+    capacity_matched_velocity_controller_v2,
     coverage_policy,
     density_greedy_policy,
     full_state_interception_oracle,
@@ -107,6 +109,42 @@ class TestFrozenPolicies(unittest.TestCase):
         self.assertLessEqual(float(np.linalg.norm(action_left[0])), 1.0)
 
 
+    def test_v2_summary_is_permutation_invariant(self) -> None:
+        a = _observation(relative=[[1, 0]], velocities=[[0.2, 0.4]], valid=[True])
+        b = _observation(relative=[[0, 1]], velocities=[[-0.1, 0.2]], valid=[True])
+        np.testing.assert_allclose(
+            bounded_team_velocity_summary_v2((a, b)),
+            bounded_team_velocity_summary_v2((b, a)),
+        )
+        self.assertTrue(np.all(np.abs(bounded_team_velocity_summary_v2((a, b))) <= 1.0))
+
+    def test_v2_summary_count_weights_higher_fraction_agent(self) -> None:
+        # Agent with 2/2 valid slots (f=1.0) vs agent with 1/2 valid slots (f=0.5).
+        # Equal-weight mean of vx=[0.8, 0.0] => 0.4; count-weighted => 0.8*1/(1+0.5)+0.0*0.5/(1+0.5) ~ 0.533
+        high = _observation(relative=[[1, 0], [0, 1]], velocities=[[0.8, 0.0], [0.8, 0.0]], valid=[True, True])
+        low = _observation(relative=[[1, 0], [0, 1]], velocities=[[0.0, 0.0], [0.0, 0.0]], valid=[True, False])
+        v2 = bounded_team_velocity_summary_v2((high, low))
+        v1 = bounded_team_velocity_summary((high, low))
+        # v2 vx should be closer to 0.8 (higher-fraction agent) than v1 vx
+        self.assertGreater(float(v2[0]), float(v1[0]))
+
+    def test_v2_controller_equivariance(self) -> None:
+        a = _observation(relative=[[1, 0]], velocities=[[0.2, 0.4]], valid=[True])
+        b = _observation(relative=[[0, 1]], velocities=[[-0.1, 0.2]], valid=[True])
+        for shared in (False, True):
+            original = capacity_matched_velocity_controller_v2((a, b), shared=shared)
+            permuted = capacity_matched_velocity_controller_v2((b, a), shared=shared)
+            self.assertEqual(original.shape, (2, 2))
+            np.testing.assert_allclose(original, permuted[::-1])
+
+    def test_v2_independent_matches_v1_independent(self) -> None:
+        a = _observation(relative=[[1, 0]], velocities=[[0.2, 0.4]], valid=[True])
+        b = _observation(relative=[[0, 1]], velocities=[[-0.1, 0.2]], valid=[True])
+        np.testing.assert_allclose(
+            capacity_matched_velocity_controller((a, b), shared=False),
+            capacity_matched_velocity_controller_v2((a, b), shared=False),
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
-    full_state_interception_oracle,

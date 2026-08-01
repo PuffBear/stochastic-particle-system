@@ -164,6 +164,34 @@ def bounded_team_velocity_summary(
     return np.clip(np.mean(summaries, axis=0), -1.0, 1.0)
 
 
+def bounded_team_velocity_summary_v2(
+    observations: tuple[LocalObservation, ...], *, leave_out_agent: int | None = None
+) -> NDArray[np.float64]:
+    """Count-weighted team mean — the Proposition 2 sufficient statistic.
+
+    Weights each agent's local mean by its validity fraction (proportional to
+    the number of valid velocity observations it contributed).  Equal-weight
+    averaging is a special case when all agents observe the same number of
+    valid particles.  The returned f_valid slot is the unweighted mean of
+    per-agent fractions, consistent with the original 3-slot message format.
+    """
+    summaries = np.stack([local_velocity_summary(obs) for obs in observations])
+    if leave_out_agent is not None:
+        if not 0 <= leave_out_agent < len(observations):
+            raise ValueError("leave_out_agent is out of range")
+        summaries = np.delete(summaries, leave_out_agent, axis=0)
+    if summaries.shape[0] == 0:
+        return np.zeros(3, dtype=np.float64)
+    weights = summaries[:, 2]          # validity fractions ∝ observation counts
+    total = float(weights.sum())
+    if total > 0.0:
+        vel = np.average(summaries[:, :2], weights=weights, axis=0)
+    else:
+        vel = np.zeros(2, dtype=np.float64)
+    frac = float(np.mean(weights))
+    return np.clip(np.array([vel[0], vel[1], frac], dtype=np.float64), -1.0, 1.0)
+
+
 def capacity_matched_velocity_controller(
     observations: tuple[LocalObservation, ...], *, shared: bool
 ) -> NDArray[np.float64]:
@@ -180,6 +208,55 @@ def capacity_matched_velocity_controller(
             slots = np.asarray(observation["particles"], dtype=np.float64)
             if np.any(mask):
                 actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+    return actions
+
+
+def capacity_matched_velocity_controller_v2(
+    observations: tuple[LocalObservation, ...], *, shared: bool
+) -> NDArray[np.float64]:
+    """Improved controller with count-weighted team mean and field+density blend.
+
+    shared=True improvements over v1:
+      1. Count-weighted team mean (Proposition 2 — gives more weight to agents
+         with more valid observations, reducing noise from data-sparse agents).
+      2. Field+density blend: each agent blends the shared upstream direction
+         with its local particle-density signal.  This prevents the correlated
+         failure mode in which all agents simultaneously follow a noisy field
+         estimate into an unpopulated region.  The blend weight scales with
+         the team's mean validity fraction so the mix is data-driven:
+           blend_w = min(0.7, 2 · f_valid_team)
+         At the canonical f_valid ≈ 0.35 the split is ≈70/30 field/density.
+
+    shared=False: identical to capacity_matched_velocity_controller v1 so that
+    the independent baseline remains an unmodified comparison point.
+    """
+    team = bounded_team_velocity_summary_v2(observations) if shared else None
+    actions = np.zeros((len(observations), 2), dtype=np.float64)
+    for agent_id, observation in enumerate(observations):
+        mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
+        slots = np.asarray(observation["particles"], dtype=np.float64)
+        if shared:
+            assert team is not None
+            if team[2] > 0.0:
+                field_dir = _unit(-team[:2])
+                blend_w = min(0.7, float(team[2]) * 2.0)
+                if np.any(mask):
+                    density_dir = _unit(np.mean(slots[mask, :2], axis=0))
+                    combined = blend_w * field_dir + (1.0 - blend_w) * density_dir
+                    norm = float(np.linalg.norm(combined))
+                    actions[agent_id] = _unit(combined) if norm > 1e-12 else field_dir
+                else:
+                    actions[agent_id] = field_dir
+            else:
+                if np.any(mask):
+                    actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+        else:
+            message = local_velocity_summary(observation)
+            if message[2] > 0.0:
+                actions[agent_id] = _unit(-message[:2])
+            else:
+                if np.any(mask):
+                    actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
     return actions
 
 

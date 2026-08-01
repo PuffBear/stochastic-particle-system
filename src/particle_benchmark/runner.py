@@ -36,6 +36,7 @@ from .io import (
 from .observations import LocalObservation
 from .policies import (
     capacity_matched_velocity_controller,
+    capacity_matched_velocity_controller_v2,
     coverage_policy,
     density_greedy_policy,
     full_state_interception_oracle,
@@ -58,6 +59,7 @@ SUPPORTED_POLICIES = frozenset(
         "full_state_interception_oracle",
         "capacity_matched_independent",
         "shared_summary",
+        "shared_summary_v2",
     }
 )
 EVENT_KEYED_TIE_SCHEME = "event_keyed_seed_step_particle_v1"
@@ -298,6 +300,8 @@ def _policy_actions(
         return capacity_matched_velocity_controller(observations, shared=False)
     if policy_id == "shared_summary":
         return capacity_matched_velocity_controller(observations, shared=True)
+    if policy_id == "shared_summary_v2":
+        return capacity_matched_velocity_controller_v2(observations, shared=True)
     raise AssertionError(f"unreachable policy {policy_id}")
 
 
