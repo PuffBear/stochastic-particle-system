@@ -260,6 +260,74 @@ def capacity_matched_velocity_controller_v2(
     return actions
 
 
+def capacity_matched_velocity_controller_v2_shuffled(
+    observations: tuple[LocalObservation, ...],
+    *,
+    scenario_seed: int,
+    step: int,
+) -> NDArray[np.float64]:
+    """Ablation: replace team message with reproducible random noise same format.
+
+    The velocity direction and validity fraction are drawn from a deterministic
+    RNG seeded by (scenario_seed, step). This tests whether the coordination
+    gain is due to message *content* (field-correlated direction) or just the
+    extra input slots (bandwidth).
+    """
+    rng = np.random.default_rng([scenario_seed, step, 0xAB1A710])
+    fake = np.array(
+        [rng.uniform(-1.0, 1.0), rng.uniform(-1.0, 1.0), rng.uniform(0.0, 1.0)],
+        dtype=np.float64,
+    )
+    actions = np.zeros((len(observations), 2), dtype=np.float64)
+    for agent_id, observation in enumerate(observations):
+        mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
+        slots = np.asarray(observation["particles"], dtype=np.float64)
+        if fake[2] > 0.0:
+            field_dir = _unit(-fake[:2])
+            blend_w = min(0.7, float(fake[2]) * 2.0)
+            if np.any(mask):
+                density_dir = _unit(np.mean(slots[mask, :2], axis=0))
+                combined = blend_w * field_dir + (1.0 - blend_w) * density_dir
+                norm = float(np.linalg.norm(combined))
+                actions[agent_id] = _unit(combined) if norm > 1e-12 else field_dir
+            else:
+                actions[agent_id] = field_dir
+        else:
+            if np.any(mask):
+                actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+    return actions
+
+
+def capacity_matched_velocity_controller_v2_leave_self_out(
+    observations: tuple[LocalObservation, ...],
+) -> NDArray[np.float64]:
+    """Ablation: each agent receives team mean computed without its own observations.
+
+    Tests whether each agent is benefiting from *others'* information or merely
+    re-routing its own local estimate through the aggregation arithmetic.
+    Uses the same field+density blend logic as v2.
+    """
+    actions = np.zeros((len(observations), 2), dtype=np.float64)
+    for agent_id, observation in enumerate(observations):
+        mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
+        slots = np.asarray(observation["particles"], dtype=np.float64)
+        team = bounded_team_velocity_summary_v2(observations, leave_out_agent=agent_id)
+        if team[2] > 0.0:
+            field_dir = _unit(-team[:2])
+            blend_w = min(0.7, float(team[2]) * 2.0)
+            if np.any(mask):
+                density_dir = _unit(np.mean(slots[mask, :2], axis=0))
+                combined = blend_w * field_dir + (1.0 - blend_w) * density_dir
+                norm = float(np.linalg.norm(combined))
+                actions[agent_id] = _unit(combined) if norm > 1e-12 else field_dir
+            else:
+                actions[agent_id] = field_dir
+        else:
+            if np.any(mask):
+                actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+    return actions
+
+
 def density_greedy_policy(
     observations: tuple[LocalObservation, ...],
 ) -> NDArray[np.float64]:

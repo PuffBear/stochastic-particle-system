@@ -37,6 +37,8 @@ from .observations import LocalObservation
 from .policies import (
     capacity_matched_velocity_controller,
     capacity_matched_velocity_controller_v2,
+    capacity_matched_velocity_controller_v2_shuffled,
+    capacity_matched_velocity_controller_v2_leave_self_out,
     coverage_policy,
     density_greedy_policy,
     full_state_interception_oracle,
@@ -60,6 +62,8 @@ SUPPORTED_POLICIES = frozenset(
         "capacity_matched_independent",
         "shared_summary",
         "shared_summary_v2",
+        "shared_summary_v2_shuffled",
+        "shared_summary_v2_leave_self_out",
     }
 )
 EVENT_KEYED_TIE_SCHEME = "event_keyed_seed_step_particle_v1"
@@ -302,6 +306,13 @@ def _policy_actions(
         return capacity_matched_velocity_controller(observations, shared=True)
     if policy_id == "shared_summary_v2":
         return capacity_matched_velocity_controller_v2(observations, shared=True)
+    if policy_id == "shared_summary_v2_shuffled":
+        assert env.scenario_seed is not None
+        return capacity_matched_velocity_controller_v2_shuffled(
+            observations, scenario_seed=env.scenario_seed, step=step
+        )
+    if policy_id == "shared_summary_v2_leave_self_out":
+        return capacity_matched_velocity_controller_v2_leave_self_out(observations)
     raise AssertionError(f"unreachable policy {policy_id}")
 
 
