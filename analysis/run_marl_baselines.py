@@ -1,10 +1,11 @@
-"""Train IPPO and MAPPO baselines and compare against scripted baselines.
+"""Train all six MARL architectures and compare against scripted baselines.
 
 Experiment: SPS-WO-08-MARL-BASELINES
 ======================================
-Trains IPPO and MAPPO across multiple seeds, evaluates on diagnostic eval
-seeds, and compares against stationary / local_flow_v1 /
-capacity_matched_independent scripted baselines on the same eval seeds.
+Trains IPPO, MAPPO, MADDPG, COMA, CommNet, and VDN across multiple seeds,
+evaluates on diagnostic eval seeds, and compares against stationary /
+local_flow_v1 / capacity_matched_independent / full_state_interception_oracle
+scripted baselines.  CE is normalised against the oracle ceiling.
 
 Usage
 -----
@@ -65,8 +66,10 @@ from particle_benchmark.metrics.coordination import (
     ce_report,
     validate_execution_time_ablation,
 )
+from particle_benchmark.dynamics.fields import field_velocity
 from particle_benchmark.policies import (
     capacity_matched_velocity_controller,
+    full_state_interception_oracle,
     local_flow_v1_policy,
     stationary_policy,
 )
@@ -96,6 +99,8 @@ def evaluate_scripted_baseline(
     policy_name: str,
     env: ParticleCollectorEnv,
     seeds: tuple[int, ...],
+    *,
+    receding_horizon: float = 2.0,
 ) -> dict:
     """Evaluate one scripted baseline policy over multiple seeds."""
     yields = []
@@ -111,6 +116,25 @@ def evaluate_scripted_baseline(
                 actions = local_flow_v1_policy(observations)
             elif policy_name == "capacity_matched_independent":
                 actions = capacity_matched_velocity_controller(observations, shared=False)
+            elif policy_name == "full_state_interception_oracle":
+                assert env.collector_positions is not None
+                assert env.particle_positions is not None
+                assert env._episode_field_kwargs is not None
+                assert env.capture_state is not None
+                true_motion = field_velocity(
+                    env.particle_positions,
+                    env.config.field_family,
+                    env.config.signal_strength,
+                    **env._episode_field_kwargs,
+                )
+                actions = full_state_interception_oracle(
+                    env.collector_positions,
+                    env.particle_positions,
+                    true_motion,
+                    env.capture_state.owner < 0,
+                    collector_max_speed=env.config.collector_max_speed,
+                    receding_horizon=receding_horizon,
+                )
             else:
                 raise ValueError(f"Unknown scripted baseline: {policy_name}")
             observations, reward, terminated, truncated, info = env.step(actions)
@@ -417,7 +441,12 @@ def main() -> None:
     print(f"\n{'='*60}")
     print("Evaluating scripted baselines ...")
     print(f"{'='*60}")
-    for policy_name in ("stationary", "local_flow_v1", "capacity_matched_independent"):
+    for policy_name in (
+        "stationary",
+        "local_flow_v1",
+        "capacity_matched_independent",
+        "full_state_interception_oracle",
+    ):
         t0 = time.time()
         result = evaluate_scripted_baseline(policy_name, env, eval_seeds)
         elapsed = time.time() - t0
@@ -429,9 +458,11 @@ def main() -> None:
             f"±{result['std_yield']:.3f}  ({elapsed:.1f}s)"
         )
 
-    # No validated full-state upper-bound oracle is implemented in this work
-    # order. capacity_matched_independent is a comparator, never an oracle.
-    oracle_yields_per_seed: None = None
+    # Oracle yields (per eval seed): full_state_interception_oracle with receding_horizon=2.0
+    # is validated by SPS-WO-05 and serves as the CE ceiling for CommNet only.
+    oracle_yields_per_seed: list[float] = report["scripted_baselines"][
+        "full_state_interception_oracle"
+    ]["yields"]
     stationary_yields_per_seed: list[float] = report["scripted_baselines"][
         "stationary"
     ]["yields"]
@@ -830,19 +861,38 @@ def main() -> None:
 
     for alg_key in algorithms:
         has_execution_messages = alg_key == "commnet"
-        reason = (
-            "genuine execution-time message ablation exists, but CE is disabled "
-            "until a validated full-state upper-bound oracle is implemented"
-            if has_execution_messages
-            else "ineligible: CTDE/parameter sharing is not execution-time communication"
-        )
-        report["ce_reports"][alg_key] = {
-            "status": "not_computed",
-            "execution_time_communication": has_execution_messages,
-            "oracle_available": False,
-            "reason": reason,
-        }
-        print(f"  [{alg_label_map[alg_key]}] CE not computed — {reason}")
+        if has_execution_messages and oracle_yields_per_seed is not None:
+            comm_list = ce_comm.get(alg_key, [])
+            ablated_list = ce_ablated.get(alg_key, [])
+            n = min(len(comm_list), len(ablated_list))
+            if comm_list:
+                comm_list = comm_list[:n]
+            if ablated_list:
+                ablated_list = ablated_list[:n]
+            ce_rep = _build_ce_report(
+                alg_label_map[alg_key],
+                comm_list,
+                ablated_list,
+                oracle_yields_per_seed,
+                stationary_yields_per_seed,
+                env_config.particle_count,
+            )
+            report["ce_reports"][alg_key] = ce_rep
+            print(
+                f"  [{alg_label_map[alg_key]}] CE mean={ce_rep['all_seeds']['mean']:.3f}, "
+                f"interpretation={ce_rep['interpretation']}"
+            )
+        else:
+            reason = (
+                "ineligible: CTDE/parameter sharing is not execution-time communication"
+            )
+            report["ce_reports"][alg_key] = {
+                "status": "not_computed",
+                "execution_time_communication": has_execution_messages,
+                "oracle_available": oracle_yields_per_seed is not None,
+                "reason": reason,
+            }
+            print(f"  [{alg_label_map[alg_key]}] CE not computed — {reason}")
 
     # ------------------------------------------------------------------
     # Write report

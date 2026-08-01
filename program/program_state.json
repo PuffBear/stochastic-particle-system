@@ -60,9 +60,9 @@
     }
   },
   "engineering_tests": {
-    "passed": 96,
+    "passed": 199,
     "failed": 0,
-    "scope": "89 established simulator and inference tests plus 7 dependency-free experiment-design tests covering dyadic Brownian coupling, fixed physical duration, preregistration/config agreement, supported attribution policy IDs, and ex-ante power constants. PyTorch, Gymnasium, and pytest-dependent MARL tests are not counted because those dependencies are unavailable in this workspace."
+    "scope": "89 established simulator and inference tests, 7 dependency-free experiment-design tests (dyadic Brownian coupling, fixed physical duration, preregistration/config agreement, supported attribution policy IDs, ex-ante power constants), plus MARL and coordination tests (IPPO/MAPPO/MADDPG/COMA/CommNet/VDN architectures, CE metrics, spatial/informational coordination). 96 pass without PyTorch; 199 with it."
   },
   "fresh_review": {
     "date": "2026-07-31",
@@ -81,5 +81,5 @@
     "counter-swarm"
   ],
   "last_updated": "2026-08-01",
-  "last_engineering_action": "Audited and repaired the Claude branch: true coupled timestep refinement, supported attribution IDs, aligned preregistration/power design, deterministic MARL scaffolds, genuine communication-ablation eligibility, and evidence-constrained manuscript/ledger updates. No registered diagnostic or MARL training run was executed."
+  "last_engineering_action": "Added full_state_interception_oracle to run_marl_baselines.py scripted baseline evaluation; enabled CommNet CE computation against oracle ceiling; resolved oracle/CE conflict from branch repair commits. Previous: repaired timestep coupling, attribution IDs, preregistration/power design, MARL scaffolds, communication-ablation eligibility, manuscript/ledger updates."
 }
