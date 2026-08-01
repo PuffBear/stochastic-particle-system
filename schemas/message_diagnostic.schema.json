@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/PuffBear/stochastic-particle-system/schemas/message_diagnostic.schema.json",
+  "title": "SPS-C04 per-step communication and coordination diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run_id",
+    "scenario_seed",
+    "field_seed",
+    "correlation_length",
+    "eta",
+    "step",
+    "aggregation_mode",
+    "adjacency",
+    "sent_messages",
+    "received_messages",
+    "true_local_velocities",
+    "estimator_squared_errors",
+    "collector_actions",
+    "pairwise_action_cosines",
+    "pursuit_target_ids",
+    "pursuit_overlap_fraction",
+    "unique_yield_so_far",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "scenario_seed": {"type": "integer", "minimum": 0},
+    "field_seed": {"type": "integer", "minimum": 0},
+    "correlation_length": {"type": "number", "exclusiveMinimum": 0.0},
+    "eta": {"type": "number", "exclusiveMinimum": 0.0},
+    "step": {"type": "integer", "minimum": 0},
+    "aggregation_mode": {"enum": ["independent", "all_to_all"]},
+    "adjacency": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "array",
+        "minItems": 4,
+        "maxItems": 4,
+        "items": {"type": "boolean"}
+      }
+    },
+    "sent_messages": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/message3"}
+    },
+    "received_messages": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/message3"}
+    },
+    "true_local_velocities": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/point2"}
+    },
+    "estimator_squared_errors": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"type": "number", "minimum": 0.0}
+    },
+    "collector_actions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/point2"}
+    },
+    "pairwise_action_cosines": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"type": "number", "minimum": -1.0, "maximum": 1.0}
+    },
+    "pursuit_target_ids": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"type": "integer", "minimum": -1}
+    },
+    "pursuit_overlap_fraction": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "unique_yield_so_far": {"type": "integer", "minimum": 0},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_state_sha256",
+        "brownian_tensor_sha256",
+        "field_realization_sha256",
+        "tie_stream_sha256"
+      ],
+      "properties": {
+        "initial_state_sha256": {"$ref": "#/$defs/sha256"},
+        "brownian_tensor_sha256": {"$ref": "#/$defs/sha256"},
+        "field_realization_sha256": {"$ref": "#/$defs/sha256"},
+        "tie_stream_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  },
+  "$defs": {
+    "point2": {
+      "type": "array",
+      "prefixItems": [{"type": "number"}, {"type": "number"}],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "message3": {
+      "type": "array",
+      "prefixItems": [
+        {"type": "number", "minimum": -1.0, "maximum": 1.0},
+        {"type": "number", "minimum": -1.0, "maximum": 1.0},
+        {"type": "number", "minimum": 0.0, "maximum": 1.0}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

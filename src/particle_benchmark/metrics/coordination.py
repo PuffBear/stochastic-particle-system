@@ -38,7 +38,144 @@ uninformative) or injects noise (positive uninformative, zero informative).
 """
 from __future__ import annotations
 
+from collections.abc import Callable
+
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
+
+
+def sensed_summary_covariances(
+    particle_positions: ArrayLike,
+    valid_mask: ArrayLike,
+    component_covariance: Callable[[ArrayLike], ArrayLike],
+    *,
+    apparent_velocity_noise_variance: float,
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    r"""Return latent and error covariance of sensed velocity averages.
+
+    Collector ``i`` averages the apparent velocities of the particles selected
+    by row ``i`` of ``valid_mask``.  For a stationary scalar field covariance
+    ``C``, this routine evaluates the exact finite-sensing-kernel covariance
+
+    .. math::
+
+       B_{ij}=\frac{1}{n_i n_j}\sum_{p\in S_i}\sum_{q\in S_j} C(X_p-X_q).
+
+    If every particle's apparent-velocity error is independent with variance
+    ``apparent_velocity_noise_variance``, reuse of a particle by two sensors
+    induces the exact overlap term
+
+    .. math::
+
+       \Omega_{ij}=\sigma_e^2\frac{|S_i\cap S_j|}{n_i n_j}.
+
+    This is conditional on fixed positions and validity masks.  Empty local
+    summaries, clipping, reflection, and fallback behavior are deliberately
+    rejected rather than hidden inside a point-sensor approximation.
+    """
+    positions = np.asarray(particle_positions, dtype=np.float64)
+    mask = np.asarray(valid_mask)
+    if (
+        positions.ndim != 2
+        or positions.shape[1] != 2
+        or positions.shape[0] == 0
+        or not np.all(np.isfinite(positions))
+    ):
+        raise ValueError("particle_positions must be finite with shape (N, 2)")
+    if mask.ndim != 2 or mask.shape[1] != positions.shape[0] or mask.shape[0] == 0:
+        raise ValueError("valid_mask must have shape (M, N) for M non-empty sensors")
+    if mask.dtype != np.bool_:
+        raise ValueError("valid_mask must be boolean")
+    counts = np.sum(mask, axis=1)
+    if np.any(counts == 0):
+        raise ValueError("every sensor must contain at least one valid particle")
+    if (
+        not np.isfinite(apparent_velocity_noise_variance)
+        or apparent_velocity_noise_variance < 0
+    ):
+        raise ValueError("apparent_velocity_noise_variance must be finite and non-negative")
+
+    sensor_count = mask.shape[0]
+    latent = np.empty((sensor_count, sensor_count), dtype=np.float64)
+    noise = np.empty_like(latent)
+    for i in range(sensor_count):
+        i_positions = positions[mask[i]]
+        for j in range(i, sensor_count):
+            j_positions = positions[mask[j]]
+            displacements = (
+                i_positions[:, None, :] - j_positions[None, :, :]
+            ).reshape(-1, 2)
+            values = np.asarray(component_covariance(displacements), dtype=np.float64)
+            if values.shape != (displacements.shape[0],) or not np.all(
+                np.isfinite(values)
+            ):
+                raise ValueError(
+                    "component_covariance must return one finite scalar per displacement"
+                )
+            latent_value = float(np.mean(values))
+            overlap = int(np.count_nonzero(mask[i] & mask[j]))
+            noise_value = (
+                float(apparent_velocity_noise_variance)
+                * overlap
+                / float(counts[i] * counts[j])
+            )
+            latent[i, j] = latent[j, i] = latent_value
+            noise[i, j] = noise[j, i] = noise_value
+    return latent, noise
+
+
+def global_minus_local_estimator_risk(
+    field_covariance: np.ndarray,
+    noise_covariance: np.ndarray,
+) -> float:
+    r"""Return average all-to-all minus independent scalar estimator risk.
+
+    Let local summary ``i`` be ``v_i + epsilon_i`` with latent-summary
+    covariance ``B`` and message-error covariance ``Omega``.  Without assuming
+    independent or homoscedastic errors, the average receiver-side squared-risk
+    difference is
+
+    .. math::
+
+       D = \frac{\mathrm{tr}(B)}{M}
+           -\frac{\mathbf 1^T B\mathbf 1}{M^2}
+           +\frac{\mathbf 1^T\Omega\mathbf 1}{M^2}
+           -\frac{\mathrm{tr}(\Omega)}{M}.
+
+    A negative value favors global pooling on estimator risk; a positive value
+    favors local estimates.  This is an estimator diagnostic only and is not a
+    claim about unique-capture utility.
+    """
+    latent = np.asarray(field_covariance, dtype=np.float64)
+    noise = np.asarray(noise_covariance, dtype=np.float64)
+    if (
+        latent.ndim != 2
+        or latent.shape[0] == 0
+        or latent.shape[0] != latent.shape[1]
+        or noise.shape != latent.shape
+    ):
+        raise ValueError("field and noise covariance must be same non-empty square shape")
+    if not np.all(np.isfinite(latent)) or not np.all(np.isfinite(noise)):
+        raise ValueError("covariance matrices must contain only finite values")
+    if not np.allclose(latent, latent.T, rtol=0.0, atol=1e-12):
+        raise ValueError("field covariance must be symmetric")
+    if not np.allclose(noise, noise.T, rtol=0.0, atol=1e-12):
+        raise ValueError("noise covariance must be symmetric")
+    # Reject matrices that cannot be covariance matrices.  A small tolerance
+    # permits ordinary floating-point eigensolver error at the PSD boundary.
+    if float(np.min(np.linalg.eigvalsh(latent))) < -1e-10:
+        raise ValueError("field covariance must be positive semidefinite")
+    if float(np.min(np.linalg.eigvalsh(noise))) < -1e-10:
+        raise ValueError("noise covariance must be positive semidefinite")
+
+    count = latent.shape[0]
+    ones = np.ones(count, dtype=np.float64)
+    return float(
+        np.trace(latent) / count
+        - (ones @ latent @ ones) / count**2
+        + (ones @ noise @ ones) / count**2
+        - np.trace(noise) / count
+    )
 
 
 def per_seed_ce(

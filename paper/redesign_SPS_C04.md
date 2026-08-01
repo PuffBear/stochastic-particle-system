@@ -1,7 +1,8 @@
 # SPS-C04 paper redesign: correlation-scale communication crossover
 
-**Status:** selected for theory-first feasibility; no scientific seed run is
-authorized by this document.
+**Status:** conditional analytic and deterministic feasibility passed in
+SPS-WO-09; no scientific seed run is authorized by this document. Standard
+environment/config/runner integration remains incomplete.
 
 **Predecessor:** SPS-C03 is permanently dropped after SPS-WO-07 failed its
 frozen continuation gate. Seeds 4001--4008 remain diagnostic-only and cannot be
@@ -9,11 +10,12 @@ used to choose, confirm, or estimate the redesigned claim.
 
 ## Exact research question
 
-> For four decentralized collectors that each broadcast one three-scalar local
-> velocity summary per step, at what environmental correlation-scale ratio
-> does all-to-all arithmetic averaging change the sign of its effect on
-> fixed-horizon unique team captures relative to capacity-matched independent
-> estimation?
+> On a prospectively frozen grid of field-correlation-length to nominal-spacing
+> ratios, for four collectors with the canonical square initialization and the
+> same three-scalar local message encoder and action decoder, where—if
+> anywhere—does all-to-all arithmetic averaging change from decreasing to
+> increasing fixed-horizon unique team captures relative to self-only use of
+> each collector's message?
 
 This is one question. Field-estimation error, action alignment, and duplicated
 pursuit are mechanism diagnostics; they are not additional research questions.
@@ -35,7 +37,10 @@ correlation length \(\ell_c\), define
 \eta = \ell_c/d_0.
 \]
 
-The redesigned experiment varies only \(\eta\) on a frozen grid. Signal
+The redesigned experiment varies only \(\eta\) on a frozen grid. This is a
+benchmark-conditional threshold, not a geometry-invariant physical constant:
+collector motion makes pairwise geometry endogenous after initialization.
+Signal
 amplitude, diffusion, sensing radius, action limit, particle density, collector
 reset, horizon, message dimension, update frequency, and arithmetic budget are
 matched across communication arms.
@@ -90,8 +95,63 @@ frozen grid.” No interpolated threshold is a primary result.
 
 ## Theory spine
 
-The theory begins with the simplest receiver-side estimation model. For one
-velocity component, suppose
+For one velocity component, let \(V=(V_1,\ldots,V_M)^T\) be the latent local
+velocity summaries and \(E=(E_1,\ldots,E_M)^T\) their zero-mean errors, with
+\(E\) independent of \(V\). Write
+
+\[
+B=\operatorname{Cov}(V),\qquad \Omega=\operatorname{Cov}(E).
+\]
+
+The average risk for self-only use is
+
+\[
+R_I=\frac{\operatorname{tr}(\Omega)}{M},
+\]
+
+whereas the average risk when every receiver uses the global arithmetic mean
+is
+
+\[
+R_G=\frac{\operatorname{tr}(B)}{M}
+-\frac{\mathbf 1^T B\mathbf 1}{M^2}
++\frac{\mathbf 1^T\Omega\mathbf 1}{M^2}.
+\]
+
+Therefore
+
+\[
+D=R_G-R_I=
+\frac{\operatorname{tr}(B)}{M}
+-\frac{\mathbf 1^T B\mathbf 1}{M^2}
++\frac{\mathbf 1^T\Omega\mathbf 1}{M^2}
+-\frac{\operatorname{tr}(\Omega)}{M}.
+\]
+
+Negative \(D\) favors pooling for estimator risk; positive \(D\) favors
+self-only use. Correlated errors can eliminate the usual denoising benefit, so
+an independent-noise argument is not sufficient.
+
+The benchmark does not observe a point sample. Conditional on particle
+positions \(X_p\) and valid sets \(S_i\), the exact sensing-kernel covariance is
+
+\[
+B_{ij}=\frac{1}{n_i n_j}\sum_{p\in S_i}\sum_{q\in S_j}C_{\ell_c}(X_p-X_q).
+\]
+
+Away from reflection, clipping, and fallback, Brownian apparent-velocity error
+with per-particle component variance \(\sigma_D^2/\Delta t\) gives
+
+\[
+\Omega_{ij}=\frac{\sigma_D^2}{\Delta t}
+\frac{|S_i\cap S_j|}{n_i n_j}.
+\]
+
+SPS-WO-09 implements and deterministically tests these two conditional
+matrices. Reflection, clipping, missing local summaries, and fallback are
+nonlinear deviations that must be logged and bounded in the next work order.
+
+The familiar point-sensor model is only a limiting illustration. Suppose
 
 \[
 \widehat v_i=v(x_i)+\epsilon_i,\qquad
@@ -117,17 +177,29 @@ squared-exponential field covariance,
 C(h)=\sigma_v^2\exp\!\left(-\frac{h^2}{2\ell_c^2}\right),
 \]
 
-the estimator-side sign is predicted from \(\eta\), team geometry, and the
-noise-to-field variance ratio. This calculation does **not** establish the team
-yield claim; it provides the pre-outcome ordering prediction.
+the estimator-side sign is predicted jointly from \(\eta\), team geometry, and
+the noise-to-field variance ratio. It cannot be predicted from \(\eta\) alone.
+For four fixed square centers and equal independent errors, a unique point-
+sensor crossover exists only when \(0<\tau^2/\sigma_v^2<1\). At
+\(\tau^2/\sigma_v^2=0.5\), the ideal squared-exponential illustration gives
+\(\eta^*\approx0.960\); changing the geometry or correlating the errors changes
+that value. This calculation does **not** establish the team-yield claim; it
+provides a conditional pre-outcome ordering prediction.
 
-The team-utility bridge uses the non-additive unique-capture objective. If two
-agents each pursue one target, their expected number of distinct targets is
-\(2-P(\text{same target})\). More generally, expected unique captures are an
-occupancy functional, so common messages can reduce team utility by increasing
+The team-utility bridge uses the non-additive unique-capture objective. In
+general,
+
+\[
+\mathbb E[U]=\sum_p P\!\left(\bigcup_i\{i\text{ captures particle }p\}\right).
+\]
+
+The simpler \(2-P(\text{same target})\) identity applies only to a two-agent,
+one-choice special case. Common messages can reduce team utility by increasing
 action or pursuit overlap even when they improve an individual estimate. The
 paper must quantify this estimator-gain versus diversity-loss decomposition
-without treating either mediator as a second research question.
+without treating either mediator as a second research question. A positive
+high-correlation estimator result without a positive unique-yield consequence
+does not support the paper.
 
 ## Falsifiable hypotheses
 
@@ -146,7 +218,8 @@ field, covariance, communication, and mechanism microcases pass.
 
 ## Mandatory baselines and controls
 
-The primary contrast is only all-to-all versus capacity-matched independent.
+The primary contrast is only all-to-all versus the self-only aggregation
+control with the same encoder, decoder, and three-scalar action input.
 The following controls protect its interpretation:
 
 1. stationary, pregenerated-random, and deterministic coverage policies;
@@ -164,22 +237,27 @@ The following controls protect its interpretation:
 
 ## Deterministic feasibility gates before seeds
 
-1. A new stationary heterogeneous field has a declared \(\ell_c\), stable
-   episode-frozen realization, and empirically recovers its target covariance
-   within a frozen tolerance.
-2. A constant-field microcase makes independent and global aggregation
+1. **Passed in WO-09:** a stationary periodic Gaussian field has a declared
+   \(\ell_c\), immutable episode realization, exact finite-basis covariance,
+   invariant marginal variance, and reproducible fingerprint.
+2. **Passed in WO-09:** a constant-field microcase makes independent and global aggregation
    directionally equivalent, aside from controlled noise reduction.
-3. An opposing-region microcase makes global pooling cancel incompatible local
+3. **Passed in WO-09:** an opposing-region microcase makes global pooling cancel incompatible local
    directions while independent estimates preserve them.
-4. A homogeneous noisy-message microcase shows the expected \(1/M\) noise
+4. **Passed in WO-09:** a homogeneous noisy-message microcase shows the expected \(1/M\) noise
    variance reduction.
-5. The communication primitive is permutation equivariant and transmits
-   exactly three scalars per sender per step.
-6. Message, adjacency, received-summary, estimator-error, action-similarity,
+5. **Passed in WO-09:** the communication primitive is permutation equivariant
+   and processes exactly three scalars per sender per step.
+6. **Schema passed; runtime logging open:** message, adjacency, received-summary, estimator-error, action-similarity,
    pursuit-overlap, and unique-yield diagnostics are logged in a new schema;
    immutable trajectory schema v1 is not silently changed.
-7. A matched-topology runner proves identical initialization, Brownian tensor,
-   field realization, and tie stream across arms.
+7. **Open:** a matched-topology runner must prove identical initialization,
+   Brownian tensor, field realization, and tie stream across arms. The new field
+   is callable but not yet wired through standard environment/config/runner
+   reset paths.
+
+WO-09 used zero scientific episodes. Its deterministic tests support mechanism
+possibility and software correctness only; SPS-C04 remains unsupported.
 
 ## Kill criteria
 

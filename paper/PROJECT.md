@@ -2,14 +2,15 @@
 
 ## Active research question
 
-For four decentralized collectors that each broadcast one three-scalar local
-velocity summary per control step, at what ratio
+On a prospectively frozen grid, for four decentralized collectors with the
+canonical square initialization and identical three-scalar message encoders and
+action decoders, at what ratio—if anywhere—
 
 `eta = field correlation length / nominal collector spacing`
 
-does all-to-all arithmetic averaging change the sign of its effect on distinct
-team captures by physical time `T=1.34`, relative to capacity-matched
-independent estimation?
+does all-to-all arithmetic averaging change from decreasing to increasing
+distinct team captures by physical time `T=1.34`, relative to self-only use of
+each collector's generated message?
 
 This is the only active paper question. It asks for one grid-censored sign-change
 boundary in one primary outcome. Estimator error, action alignment, and pursuit
@@ -61,18 +62,23 @@ high-correlation region in the predicted order. Otherwise the primary result is
 
 ## Theory target
 
-For a stationary field and independent homoskedastic local-estimation errors,
-global averaging reduces noise but introduces spatial-mismatch error. If
-`S=sum_jk c_jk` is the sum of normalized cross-agent field correlations, the
-agent-average one-component estimator-risk difference is
+For latent local-summary covariance `B` and possibly correlated message-error
+covariance `Omega`, the general agent-average one-component estimator-risk
+difference is
+
+`D = tr(B)/M - 1'B1/M^2 + 1'Omega1/M^2 - tr(Omega)/M`.
+
+The earlier independent homoskedastic expression
 
 `R_global - R_independent = sigma_v^2 (1 - S/M^2) - tau^2 (1 - 1/M)`.
 
-The theory work must derive the corresponding estimation crossover and connect
-it to the non-additive unique-capture objective. Shared actions can increase
+is a special case. For the actual local particle averages, `B` is a double sum
+of the declared field covariance over both sensors' valid particle sets, and
+`Omega` includes their particle-set overlap. Shared actions can increase
 duplicated pursuit, so the yield crossover need not equal the estimator
 crossover. This estimation-gain/action-diversity gap is the intended multi-agent
-mechanism.
+mechanism. `eta` alone is not a universal predictor; geometry and error
+correlation are explicit conditions.
 
 ## Current implementation boundary
 
@@ -80,22 +86,34 @@ The repository already provides fixed-geometry capture, four collectors, causal
 local velocity histories, the three-scalar summary, unique-yield outcomes,
 event-keyed ties, and matched Brownian streams.
 
+SPS-WO-09 now provides:
+
+- an immutable episode-frozen periodic Gaussian field with explicit finite-
+  basis covariance, declared `ell_c`, invariant marginal variance, and a
+  realization checksum;
+- pure independent/all-to-all three-scalar aggregation with an identical
+  encoder and decoder;
+- exact conditional sensing-kernel and overlap-error covariance calculations;
+- deterministic constant, opposing, denoising, permutation, and provenance
+  tests; and
+- a strict message-diagnostic schema.
+
 It does **not** yet provide:
 
-- a field with a formally defined correlation length;
 - receiver-specific graph communication;
-- explicit message/link accounting;
-- message-level estimation and action-diversity logs; or
+- runtime message-level estimation and action-diversity logs; or
 - a matched topology runner.
 
-The existing `vortex_scale` is an envelope width and may not be relabelled as a
-correlation length. No scientific performance seed is authorized until the new
-field, covariance recovery, communication intervention, diagnostics, and matched
-stream microcases pass.
+The existing `vortex_scale` remains ineligible. The new field is callable but
+is not yet integrated through the standard config/environment/runner reset
+path. No scientific performance seed is authorized until that integration and
+matched-stream audit pass. WO-09 ran zero scientific episodes; all scientific
+claims remain unsupported.
 
 ## Mandatory controls
 
-1. capacity-matched independent estimation and all-to-all averaging;
+1. self-only aggregation and all-to-all averaging with the same encoder,
+   decoder, and three-scalar action input;
 2. stationary, pregenerated random, coverage, and density-greedy policies;
 3. privileged true-local-field control and full-state assignment oracle;
 4. shuffled messages and own-estimate duplication;
@@ -107,12 +125,12 @@ stream microcases pass.
 
 ## Immediate dependency order
 
-1. finish the primary-literature veto and formal derivation;
-2. implement and validate an episode-frozen field with declared `ell_c`;
-3. implement the pure three-scalar aggregation channel and diagnostics;
-4. pass deterministic constant-field, opposing-region, denoising,
-   permutation, bandwidth, and matched-stream tests;
-5. freeze the `eta` grid, effect threshold, inference, seed cap, and stopping
+1. close the primary-literature veto;
+2. wire the tested frozen field through config/environment/reset paths;
+3. implement runtime message diagnostics and matched-stream provenance;
+4. deterministically audit clipping, reflection, missing-summary fallback, and
+   moving-geometry effects;
+5. only then freeze the `eta` grid, effect threshold, inference, seed cap, and stopping
    rule;
 6. execute one fresh CPU diagnostic;
 7. kill or preregister a separate independent confirmation.

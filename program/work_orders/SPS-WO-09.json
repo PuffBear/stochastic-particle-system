@@ -71,5 +71,13 @@
   "positive_interpretation": "Authorize a separate preregistration work order to freeze eta grid, practical threshold, simultaneous inference, fresh seeds, and a bounded CPU diagnostic. This work order itself cannot support SPS-C04.",
   "null_interpretation": "Kill or redesign the phase-boundary question before scientific compute.",
   "reversed_interpretation": "Reject the one-boundary theory; do not fit a post-hoc non-monotone story.",
-  "scientific_status": "authorized theory and deterministic engineering only; no scientific seeds"
+  "gate_outcome": {
+    "theory": "conditional pass: general covariance derivation and a defensible point-sensor crossover exist, but eta is not geometry invariant",
+    "field": "pass: immutable periodic Gaussian field has exact finite-basis covariance, declared ell_c, invariant marginal variance, and canonical fingerprint",
+    "communication": "pass: self-only and all-to-all arms share one three-scalar encoder/decoder and differ only in aggregation",
+    "mechanism_microcases": "pass: constant, opposing-region, homogeneous-noise, correlated-error, sensing-overlap, and permutation tests",
+    "runtime_integration": "blocked by original allowlist: config, environment reset, matched runner, and runtime diagnostic logging require a successor work order",
+    "scientific_claim": "unsupported; zero scientific episodes"
+  },
+  "scientific_status": "completed conditional theory and deterministic engineering gate; no scientific seeds; standard runner integration remains blocked"
 }

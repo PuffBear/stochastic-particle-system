@@ -5,6 +5,7 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from .communication import aggregate_three_scalar_messages
 from .dynamics.fields import field_velocity
 from .observations import LocalObservation
 
@@ -161,17 +162,28 @@ def bounded_team_velocity_summary(
         summaries = np.delete(summaries, leave_out_agent, axis=0)
     if summaries.shape[0] == 0:
         return np.zeros(3, dtype=np.float64)
-    return np.clip(np.mean(summaries, axis=0), -1.0, 1.0)
+    received = aggregate_three_scalar_messages(summaries, mode="all_to_all")
+    return received[0]
 
 
 def capacity_matched_velocity_controller(
     observations: tuple[LocalObservation, ...], *, shared: bool
 ) -> NDArray[np.float64]:
-    """Identical-shape controller using either local or shared three slots."""
-    team = bounded_team_velocity_summary(observations) if shared else None
+    """Identical controller using local or all-to-all three-scalar inputs.
+
+    The observation-to-message encoder and action decoder are shared exactly;
+    only the pure aggregation map in :mod:`particle_benchmark.communication`
+    changes between arms.
+    """
+    if len(observations) == 0:
+        raise ValueError("at least one observation is required")
+    sent = np.stack([local_velocity_summary(obs) for obs in observations])
+    received = aggregate_three_scalar_messages(
+        sent, mode="all_to_all" if shared else "independent"
+    )
     actions = np.zeros((len(observations), 2), dtype=np.float64)
     for agent_id, observation in enumerate(observations):
-        message = team if shared else local_velocity_summary(observation)
+        message = received[agent_id]
         if message[2] > 0.0:
             actions[agent_id] = _unit(-message[:2])
         else:

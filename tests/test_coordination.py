@@ -5,10 +5,19 @@ CommNet ablation tests are skipped automatically if PyTorch is not installed.
 
 from __future__ import annotations
 
+import unittest
+
 import numpy as np
 import pytest
 
+try:
+    import torch as _torch
+except ImportError:  # Optional MARL dependency is not needed by SPS-WO-09.
+    _torch = None
+
 from particle_benchmark.metrics.coordination import (
+    global_minus_local_estimator_risk,
+    sensed_summary_covariances,
     ce_report,
     per_seed_ce,
     spatial_coverage_metrics,
@@ -16,6 +25,95 @@ from particle_benchmark.metrics.coordination import (
     upstream_alignment_score,
     validate_execution_time_ablation,
 )
+
+
+# ---------------------------------------------------------------------------
+# general estimator-risk decomposition
+# ---------------------------------------------------------------------------
+
+class TestGeneralEstimatorRisk(unittest.TestCase):
+
+    def test_sensing_kernel_and_overlap_covariances_are_exact(self):
+        positions = np.array([[0.0, 0.0], [1.0, 0.0], [2.0, 0.0]])
+        visible = np.array(
+            [[True, True, False], [False, True, True]], dtype=bool
+        )
+
+        def covariance(displacements):
+            delta = np.asarray(displacements)
+            return np.exp(-0.5 * np.sum(delta**2, axis=1))
+
+        latent, noise = sensed_summary_covariances(
+            positions,
+            visible,
+            covariance,
+            apparent_velocity_noise_variance=0.8,
+        )
+        e1 = np.exp(-0.5)
+        e2 = np.exp(-2.0)
+        expected_latent = np.array(
+            [[(2.0 + 2.0 * e1) / 4.0, (1.0 + 2.0 * e1 + e2) / 4.0],
+             [(1.0 + 2.0 * e1 + e2) / 4.0, (2.0 + 2.0 * e1) / 4.0]]
+        )
+        np.testing.assert_allclose(latent, expected_latent)
+        np.testing.assert_allclose(noise, [[0.4, 0.2], [0.2, 0.4]])
+
+    def test_sensing_kernel_rejects_empty_or_non_boolean_visibility(self):
+        positions = np.array([[0.0, 0.0]])
+        covariance = lambda displacements: np.ones(len(displacements))
+        with pytest.raises(ValueError, match="at least one valid particle"):
+            sensed_summary_covariances(
+                positions,
+                np.array([[False]], dtype=bool),
+                covariance,
+                apparent_velocity_noise_variance=1.0,
+            )
+        with pytest.raises(ValueError, match="must be boolean"):
+            sensed_summary_covariances(
+                positions,
+                np.array([[1]], dtype=int),
+                covariance,
+                apparent_velocity_noise_variance=1.0,
+            )
+
+    def test_recovers_iid_scalar_formula(self):
+        count = 4
+        sigma2 = 0.7
+        tau2 = 0.3
+        correlation = np.array(
+            [
+                [1.0, 0.4, 0.2, 0.1],
+                [0.4, 1.0, 0.3, 0.2],
+                [0.2, 0.3, 1.0, 0.5],
+                [0.1, 0.2, 0.5, 1.0],
+            ]
+        )
+        latent = sigma2 * correlation
+        iid_noise = tau2 * np.eye(count)
+        expected = (
+            sigma2 * (1.0 - float(np.sum(correlation)) / count**2)
+            - tau2 * (1.0 - 1.0 / count)
+        )
+        assert global_minus_local_estimator_risk(latent, iid_noise) == pytest.approx(
+            expected
+        )
+
+    def test_correlated_errors_reduce_pooling_benefit(self):
+        count = 4
+        latent = np.full((count, count), 0.8)
+        np.fill_diagonal(latent, 1.0)
+        iid = 0.4 * np.eye(count)
+        common = np.full((count, count), 0.4)
+        iid_risk = global_minus_local_estimator_risk(latent, iid)
+        common_risk = global_minus_local_estimator_risk(latent, common)
+        assert iid_risk < common_risk
+        assert common_risk == pytest.approx(0.15)
+
+    def test_rejects_non_covariance_input(self):
+        with pytest.raises(ValueError, match="positive semidefinite"):
+            global_minus_local_estimator_risk(
+                np.array([[1.0, 2.0], [2.0, 1.0]]), np.eye(2)
+            )
 
 
 # ---------------------------------------------------------------------------
@@ -389,7 +487,11 @@ class TestSpatialCoverageMetrics:
 
 class TestCommNetAblation:
 
-    torch = pytest.importorskip("torch")
+    torch = _torch
+
+    def setup_method(self):
+        if self.torch is None:
+            pytest.skip("torch is not installed")
 
     def test_ablated_actions_shape(self):
         from particle_benchmark.environment import ParticleCollectorEnv, ParticleEnvConfig

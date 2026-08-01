@@ -69,6 +69,40 @@ class TestFrozenPolicies(unittest.TestCase):
             permuted = capacity_matched_velocity_controller((b, a), shared=shared)
             self.assertEqual(original.shape, (2, 2))
             np.testing.assert_allclose(original, permuted[::-1])
+
+    def test_constant_velocity_microcase_has_identical_actions(self) -> None:
+        observations = tuple(
+            _observation(
+                relative=[[1.0, 0.0]],
+                velocities=[[0.6, -0.2]],
+                valid=[True],
+            )
+            for _ in range(4)
+        )
+        independent = capacity_matched_velocity_controller(
+            observations, shared=False
+        )
+        global_mean = capacity_matched_velocity_controller(
+            observations, shared=True
+        )
+        np.testing.assert_array_equal(independent, global_mean)
+
+    def test_opposing_regions_preserve_local_actions_but_global_mean_stalls(self) -> None:
+        observations = tuple(
+            _observation(
+                relative=[[1.0, 0.0]], velocities=[[velocity, 0.0]], valid=[True]
+            )
+            for velocity in (1.0, 1.0, -1.0, -1.0)
+        )
+        independent = capacity_matched_velocity_controller(
+            observations, shared=False
+        )
+        global_mean = capacity_matched_velocity_controller(
+            observations, shared=True
+        )
+        np.testing.assert_array_equal(independent[:, 0], [-1.0, -1.0, 1.0, 1.0])
+        np.testing.assert_array_equal(global_mean, 0.0)
+
     def test_local_flow_moves_against_valid_mean_only(self) -> None:
         observation = _observation(
             relative=[[1.0, 0.0], [0.0, 1.0]],
