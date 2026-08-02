@@ -12,9 +12,8 @@
 # Output/error logs are set dynamically by submit_all.sh via -o/-e flags.
 
 # --- Environment ---
-module load Anaconda3
 source "$(conda info --base)/etc/profile.d/conda.sh"
-conda activate sps-marl
+conda activate marl
 
 # --- Working directory ---
 cd "$HOME/sps/stochastic-particle-system"
