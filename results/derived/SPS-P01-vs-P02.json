@@ -1,9 +1,0 @@
-{
-  "changed_examples": [],
-  "changed_first_interception_outcomes": 0,
-  "comparison": "SPS-P01 guarded-reflection diagnostic vs SPS-P02 exact specular-reflection repair",
-  "guarded_reflection_pairs_after": 0,
-  "guarded_reflection_pairs_before": 28929,
-  "interpretation": "Same calibration seeds; this is a correctness regression comparison, not independent confirmation.",
-  "pair_count": 144
-}
