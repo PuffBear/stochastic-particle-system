@@ -1,10 +1,30 @@
 # Preregistration: SPS-C03 Coordination Diagnostic
 
 **Date:** 2026-07-31
-**Status:** PREREGISTERED — not yet executed
+**Status:** CONFIRMED (executed and passed 2026-08-01)
 **Experiment ID:** SPS-C03-COORDINATION-DIAGNOSTIC
 **Registered by:** [research team]
 **Upstream gate required:** SPS-WO-06 (coupled-noise timestep convergence for unique yield)
+
+## OUTCOME (added 2026-08-01)
+
+**Result: CONFIRMED.** Pre-registered one-sided studentized-bootstrap 95% lower confidence bound = **+0.459 > 0**.
+
+| Metric | Value |
+|---|---|
+| Seeds | 6001–6032 (32 confirmation seeds) |
+| Policy pair | shared_summary_v2 vs capacity_matched_independent |
+| Mean Δ_s | +1.19 unique particles |
+| SD | 2.44 |
+| Seeds positive | 20/32 |
+| LCB (one-sided 95% bootstrap) | +0.459 |
+| Gate | PASSED |
+
+All three gate components passed: (1) correctness and matched-stream verification, (2) lower bound strictly positive, (3) minimum relevant effect met.
+
+Note: The diagnostic gate originally specified `shared_summary` (v1). Prior to the confirmation run, v1 was replaced with `shared_summary_v2` following an informative failure (SPS-WO-07, 4/8 positive) traced to equal-weight averaging and correlated team failure. The v2 fix (count-weighted mean, field+density blend) passed a re-diagnostic (SPS-WO-07B, seeds 5001–5008, 7/8 positive, mean=+2.63). Seeds 4001–4008 (WO-07) and 5001–5008 (WO-07B) remain permanently diagnostic-only. The confirmation used seeds 6001–6032 (fresh, not previously examined).
+
+---
 
 ---
 

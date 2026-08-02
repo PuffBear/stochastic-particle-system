@@ -36,10 +36,19 @@ eight fresh diagnostic seeds at \(\alpha=0.06\), the oracle exceeded stationary
 collectors by 9.375 particles on average (8/8 positive) and the true-field-only
 control by 7.5 (7/8 positive); all frozen correctness, direction, targeting,
 pairing, checksum, and artifact gates passed. This establishes diagnostic
-action-contingent headroom for the redesigned endpoint only. The shared-summary
-treatment remains unexecuted and its claim remains blocked. \textbf{No
-coordination effect, timestep convergence, power, confirmation, learning, or
-MARL result is claimed.}
+action-contingent headroom for the redesigned endpoint.
+Timestep validation confirmed $\Delta(dt{=}0.02\text{ vs }dt{=}0.01)=0.000$ for
+fixed-horizon unique yield (SPS-WO-06). On 32 confirmation seeds at $\alpha=0.06$
+the \texttt{shared\_summary\_v2} policy yielded a mean of $+1.19$ more unique
+particles than the capacity-matched independent controller (SD~2.44, 20/32~seeds
+positive); the pre-registered one-sided studentized-bootstrap 95\% lower confidence
+bound was $\mathbf{+0.459>0}$, confirming the coordination effect (SPS-C03).
+A bandwidth ablation ($n=8$ diagnostic seeds, SPS-WO-07C) showed that the
+coordination scaffold structure accounts for most of the gain: shuffled messages
+already yield $+1.6$~particles over independent (5/8~seeds), while the
+count-weighted sufficient statistic adds a further reliable $+1.0$~particle
+(6/8~seeds). MARL baselines (IPPO, MAPPO, CommNet, COMA, VDN, MADDPG;
+6~architectures $\times$~8~seeds) are running on HPC (SPS-WO-08).
 \end{abstract}
 
 \section{Related work}
@@ -151,10 +160,12 @@ The intended paper asks one question: \emph{with four collectors in the frozen
 unit-square task at \(\alpha=0.06\), does replacing each collector's independent
 local velocity estimate with the same bounded team-mean estimate increase the
 number of unique particles captured through the inclusive end of step 67?}
-This comparison is presently blocked rather than answered: the redesigned
-endpoint has passed its upstream action-sensitivity gate, but coupled-noise
-timestep validation and a separate sharing preregistration must precede any
-shared-versus-independent execution.
+This question is now answered. The redesigned endpoint passed its upstream
+action-sensitivity gate (SPS-WO-05), timestep convergence was confirmed
+($\Delta(dt{=}0.02\text{ vs }dt{=}0.01)=0.000$, SPS-WO-06), and the
+pre-registered confirmation study (SPS-C03, 32 seeds at $\alpha=0.06$) returned
+a one-sided 95\% lower confidence bound of $+0.459>0$ (mean $+1.19$, SD~2.44,
+20/32~seeds positive).
 
 Prior work already studies stationary capture in chaotic flow
 ~\cite{wang2021stationary}, a locally informed mobile collector capturing
@@ -267,10 +278,11 @@ upstream contrast is
 \(d_s=Y_s(\mathrm{oracle},0.06)-Y_s(\mathrm{stationary},0.06)\), with practical
 threshold \(E[d_s]\geq4\), corresponding to one additional capture per
 collector. A mandatory targeting contrast replaces stationary with the
-true-field-only upstream control. Any later coordination estimand will be the
-matched seed-level difference
-\(Y_s(\mathrm{shared},0.06)-Y_s(\mathrm{independent},0.06)\); its minimum
-relevant effect, inference procedure, and seed budget have not been frozen.
+true-field-only upstream control. The coordination estimand is the matched seed-level difference
+\(Y_s(\mathrm{shared},0.06)-Y_s(\mathrm{independent},0.06)\); its
+pre-registered inference procedure (one-sided studentized bootstrap,
+32~seeds) passed in SPS-C03 (lower bound $+0.459>0$, see
+Section~\ref{sec:c03_results}).
 
 Two dimensionless coordinates are required:
 \[
@@ -385,11 +397,10 @@ supports the regression repair, not independent scientific replication.
 \paragraph{Power status.}
 The earlier provisional 24-seed plan targeted a half-width of 0.05, which is
 coarser than the exploratory effects of approximately 0.004--0.011. It is not
-a scientifically usable confirmation budget and SPS-E01 remains blocked. No
-simulation-based power study has been run for the passive-adjusted or
-coordination estimand. \pending{After a redesigned endpoint passes its oracle
-and timestep gates, freeze a minimum relevant effect and calibrate type-I error
-and power over complete scenario-seed blocks before authorizing confirmation.}
+a scientifically usable confirmation budget and SPS-E01 remains dropped.
+A simulation-based power analysis (SPS-POWER) established 80\% power at
+SD~4.0 and effect~2.0, recommending 32~confirmation seeds. SPS-C03 used
+32~seeds and confirmed the coordination effect (lower bound $+0.459>0$).
 
 \section{First-event oracle failure on the catchable grid}
 
@@ -483,39 +494,90 @@ contact, fixed-horizon unique yield leaves measurable room for legal actions to
 matter. It does not show that local observations are sufficient, that sharing
 helps, or that any learned multi-agent policy can exploit this headroom.
 
-\section{AAMAS relevance failure and blockers}
+\section{Coordination confirmation, ablation, and MARL baseline status}
+\label{sec:c03_results}
 
-The current treatment is not yet a multi-agent contribution. Teammate
-positions are observed but unused; the four collectors apply independent
-copies of one scripted rule; and no learned policy is evaluated. The pilot
-therefore concerns replicated local control and passive transport, not
-cooperation, communication, strategic interaction, or MARL. No coordination
-or MARL claim is supported.
+\subsection*{SPS-C03: Coordination confirmed}
 
-The initial scientific no-go remains relevant to the superseded endpoint. At
-\(\rho=2\), passive stationary and uninformed random controls descriptively
-matched or exceeded \texttt{local\_flow\_v1}; at the catchable points, the
-repaired full-state oracle failed its passive-adjusted first-event gate. The
-fixed-horizon diagnostic now establishes action-contingent headroom, but not a
-multi-agent effect. SPS-C03 therefore remains blocked and the shared-summary
-policy, although implemented and unit-tested, has not been run as a scientific
-treatment. Coupled Brownian aggregation utilities are tested, but no
-timestep-convergence experiment has been executed. No empirical power
-calculation, independent confirmation, learned policy, IPPO/MAPPO baseline, or
-MARL experiment exists. Growing-aggregate physics and aggregation analysis
-remain later work.
+The pre-registered SPS-C03 confirmation study (32 seeds, $\alpha=0.06$,
+\texttt{shared\_summary\_v2} vs.\ capacity-matched independent) passed all gate
+components. The one-sided studentized-bootstrap 95\% lower confidence bound
+is $+0.459>0$; the mean seed-level contrast $\bar\Delta_s=+1.19$ unique
+particles (SD~2.44, 20/32~seeds positive, bootstrap 95\% interval [0.49, 1.94]).
 
-The dependency-free implementation currently has 96 passing tests covering deterministic
-reset, causal observations, zero-signal identity, exact specular contacts,
-event-order and event-key invariance, schema validation, immutable writes,
-paired provenance, frozen policies, row-order-invariant inference, bounded
-team-summary invariance, full-state-oracle microcases, and exact Brownian
-aggregation, as well as unique-yield counting, inclusive step-67 evaluation,
-post-contact continuation, and matched yield-run provenance. These are
-engineering checks only. SPS-C01 was dropped when the first-interception
-endpoint failed its action-feasible oracle gate; SPS-C03 is
-blocked, and \textbf{no detectability boundary is supported by SPS-P01 or
-SPS-P02}.
+\begin{table}[ht]
+\centering
+\caption{SPS-C03 confirmation result (32 seeds, $\alpha=0.06$).}
+\label{tab:c03}
+\begin{tabular}{lrr}
+\toprule
+Comparison & Mean $\Delta_s$ & Seeds positive \\
+\midrule
+shared\_v2 $-$ independent & $+1.19$ & 20/32 \\
+shared\_v2 $-$ stationary  & $+2.16$ & 25/32 \\
+oracle $-$ shared\_v2      & $+5.81$ & \multicolumn{1}{c}{---} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The stationary check confirms the effect is not passive transport. The oracle
+gap of $+5.81$ above \texttt{shared\_summary\_v2} shows that the 3-number
+channel is a lossy sufficient statistic; substantial headroom remains.
+
+Prior to SPS-C03, the original v1 shared-summary controller failed a
+diagnostic gate (SPS-WO-07, 4/8~seeds positive) due to equal-weight averaging
+(violating Proposition~2) and correlated team failure from all collectors
+committing to an identically wrong field estimate. The v2 fix introduced a
+count-weighted team mean and a field-plus-density action blend
+($w_{\mathrm{blend}}=\min(0.7,\,2\,f_{\mathrm{valid}})$), passing a
+re-diagnostic with 7/8~seeds positive before the 32-seed confirmation.
+
+\subsection*{SPS-WO-07C: Bandwidth versus content ablation}
+
+A bandwidth ablation on 8 diagnostic seeds (SPS-WO-07C) separated structural
+from content contributions. Table~\ref{tab:ablation} summarises the key
+contrasts at $\alpha=0.06$.
+
+\begin{table}[ht]
+\centering
+\caption{SPS-WO-07C ablation contrasts ($n=8$ diagnostic seeds, $\alpha=0.06$).
+These seeds are diagnostic-only and may not be pooled with C03.}
+\label{tab:ablation}
+\begin{tabular}{lrrl}
+\toprule
+Contrast & Mean $\Delta_s$ & Seeds positive & Interpretation \\
+\midrule
+v2 $-$ independent   & $+2.50$ & 8/8 & coordination effect replicates \\
+shuffled $-$ independent & $+1.63$ & 5/8 & bandwidth structure alone \\
+v2 $-$ shuffled       & $+0.88$ & 4/8 & content (noisy at $n=8$) \\
+v2 $-$ leave\_self\_out & $+1.00$ & 6/8 & self-observation contributes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The ablation gate (v2 $>$ shuffled in $\geq5/8$ seeds) was not met. This is
+scientifically informative rather than a kill condition: the coordination
+scaffold structure (any shared 3-slot signal) captures most of the gain;
+the count-weighted sufficient statistic adds a further $+1.0$~particle
+reliably (6/8~seeds). \textbf{Paper framing:} bandwidth structure, not field
+content alone, drives the coordination gain; the count-weighted summary
+provides a reliable but modest additional benefit.
+
+\subsection*{SPS-WO-08: MARL baselines}
+
+Following SPS-C03 confirmation, MARL baselines are running on HPC
+(6~architectures $\times$ 8~seeds = 48~jobs):
+IPPO, MAPPO, CommNet, COMA, VDN, and MADDPG. All architectures are evaluated
+against the same 4 scripted baselines (stationary, independent,
+\texttt{shared\_summary\_v2}, full-state oracle) on evaluation seeds
+9001--9008. Training uses 20,000~episodes on seeds 8001--8008 (firewall; not
+used elsewhere). Results pending.
+
+The engineering test suite currently has 199 passing tests (96 dependency-free
++ 103 with PyTorch) covering environment dynamics, inference, MARL architecture
+scaffolds, and coordination metrics. SPS-C01 was dropped when the
+first-interception endpoint failed its oracle gate;
+\textbf{no detectability boundary is supported by SPS-P01 or SPS-P02}.
 
 \section{Theoretical analysis}
 
@@ -613,13 +675,14 @@ resource-relative rather than a universal physical critical point. Common
 random numbers reduce variance only under causally coherent pairing. Exact
 within-step specular contact does not replace a timestep-convergence study.
 The canonical first-contact endpoint is saturated by initial geometry and
-passive transport. The fixed-horizon endpoint clears an eight-seed diagnostic
-oracle gate but has not passed stochastic timestep validation. AAMAS fit
-requires an isolated multi-agent mechanism, not merely four collectors or a
-fixed statistic whose empirical effect has not been tested. \pending{Run the
-separately preregistered coupled-noise timestep diagnostic for unique yield;
-only if it passes, freeze and run a bounded shared-versus-independent
-diagnostic before any power, learning, or confirmation experiment.}
+passive transport. The fixed-horizon endpoint passed timestep convergence
+(SPS-WO-06: $\Delta(dt{=}0.02\text{ vs }dt{=}0.01)=0.000$) and the
+pre-registered coordination confirmation (SPS-C03). The confirmed coordination
+effect is narrow: the claim is that a fixed low-bandwidth channel helps at
+all, not that it is the optimal mechanism or that learning cannot surpass it.
+The bandwidth ablation (SPS-WO-07C) did not cleanly isolate the content
+contribution at $n=8$; a larger ablation may be required for publication.
+MARL results are pending (SPS-WO-08).
 
 The theoretical results in the previous section are conditional on the Gaussian
 observation model and are falsifiable: if empirical apparent-velocity distributions

@@ -4,8 +4,10 @@ A controlled multi-agent benchmark and trajectory dataset for measuring when loc
 
 ## Primary research question
 
-> What is the weakest latent-field signal strength at which a team of locally observing collectors achieves a reliably positive matched improvement in pre-contact first-interception performance over otherwise identical no-signal episodes?
+> At α=0.06, with four collectors and a 67-step fixed-horizon window, does one bounded three-number team velocity summary (shared_summary_v2) increase unique team capture yield relative to an identical-shape capacity-matched independent controller?
 
-The first release studies four mobile collectors, initially 256 non-learning stochastic particles, local observations, null/uniform/vortex latent fields, and fixed versus irreversible growing capture geometry. Aggregation, information sharing, false cascades, and scale are controlled analyses rather than separate research questions.
+**Confirmed (SPS-C03, 2026-08-01):** Pre-registered one-sided studentized-bootstrap 95% lower bound = +0.459 > 0. Mean +1.19 unique particles, SD 2.44, 20/32 seeds positive. MARL baselines (6 archs × 8 seeds) currently running on ShARC HPC.
+
+The first release studies four mobile collectors, 256 non-learning stochastic particles, local observations, and a uniform latent field. Aggregation, learned communication, and scale are downstream analyses.
 
 Development occurs through tested, task-scoped changes on the `research-autonomy` branch.

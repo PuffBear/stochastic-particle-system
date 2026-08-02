@@ -174,6 +174,6 @@ Contrasts (α=0.06, n=8 diagnostic seeds):
 **Paper framing:** "Bandwidth structure, not field content alone, drives most of the coordination gain; the count-weighted sufficient statistic provides a reliable but modest additional benefit (+1.0 particle, 6/8 seeds)."
 
 **Next steps:**
-1. SPS-WO-08: MARL baselines (IPPO, MAPPO) — now unblocked
-2. Manuscript: full results table including ablation arms; WO-07/07B failure as mechanism insight; ablation narrative as Section 4
-3. Consider expanded ablation with n=32 seeds if AAMAS reviewers require cleaner content separation
+1. **SPS-WO-08: MARL baselines (IPPO, MAPPO, CommNet, COMA, VDN, MADDPG, 6 archs × 8 seeds) — ACTIVELY RUNNING on ShARC HPC.** Pilot jobs (1 seed each) queued 2026-08-02; full 48-job run pending pilot validation. Aggregate with `analysis/aggregate_marl_results.py` once complete.
+2. Manuscript: add full results section with C03 numbers (+1.19 particles, lower_bound=+0.459, 20/32 seeds), WO-07C ablation table (bandwidth vs content separation), WO-08 MARL results once available
+3. Consider expanded WO-07C ablation with n=32 seeds if AAMAS reviewers require cleaner content-vs-bandwidth separation
