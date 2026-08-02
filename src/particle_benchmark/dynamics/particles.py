@@ -30,8 +30,17 @@ def advance_free_particles(
     field_family: str,
     signal_strength: float,
     field_kwargs: dict[str, object] | None = None,
-) -> NDArray[np.float64]:
-    """Advance one time step under the benchmark's noise convention."""
+    return_unfolded: bool = False,
+) -> NDArray[np.float64] | tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Advance one time step under the benchmark's noise convention.
+
+    Parameters
+    ----------
+    return_unfolded:
+        If True, return (reflected_positions, unfolded_proposals) so callers
+        can pass the unfolded positions to swept-capture geometry without
+        duplicating the arithmetic and risking floating-point divergence.
+    """
     pos = np.asarray(positions, dtype=np.float64)
     forcing = np.asarray(epsilon, dtype=np.float64)
     if pos.shape != forcing.shape or pos.ndim != 2 or pos.shape[1] != 2:
@@ -49,7 +58,10 @@ def advance_free_particles(
         + dt * velocity
         + diffusion_sigma * np.sqrt(dt) * forcing
     )
-    return reflect(proposed, np.asarray(arena_size, dtype=np.float64))
+    reflected = reflect(proposed, np.asarray(arena_size, dtype=np.float64))
+    if return_unfolded:
+        return reflected, proposed
+    return reflected
 
 
 def simulate_matched_pair(

@@ -249,18 +249,7 @@ class ParticleCollectorEnv:
                 self.config.signal_strength,
                 **self._episode_field_kwargs,
             )
-            raw_particle_end = (
-                prior_particles[free]
-                + self.config.dt * free_velocity
-                + self.config.diffusion_sigma
-                * np.sqrt(self.config.dt)
-                * self._noise[self.step_count, free]
-            )
-            particle_reflected[free] = np.any(
-                (raw_particle_end < 0.0) | (raw_particle_end > arena), axis=1
-            )
-            particle_unfolded_end[free] = raw_particle_end
-            self.particle_positions[free] = advance_free_particles(
+            new_pos, raw_particle_end = advance_free_particles(
                 self.particle_positions[free],
                 self._noise[self.step_count, free],
                 dt=self.config.dt,
@@ -269,7 +258,13 @@ class ParticleCollectorEnv:
                 field_family=self.config.field_family,
                 signal_strength=self.config.signal_strength,
                 field_kwargs=self._episode_field_kwargs,
+                return_unfolded=True,
             )
+            particle_reflected[free] = np.any(
+                (raw_particle_end < 0.0) | (raw_particle_end > arena), axis=1
+            )
+            particle_unfolded_end[free] = raw_particle_end
+            self.particle_positions[free] = new_pos
         self._particle_velocities = (
             self.particle_positions - prior_particles
         ) / self.config.dt
