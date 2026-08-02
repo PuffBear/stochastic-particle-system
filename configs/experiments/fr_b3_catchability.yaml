@@ -1,5 +1,5 @@
 experiment_id: FR-B3-CATCHABILITY
-protocol_status: proposed_not_preregistered
+protocol_status: registered
 
 # Fresh common random numbers across every factorial cell. SPS-C03 seeds
 # (6001-6032) remain historical evidence and are not reused inferentially.

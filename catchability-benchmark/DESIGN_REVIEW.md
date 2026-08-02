@@ -15,9 +15,10 @@ under zero cross-cell correlation and 95.0% at correlation 0.25, while producing
 no false rejection in 500 simulated null studies for either setting.
 
 **Recommendation:** approve the axis grid; approve 64 fresh common seeds; replace
-the old rule with the revised practical-plus-statistical gate. The protocol
-remains `proposed_not_preregistered` until a human advisor signs off and the
-document is externally timestamped.
+the old rule with the revised practical-plus-statistical gate. The author
+confirmed the complete checklist on 3 August 2026, and the protocol is
+externally timestamped by its registration commit on
+`fr-b3-catchability-benchmark`.
 
 ## The axis grid spans the intended dynamical regimes
 
@@ -119,12 +120,16 @@ proof that `(rho, kappa)` are sufficient.
 
 ## Human sign-off checklist
 
-- [ ] Confirm that a broad one-capture high-versus-low `eta` effect is the
+- [x] Confirm that a broad one-capture high-versus-low `eta` effect is the
   smallest scientifically meaningful target.
-- [ ] Accept 64 seeds per cell and the resulting 6,912-episode budget.
-- [ ] Accept the two-part predictive decision rule.
-- [ ] Accept that sparse cell-specific `eta` effects are exploratory.
-- [ ] Externally timestamp the approved protocol.
-- [ ] Change `protocol_status` to `registered` only after the preceding items.
+- [x] Accept 64 seeds per cell and the resulting 6,912-episode budget.
+- [x] Accept the two-part predictive decision rule.
+- [x] Accept that sparse cell-specific `eta` effects are exploratory.
+- [x] Externally timestamp the approved protocol.
+- [x] Change `protocol_status` to `registered` only after the preceding items.
 
-No frozen factorial seed should be executed before all six items are resolved.
+**Sign-off record:** confirmed by Agriya Yadav in the project thread on
+3 August 2026. The corresponding Git commit is the external timestamp.
+
+All six items were resolved before any frozen rescaling-audit or factorial seed
+was executed.

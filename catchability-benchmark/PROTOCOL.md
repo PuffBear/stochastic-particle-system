@@ -1,7 +1,13 @@
 # FR-B3 Candidate Protocol
 
-**Status:** proposed; not externally preregistered; no FR-B3 registered seeds
-have been run.
+**Status:** registered on 3 August 2026 through the immutable Git history of
+`fr-b3-catchability-benchmark`; no FR-B3 registered seeds have been run at the
+time of registration.
+
+The author confirmed the complete design-review checklist before registration.
+The registration commit freezes the axis grid, seed panels, policy arms,
+decision rule, and analysis settings below. Its full commit SHA must be recorded
+in every frozen-run manifest.
 
 Development seed 7201 was used once for a local runner smoke test and is
 explicitly excluded from the candidate rescaling-audit panel.
