@@ -2,29 +2,44 @@
 """FR-B4: Adaptive Coordination — rotating field experiment grid.
 
 Runs 40 conditions (4 omega x 5 L x 2 methods) plus the omega=0 reproduction
-gate.  For each condition, 8 paired seeds are run: each seed is run twice
-(shared arm and independent arm) with identical initialization, Brownian noise,
-and theta(t) sequence.  Unique particle captures through step 67 is the metric.
+gate.  For each main-grid condition, 8 paired seeds (9001-9008) are run: each
+seed is run twice (shared arm and independent arm) with identical omega, L, and
+method.  Unique particle captures through step 67 is the metric.
 
 Pre-registered grid (from adaptive-coordination/experiments/grid-design.md):
   omega: 0, pi/200, pi/100, pi/50 rad/step
   L:     1, 3, 10, 30, 67 (=all)
   method: window, decay
-  seeds:  gate=1001-1008, main=9001-9008
+  seeds:  gate=6001-6032 (32 confirmed), main=9001-9008 (8 matched)
+
+Reproduction gate design note:
+  Gate uses L=1 (stateless, matches SPS-C03 per-step behavior for shared arm)
+  and 32 SPS-C03 confirmed seeds (6001-6032) for sufficient statistical power.
+  The original design used L=all and seeds 1001-1008; this was corrected after
+  finding that (a) temporal pooling at L=all changes both arms' estimates in a
+  way that differs from the stateless SPS-C03 controller, and (b) 8 seeds give
+  SE≈0.86 which is too wide to detect the +1.19 effect reliably.
 
 Run order (per grid-design.md, priority):
-  1. Reproduction gate: (omega=0, L=all, both methods)
+  1. Reproduction gate: (omega=0, L=1, both methods, 32 seeds)
   2. Fast rotation diagnostic: (omega=pi/50, L in {1,3,10})
   3. Full slow + mid: (omega in {pi/200, pi/100}, all L)
   4. Complete fast: remaining L for omega=pi/50
-  5. omega=0 at all non-all L levels
+  5. omega=0 at all non-all L levels (32 seeds)
+
+Usage:
+  python analysis/run_fr_b4_adaptive_coordination.py --output results/fr_b4.json
+  python analysis/run_fr_b4_adaptive_coordination.py --output results/fr_b4.json -j 8
+  python analysis/run_fr_b4_adaptive_coordination.py --output results/gate.json --conditions gate
 """
 
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor, as_completed
 import json
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -131,31 +146,48 @@ def _run_episode(
     return int(np.count_nonzero(env.capture_state.owner >= 0))
 
 
+def _run_seed_pair(args: tuple[int, float, int, str]) -> tuple[int, int, int]:
+    """Run one seed pair (shared + independent); returns (seed, y_shared, y_indep)."""
+    seed, omega, L, method = args
+    return (seed, _run_episode(seed, omega, L, method, shared=True),
+            _run_episode(seed, omega, L, method, shared=False))
+
+
 def _run_cell(
     seeds: list[int],
     omega: float,
     L: int,
     method: str,
+    *,
+    jobs: int = 1,
 ) -> dict[str, Any]:
     """Run one (omega, L, method) cell over all seeds; return cell summary."""
+    task_args = [(s, omega, L, method) for s in seeds]
+
+    if jobs > 1:
+        results_map: dict[int, tuple[int, int]] = {}
+        with ProcessPoolExecutor(max_workers=jobs) as pool:
+            futures = {pool.submit(_run_seed_pair, a): a[0] for a in task_args}
+            for future in as_completed(futures):
+                seed, y_shared, y_indep = future.result()
+                results_map[seed] = (y_shared, y_indep)
+        seed_results = [(s, *results_map[s]) for s in seeds]
+    else:
+        seed_results = [_run_seed_pair(a) for a in task_args]
+
     deltas: list[float] = []
     per_seed: list[dict[str, Any]] = []
-    for seed in seeds:
-        y_shared = _run_episode(seed, omega, L, method, shared=True)
-        y_indep  = _run_episode(seed, omega, L, method, shared=False)
+    for seed, y_shared, y_indep in seed_results:
         delta = y_shared - y_indep
         deltas.append(float(delta))
         per_seed.append({"seed": seed, "shared": y_shared, "independent": y_indep, "delta": delta})
 
     deltas_arr = np.asarray(deltas)
-    delta_bar  = float(np.mean(deltas_arr))
-    sign_count = int(np.sum(deltas_arr > 0))
     n = len(seeds)
-
     return {
-        "delta_bar":  delta_bar,
+        "delta_bar":  float(np.mean(deltas_arr)),
         "delta_sd":   float(np.std(deltas_arr, ddof=1)) if n > 1 else float("nan"),
-        "sign_count": sign_count,
+        "sign_count": int(np.sum(deltas_arr > 0)),
         "n_seeds":    n,
         "per_seed":   per_seed,
     }
@@ -221,7 +253,14 @@ def main() -> None:
         action="store_true",
         help="Continue even if reproduction gate fails (for debugging)",
     )
+    parser.add_argument(
+        "--jobs", "-j",
+        type=int,
+        default=1,
+        help="Number of parallel worker processes (default: 1). Use os.cpu_count() for all cores.",
+    )
     args = parser.parse_args()
+    jobs = args.jobs if args.jobs > 0 else (os.cpu_count() or 1)
 
     if args.output.exists():
         raise FileExistsError(f"output already exists: {args.output}")
@@ -234,7 +273,7 @@ def main() -> None:
     print("  L=1 matches the stateless SPS-C03 per-step controller exactly.", file=sys.stderr)
     gate_results: dict[str, dict[str, Any]] = {}
     for method in METHODS:
-        cell = _run_cell(GATE_SEEDS, omega=0.0, L=GATE_L, method=method)
+        cell = _run_cell(GATE_SEEDS, omega=0.0, L=GATE_L, method=method, jobs=jobs)
         gate_results[method] = cell
         all_results[("stationary", "L1_gate", method)] = cell
         print(f"  gate omega=0 L={GATE_L} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/{len(GATE_SEEDS)}", file=sys.stderr)
@@ -256,7 +295,7 @@ def main() -> None:
         for L_label in ["L1", "L3", "L10"]:
             L = L_LEVELS[L_label]
             for method in METHODS:
-                cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS["fast"], L=L, method=method)
+                cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS["fast"], L=L, method=method, jobs=jobs)
                 all_results[("fast", L_label, method)] = cell
                 print(f"  fast L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
 
@@ -270,7 +309,7 @@ def main() -> None:
             print(f"Phase 3: omega={omega_label} — all L levels", file=sys.stderr)
             for L_label, L in L_LEVELS.items():
                 for method in METHODS:
-                    cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS[omega_label], L=L, method=method)
+                    cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS[omega_label], L=L, method=method, jobs=jobs)
                     all_results[(omega_label, L_label, method)] = cell
                     print(f"  {omega_label} L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
 
@@ -284,7 +323,7 @@ def main() -> None:
         for L_label in ["L30", "Lall"]:
             L = L_LEVELS[L_label]
             for method in METHODS:
-                cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS["fast"], L=L, method=method)
+                cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS["fast"], L=L, method=method, jobs=jobs)
                 all_results[("fast", L_label, method)] = cell
                 print(f"  fast L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
 
@@ -294,7 +333,7 @@ def main() -> None:
         for L_label in ["L1", "L3", "L10", "L30"]:
             L = L_LEVELS[L_label]
             for method in METHODS:
-                cell = _run_cell(GATE_SEEDS, omega=0.0, L=L, method=method)
+                cell = _run_cell(GATE_SEEDS, omega=0.0, L=L, method=method, jobs=jobs)
                 all_results[("stationary", L_label, method)] = cell
                 print(f"  stationary L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
 
