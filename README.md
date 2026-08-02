@@ -1,13 +1,21 @@
-# Stochastic Particle System
+# Stochastic Particle System — FR-B3 Branch
 
-A controlled multi-agent benchmark and trajectory dataset for measuring when locally informed collectors can detect and exploit weak structure in stochastic particle motion.
+This branch isolates the FR-B3 catchability question:
 
-## Primary research question
+> Are drift SNR (`rho`) and the drift-to-collector speed ratio (`kappa`)
+> sufficient to predict coordination gain, or must the benchmark also include
+> absolute transport scale (`eta`)?
 
-> At α=0.06, with four collectors and a 67-step fixed-horizon window, does one bounded three-number team velocity summary (shared_summary_v2) increase unique team capture yield relative to an identical-shape capacity-matched independent controller?
+The historical SPS-C03 result supplies one anchor: at `alpha=0.06`,
+`sigma=0.06`, `dt=0.02`, and the **executed** `v_max=0.12`, the bounded shared
+summary improved mean unique capture yield by `+1.1875` over the
+capacity-matched independent controller (one-sided lower bound `+0.4587`, 32
+matched seeds). Its dimensionless coordinates are `rho=0.1414`, `kappa=0.50`,
+and `eta=0.00849`.
 
-**Confirmed (SPS-C03, 2026-08-01):** Pre-registered one-sided studentized-bootstrap 95% lower bound = +0.459 > 0. Mean +1.19 unique particles, SD 2.44, 20/32 seeds positive. MARL baselines (6 archs × 8 seeds) currently running on ShARC HPC.
-
-The first release studies four mobile collectors, 256 non-learning stochastic particles, local observations, and a uniform latent field. Aggregation, learned communication, and scale are downstream analyses.
-
-Development occurs through tested, task-scoped changes on the `research-autonomy` branch.
+FR-B3 tests whether that effect can be predicted across a controlled
+`3 x 3 x 3` dimensionless regime and whether physically equivalent rescalings
+preserve normalized behavior. The inherited environment, policies, immutable
+SPS-C03 evidence, and tests remain because they are direct dependencies of the
+FR-B3 audit; the new research assets are confined to the FR-B3 files listed in
+[catchability-benchmark/README.md](catchability-benchmark/README.md).

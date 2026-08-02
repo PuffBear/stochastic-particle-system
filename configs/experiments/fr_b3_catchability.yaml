@@ -1,0 +1,60 @@
+experiment_id: FR-B3-CATCHABILITY
+protocol_status: proposed_not_preregistered
+
+# Fresh common random numbers across every factorial cell. SPS-C03 seeds
+# (6001-6032) remain historical evidence and are not reused inferentially.
+seeds: [7101, 7102, 7103, 7104, 7105, 7106, 7107, 7108,
+        7109, 7110, 7111, 7112, 7113, 7114, 7115, 7116,
+        7117, 7118, 7119, 7120, 7121, 7122, 7123, 7124,
+        7125, 7126, 7127, 7128, 7129, 7130, 7131, 7132]
+
+policies:
+  - capacity_matched_independent
+  - shared_summary_v2
+  - stationary
+  - full_state_interception_oracle
+
+fixed_environment:
+  arena_size: [1.0, 1.0]
+  dt: 0.02
+  horizon: 67
+  particle_count: 256
+  collector_count: 4
+  sensing_radius: 0.16
+  collector_radius: 0.012
+  particle_radius: 0.0
+  field_family: uniform
+  capture_geometry: fixed
+  nearest_particles_k: 32
+
+# The middle cell reproduces the executed SPS-C03 physical configuration:
+# alpha=0.06, sigma=0.06, v_max=0.12, hence rho=sqrt(0.02) and kappa=0.50.
+factorial_axes:
+  rho: [0.07071067811865475, 0.1414213562373095, 0.282842712474619]
+  kappa: [0.25, 0.50, 1.00]
+  eta: [0.004242640687119285, 0.00848528137423857, 0.01697056274847714]
+
+anchor:
+  rho: 0.1414213562373095
+  kappa: 0.50
+  eta: 0.00848528137423857
+  historical_sps_c03_mean_gain: 1.1875
+  historical_sps_c03_lower_bound: 0.4586551114750922
+
+rescaling_audit:
+  # Seed 7201 was consumed by a development-only one-seed smoke test and is
+  # excluded from the frozen audit panel.
+  excluded_development_seeds: [7201]
+  seeds: [7211, 7212, 7213, 7214]
+  policies: [capacity_matched_independent, shared_summary_v2]
+  variants:
+    - {id: canonical, length_scale: 1.0, time_scale: 1.0}
+    - {id: length_x2, length_scale: 2.0, time_scale: 1.0}
+    - {id: time_x4, length_scale: 1.0, time_scale: 4.0}
+    - {id: mixed_half, length_scale: 0.5, time_scale: 0.25}
+
+analysis:
+  primary_contrast: shared_summary_v2_minus_capacity_matched_independent
+  bootstrap_draws: 2000
+  bootstrap_seed: 7301
+  two_axis_rejection_rmse_ratio: 0.80

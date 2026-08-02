@@ -1,36 +1,82 @@
-# Catchability Benchmark: A Nondimensional Two-Axis Parameterization
+# FR-B3: Dimensionless Catchability and Coordination Gain
 
-**Research idea:** FR-B3
-**Target venue:** ICML 2027 (primary) / NeurIPS 2027 D&B (fallback)
-**Status:** Ready to run — zero new code required; parameter sweeps over confirmed SPS infrastructure
+## Research question
 
-## Core contribution
+> Are per-observation drift SNR (`rho`) and relative drift-to-collector speed
+> (`kappa`) sufficient to predict the causal gain from a bounded team velocity
+> summary, or is an absolute transport-scale term (`eta`) required?
 
-The SPS-C03 confirmation established a positive coordination effect at one operating point. But α=0.06 conflates two independent axes of task difficulty:
+The primary outcome is the matched-seed difference in unique team capture
+yield between `shared_summary_v2` and `capacity_matched_independent`. Both
+controllers have the same three-number message capacity; only the shared arm
+pools information across collectors.
 
-- **ρ = α·√dt / σ** — sensing difficulty (per-observation SNR of the latent field direction)
-- **κ = α / v_max** — control authority (how catchable field-advected targets are)
+## Correct dimensionless quantities
 
-Changing α alone moves both axes simultaneously. A result at α=0.06 is not directly comparable to one at α=0.12 without separately holding ρ and κ.
+For arena characteristic length `L`:
 
-This paper proposes the (ρ, κ) parameterization, tests whether coordination gain curves collapse across physical rescalings at fixed ρ when indexed by κ, and validates the separability hypothesis Δ̄(ρ, κ) ≈ g(ρ)·h(κ) across a 3×3 grid. If the surface is separable, SPS results become transferable across physical domains. If not, the paper identifies what additional structure is missing.
+- `rho = alpha * sqrt(dt) / sigma`: drift-to-diffusion ratio in one observed
+  displacement. Larger `rho` means the field direction is easier to estimate.
+- `kappa = alpha / v_max`: drift speed relative to collector speed. Larger
+  `kappa` means lower control authority and harder interception.
+- `eta = sigma * sqrt(dt) / L`: one-step diffusive displacement relative to
+  the arena.
 
-**Note on ρ at SPS-C03:** At α=0.06, dt=0.02, σ=0.06, the formula gives ρ = α·√dt/σ = √0.02 ≈ 0.141. Earlier project documents cited ρ≈0.21 — this appears to be an arithmetic error in those documents. All experiments and analysis use ρ = 0.141 as the confirmed anchor.
+The normalized one-step drift and control displacements are
 
-## Physical domain examples
+```text
+drift / L   = rho * eta
+control / L = rho * eta / kappa
+```
 
-| Domain | ρ analog | κ analog |
-|---|---|---|
-| Agricultural UAV (pest spores) | Wind direction SNR from particle density | UAV speed / wind speed |
-| Water-quality AUV sampling | Tracer concentration gradient SNR | AUV speed / current speed |
-| Warehouse robot collection | Sensor noise on item flow direction | Robot speed / conveyor speed |
-| Aerial wildlife surveillance | Detection SNR of animal movement | UAV speed / animal speed |
+Therefore `(rho, kappa)` do not determine the normalized dynamics. The old
+two-axis plan omitted `eta`; the revised study tests that omission rather than
+assuming two-axis sufficiency.
 
-## Files
+## Executed SPS-C03 anchor
 
-- `research-questions.md` — collapse hypothesis, 3×3 grid sub-question, transfer sub-question, kill criteria
-- `PLAN.md` — seven-phase publication plan to ICML 2027 submission
-- `theory/parameterization.md` — first-principles derivation of ρ and κ, separability hypothesis
-- `theory/domain-mapping.md` — five real-world domains mapped to (ρ, κ) space
-- `experiments/grid-design.md` — pre-registered 3×3 grid, seed plan, analysis protocol
-- `paper/outline.md` — full 8-page ICML section outline with draft abstract
+The immutable SPS-C03 summaries record:
+
+| Quantity | Executed value |
+|---|---:|
+| `alpha` | 0.06 |
+| `sigma` | 0.06 |
+| `dt` | 0.02 |
+| `v_max` | 0.12 |
+| `rho` | 0.1414213562 |
+| `kappa` | 0.50 |
+| `eta` | 0.0084852814 |
+| Mean matched gain | +1.1875 captures |
+| One-sided lower bound | +0.4586551 |
+
+Earlier FR-B3 documents incorrectly described `v_max=0.30` and `kappa=0.20`.
+Those values were not used by SPS-C03 and must not be cited as its anchor.
+
+## What is implemented here
+
+- `src/particle_benchmark/catchability.py`: dimensionless transforms and
+  physically equivalent rescaling.
+- `configs/experiments/fr_b3_catchability.yaml`: frozen candidate design with
+  27 factorial cells and a scale-equivalence audit.
+- `analysis/run_fr_b3_catchability.py`: FR-B3-only runner with matched-stream
+  validation, provenance, parallel execution, and development limits.
+- `analysis/analyze_fr_b3_catchability.py`: paired contrasts and held-out
+  comparison of two-axis versus three-axis predictive models.
+- `tests/test_catchability.py`: anchor, transform, design, and analysis tests.
+
+The candidate protocol is deliberately labelled `proposed_not_preregistered`.
+The runner refuses a complete frozen-seed execution until that status changes
+to `registered` after advisor review and an external timestamp.
+
+## Scope boundaries
+
+This branch does not claim that three quantities characterize arbitrary swarm
+systems. The factorial freezes horizon, normalized geometry, team size,
+particle density, sensing radius, capture radius, field family, and controller
+definitions. It asks whether `eta` is needed within that controlled SPS slice.
+
+Speculative mappings to agricultural, ocean, wildfire, or search-and-rescue
+systems were removed: no domain calibration currently supports those claims.
+
+See [PROTOCOL.md](PROTOCOL.md) for the experiment contract and
+[ROADMAP.md](ROADMAP.md) for venue fit, feasibility gates, and remaining work.
