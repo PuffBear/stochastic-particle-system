@@ -418,6 +418,27 @@ def _apply_field_density_blend(
             actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
 
 
+def _apply_velocity_only_action(
+    summary: NDArray[np.float64],
+    observation: LocalObservation,
+    actions: NDArray[np.float64],
+    agent_id: int,
+) -> None:
+    """In-place action: move against windowed mean velocity, density fallback.
+
+    Matches the capacity_matched_velocity_controller_v2(shared=False) logic so
+    the FR-B4 independent arm is directly comparable to the SPS-C03 baseline.
+    No field+density blend — this arm uses only the mean velocity direction.
+    """
+    mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
+    slots = np.asarray(observation["particles"], dtype=np.float64)
+    if summary[2] > 0.0:
+        actions[agent_id] = _unit(-summary[:2])
+    else:
+        if np.any(mask):
+            actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+
+
 def capacity_matched_velocity_controller_v2_window(
     observations: tuple[LocalObservation, ...],
     history: list[tuple[LocalObservation, ...]],
@@ -425,10 +446,14 @@ def capacity_matched_velocity_controller_v2_window(
     *,
     shared: bool,
 ) -> NDArray[np.float64]:
-    """FR-B4 sliding-window controller: last L steps, count-weighted team mean.
+    """FR-B4 sliding-window controller: last L steps, count-weighted mean.
 
-    At L=all (L >= episode length) and omega=0 this reproduces v2 exactly.
-    shared=False uses the same window over each agent's own local observations.
+    shared=True:  windowed team mean (all agents, last L steps) → field+density blend.
+                  At L=1, ω=0: equivalent to capacity_matched_velocity_controller_v2(shared=True).
+    shared=False: windowed self mean (own observations, last L steps) → velocity-only action.
+                  At L=1, ω=0: equivalent to capacity_matched_velocity_controller_v2(shared=False).
+                  The independent arm does not blend to match the SPS-C03 baseline design.
+
     history should be the list of past observation tuples (oldest first).
     """
     actions = np.zeros((len(observations), 2), dtype=np.float64)
@@ -439,8 +464,8 @@ def capacity_matched_velocity_controller_v2_window(
     else:
         for agent_id, observation in enumerate(observations):
             solo_history = [(obs_tuple[agent_id],) for obs_tuple in history]
-            team = _windowed_team_summary(solo_history, (observation,), L)
-            _apply_field_density_blend(team, observation, actions, agent_id)
+            summary = _windowed_team_summary(solo_history, (observation,), L)
+            _apply_velocity_only_action(summary, observation, actions, agent_id)
     return actions
 
 
@@ -453,8 +478,10 @@ def capacity_matched_velocity_controller_v2_decay(
 ) -> NDArray[np.float64]:
     """FR-B4 exponential-decay controller: lambda=exp(-1/L), count-weighted.
 
-    At L=all and omega=0 the decay is negligible and this approaches v2.
-    shared=False applies decay over each agent's own local observations.
+    shared=True:  exponentially-weighted team mean → field+density blend.
+    shared=False: exponentially-weighted self mean → velocity-only action.
+                  No blend, matching SPS-C03 independent-arm design.
+
     history should be the list of past observation tuples (oldest first).
     """
     actions = np.zeros((len(observations), 2), dtype=np.float64)
@@ -465,8 +492,8 @@ def capacity_matched_velocity_controller_v2_decay(
     else:
         for agent_id, observation in enumerate(observations):
             solo_history = [(obs_tuple[agent_id],) for obs_tuple in history]
-            team = _decay_team_summary(solo_history, (observation,), L)
-            _apply_field_density_blend(team, observation, actions, agent_id)
+            summary = _decay_team_summary(solo_history, (observation,), L)
+            _apply_velocity_only_action(summary, observation, actions, agent_id)
     return actions
 
 
