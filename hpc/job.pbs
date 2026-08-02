@@ -6,7 +6,7 @@
 # Training is CPU-bottlenecked (NumPy environment simulation); the GPU node
 # is used only because it has more available CPUs for the process.
 #PBS -q gpu
-#PBS -l select=1:ncpus=8:ngpus=1
+#PBS -l select=1:ncpus=8
 #PBS -l walltime=24:00:00
 
 # Output/error logs are set dynamically by submit_all.sh via -o/-e flags.
