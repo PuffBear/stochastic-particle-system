@@ -727,6 +727,8 @@ def train_maddpg(
             eval_result["step"] = step
             history["eval_yields"].append(eval_result)
             last_eval_step = step
+            # _eval_maddpg leaves the env in a done state; force reset on next rollout.
+            maddpg._obs = None
             if verbose:
                 print(
                     f"[MADDPG] EVAL step={step}: "
