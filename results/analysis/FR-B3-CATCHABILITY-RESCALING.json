@@ -1,0 +1,1 @@
+{"audit_passed":false,"comparison_count":8,"criterion":"identical yield and normalized final-state checksum across all rescalings","failures":[{"normalized_state_hash_count":2,"policy_id":"capacity_matched_independent","seed":7211,"yield_values":[9]}]}

@@ -47,9 +47,12 @@ anchor:
 
 rescaling_audit:
   # Seed 7201 was consumed by a development-only one-seed smoke test and is
-  # excluded from the frozen audit panel.
+  # excluded. Seeds 7211-7214 were consumed by the immutable v1 audit, which
+  # exposed physical-unit velocity clipping in one comparison; they are not
+  # reused after the versioned correctness fix.
   excluded_development_seeds: [7201]
-  seeds: [7211, 7212, 7213, 7214]
+  excluded_failed_audit_seeds: [7211, 7212, 7213, 7214]
+  seeds: [7221, 7222, 7223, 7224]
   policies: [capacity_matched_independent, shared_summary_v2]
   variants:
     - {id: canonical, length_scale: 1.0, time_scale: 1.0}

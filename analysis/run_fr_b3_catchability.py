@@ -192,10 +192,36 @@ def rescaling_conditions(protocol: Mapping[str, object]) -> list[StudyCondition]
                 metadata={
                     "length_scale": float(variant["length_scale"]),
                     "time_scale": float(variant["time_scale"]),
+                    # Map apparent velocities back to canonical physical units
+                    # before applying scripted-controller clipping. Positions
+                    # are already normalized in the observation builder.
+                    "velocity_to_canonical_scale": (
+                        float(variant["time_scale"])
+                        / float(variant["length_scale"])
+                    ),
                 },
             )
         )
     return conditions
+
+
+def _canonicalize_policy_observations(
+    observations: tuple[Mapping[str, np.ndarray], ...], *, velocity_scale: float
+) -> tuple[dict[str, np.ndarray], ...]:
+    """Return policy inputs with velocity slots in canonical audit units."""
+
+    if not np.isfinite(velocity_scale) or velocity_scale <= 0.0:
+        raise ValueError("velocity_scale must be finite and positive")
+    if velocity_scale == 1.0:
+        return tuple(dict(observation) for observation in observations)
+    canonical: list[dict[str, np.ndarray]] = []
+    for observation in observations:
+        converted = dict(observation)
+        particles = np.asarray(observation["particles"], dtype=np.float64).copy()
+        particles[:, 2:4] *= velocity_scale
+        converted["particles"] = particles
+        canonical.append(converted)
+    return tuple(canonical)
 
 
 def load_protocol(path: Path) -> dict[str, object]:
@@ -232,6 +258,12 @@ def rollout(
     for step in range(env.config.horizon):
         assert env.collector_positions is not None
         before = env.collector_positions.copy()
+        policy_observations = _canonicalize_policy_observations(
+            observations,
+            velocity_scale=float(
+                condition.metadata.get("velocity_to_canonical_scale", 1.0)
+            ),
+        )
         policy_config = (
             {"receding_horizon": 2.0}
             if policy_id == "full_state_interception_oracle"
@@ -239,7 +271,7 @@ def rollout(
         )
         actions = _policy_actions(
             policy_id,
-            observations,
+            policy_observations,
             env,
             step=step,
             random_actions=None,
@@ -314,10 +346,14 @@ def _study_design(
             tuple(str(x) for x in protocol["policies"]),
         )
     audit = dict(protocol["rescaling_audit"])
-    excluded = {int(x) for x in audit.get("excluded_development_seeds", [])}
+    excluded = {
+        int(x)
+        for key in ("excluded_development_seeds", "excluded_failed_audit_seeds")
+        for x in audit.get(key, [])
+    }
     audit_seeds = tuple(int(x) for x in audit["seeds"])
     if excluded.intersection(audit_seeds):
-        raise ValueError("development seeds cannot enter the frozen rescaling audit")
+        raise ValueError("excluded seeds cannot enter the frozen rescaling audit")
     return (
         rescaling_conditions(protocol),
         audit_seeds,

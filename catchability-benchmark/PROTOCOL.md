@@ -9,6 +9,23 @@ The registration commit freezes the axis grid, seed panels, policy arms,
 decision rule, and analysis settings below. Its full commit SHA must be recorded
 in every frozen-run manifest.
 
+### Registered correctness amendment: audit v2
+
+The first registered rescaling audit, tied to commit
+`6390608ad935488e706fbd59c56ec7f32fa8d437`, failed one of eight comparisons:
+seed 7211 under `capacity_matched_independent` had identical capture yield but
+two normalized final-state hashes. Diagnosis localized the first divergence to
+step 50, where multiplying physical length by two caused an apparent-velocity
+component to cross the controller's absolute `[-1, 1]` clipping boundary.
+
+Before any factorial seed was run, audit v2 canonicalized apparent-velocity
+slots by `time_scale / length_scale` at the FR-B3 runner boundary. The canonical
+factorial scale is exactly one, so this amendment does not change any factorial
+policy action, seed, estimand, or decision rule. Seeds 7211-7214 remain attached
+to the immutable failed audit; audit v2 uses fresh seeds 7221-7224. This
+post-registration amendment is versioned as a correctness repair and the
+rescaling result remains a non-inferential, exploratory software audit.
+
 Development seed 7201 was used once for a local runner smoke test and is
 explicitly excluded from the candidate rescaling-audit panel.
 
@@ -44,8 +61,10 @@ rescaled environments should have identical normalized trajectories under the
 scripted controllers and common random numbers.
 
 The audit requires identical capture yield and identical quantized normalized
-final-state checksums for every seed-policy pair. This is a correctness gate,
-not independent scientific evidence.
+final-state checksums for every seed-policy pair. Position observations are
+already normalized; apparent-velocity slots are mapped to canonical units by
+`time_scale / length_scale` before the scripted controllers are evaluated.
+This is a correctness gate, not independent scientific evidence.
 
 ### C3: coordination-gain regime
 

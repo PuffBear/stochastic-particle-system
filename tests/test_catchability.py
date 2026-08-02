@@ -14,7 +14,11 @@ from analysis.analyze_fr_b3_catchability import (
     validate_rescaling_audit,
 )
 from analysis.calibrate_fr_b3_design import loco_rmses
-from analysis.run_fr_b3_catchability import factorial_conditions, load_protocol
+from analysis.run_fr_b3_catchability import (
+    _canonicalize_policy_observations,
+    factorial_conditions,
+    load_protocol,
+)
 from particle_benchmark.catchability import (
     catchability_groups,
     physical_parameters_from_groups,
@@ -28,6 +32,19 @@ PROTOCOL = ROOT / "configs" / "experiments" / "fr_b3_catchability.yaml"
 
 
 class DimensionlessCatchabilityTests(unittest.TestCase):
+    def test_audit_velocity_canonicalization_is_scale_invariant(self) -> None:
+        particles = np.zeros((2, 5), dtype=np.float64)
+        particles[:, 2:4] = [[1.25, -0.75], [0.5, 2.0]]
+        observation = {
+            "particles": particles,
+            "particle_mask": np.asarray([True, True]),
+            "velocity_valid_mask": np.asarray([True, True]),
+        }
+        scaled = {**observation, "particles": particles * [1.0, 1.0, 2.0, 2.0, 1.0]}
+        converted = _canonicalize_policy_observations((scaled,), velocity_scale=0.5)
+        np.testing.assert_array_equal(converted[0]["particles"], particles)
+        np.testing.assert_array_equal(converted[0]["particle_mask"], observation["particle_mask"])
+
     def test_executed_c03_anchor_is_kappa_point_five(self) -> None:
         config = ParticleEnvConfig(
             horizon=67,
