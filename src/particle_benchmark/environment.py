@@ -44,6 +44,8 @@ class ParticleEnvConfig:
     nearest_particles_k: int = 32
     include_particle_velocity: bool = True
     include_teammates: bool = True
+    # FR-B4: field rotation rate in rad/step. omega=0 recovers SPS-C03 exactly.
+    omega: float = 0.0
 
     def __post_init__(self) -> None:
         arena = np.asarray(self.arena_size, dtype=np.float64)
@@ -67,6 +69,8 @@ class ParticleEnvConfig:
             raise ValueError("capture_geometry must be 'fixed' or 'growing'")
         if self.nearest_particles_k <= 0:
             raise ValueError("nearest_particles_k must be positive")
+        if not np.isfinite(self.omega) or self.omega < 0:
+            raise ValueError("omega must be finite and non-negative")
 
 
 class ParticleCollectorEnv:
@@ -94,6 +98,8 @@ class ParticleCollectorEnv:
         self.scenario_seed: int | None = None
         self.tie_scheme = "event_keyed_seed_step_particle_v1"
         self._done = False
+        # FR-B4: pre-generated field orientation sequence, shape (horizon,)
+        self._theta_seq: NDArray[np.float64] | None = None
 
     def reset(
         self, *, seed: int
@@ -126,9 +132,15 @@ class ParticleCollectorEnv:
             self.config.field_family == "uniform"
             and "orientation" not in self._episode_field_kwargs
         ):
-            self._episode_field_kwargs["orientation"] = float(
-                self._streams.field.uniform(0.0, 2.0 * np.pi)
-            )
+            theta_0 = float(self._streams.field.uniform(0.0, 2.0 * np.pi))
+            self._episode_field_kwargs["orientation"] = theta_0
+            # FR-B4: pre-generate full rotation sequence. At omega=0 this is a
+            # constant array equal to theta_0, recovering SPS-C03 exactly.
+            self._theta_seq = theta_0 + self.config.omega * np.arange(
+                self.config.horizon, dtype=np.float64
+            ) * self.config.dt
+        else:
+            self._theta_seq = None
         self.step_count = 0
         self.first_contact_step = None
         self._done = False
@@ -137,6 +149,11 @@ class ParticleCollectorEnv:
             dtype=np.bool_,
         )
         self._last_visibility = self._visibility()
+        theta_0 = (
+            float(self._episode_field_kwargs.get("orientation", 0.0))
+            if self._episode_field_kwargs is not None
+            else 0.0
+        )
         return self._observations(), {
             "step": 0,
             "captures": (),
@@ -144,6 +161,8 @@ class ParticleCollectorEnv:
             "first_contact_step": None,
             "scenario_seed": self.scenario_seed,
             "tie_scheme": self.tie_scheme,
+            "field_theta_0": theta_0,
+            "field_omega": self.config.omega,
         }
 
     def _require_reset(self) -> None:
@@ -221,6 +240,12 @@ class ParticleCollectorEnv:
         assert self._episode_field_kwargs is not None
         assert self._last_visibility is not None
         assert self.scenario_seed is not None
+
+        # FR-B4: advance field orientation to current step before computing forces.
+        if self._theta_seq is not None and self.config.omega > 0.0:
+            self._episode_field_kwargs["orientation"] = float(
+                self._theta_seq[self.step_count]
+            )
 
         prior_collectors = self.collector_positions.copy()
         collector_velocity = bounded_velocity(

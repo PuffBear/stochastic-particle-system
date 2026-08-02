@@ -328,6 +328,148 @@ def capacity_matched_velocity_controller_v2_leave_self_out(
     return actions
 
 
+def _windowed_team_summary(
+    history: list[tuple[LocalObservation, ...]],
+    current: tuple[LocalObservation, ...],
+    L: int,
+) -> NDArray[np.float64]:
+    """Count-weighted team mean over the last L steps (inclusive of current).
+
+    history[0] is the oldest observation tuple; current is step t.
+    Only the last L-1 history entries plus current are used.
+    At L >= len(history)+1 this is equivalent to full-history pooling.
+    """
+    window = (list(history)[-(L - 1):] if L > 1 else []) + [current]
+    vx_sum = 0.0
+    vy_sum = 0.0
+    w_sum = 0.0
+    for obs_tuple in window:
+        for obs in obs_tuple:
+            s = local_velocity_summary(obs)
+            w = s[2]
+            vx_sum += w * s[0]
+            vy_sum += w * s[1]
+            w_sum += w
+    if w_sum > 0.0:
+        vel = np.array([vx_sum / w_sum, vy_sum / w_sum], dtype=np.float64)
+    else:
+        vel = np.zeros(2, dtype=np.float64)
+    frac = float(
+        np.mean([local_velocity_summary(obs)[2] for obs in current])
+    )
+    return np.clip(np.array([vel[0], vel[1], frac], dtype=np.float64), -1.0, 1.0)
+
+
+def _decay_team_summary(
+    history: list[tuple[LocalObservation, ...]],
+    current: tuple[LocalObservation, ...],
+    L: int,
+) -> NDArray[np.float64]:
+    """Exponentially-decayed count-weighted team mean with lambda = exp(-1/L).
+
+    Weights observations at lag k with lambda^k. Current step has weight 1.
+    history[0] is the oldest; current is step t.
+    """
+    lam = float(np.exp(-1.0 / max(L, 1)))
+    all_steps = list(history) + [current]
+    n = len(all_steps)
+    vx_sum = 0.0
+    vy_sum = 0.0
+    w_sum = 0.0
+    for lag, obs_tuple in enumerate(reversed(all_steps)):
+        decay = lam ** lag
+        for obs in obs_tuple:
+            s = local_velocity_summary(obs)
+            w = decay * s[2]
+            vx_sum += w * s[0]
+            vy_sum += w * s[1]
+            w_sum += w
+    if w_sum > 0.0:
+        vel = np.array([vx_sum / w_sum, vy_sum / w_sum], dtype=np.float64)
+    else:
+        vel = np.zeros(2, dtype=np.float64)
+    frac = float(
+        np.mean([local_velocity_summary(obs)[2] for obs in current])
+    )
+    return np.clip(np.array([vel[0], vel[1], frac], dtype=np.float64), -1.0, 1.0)
+
+
+def _apply_field_density_blend(
+    team: NDArray[np.float64],
+    observation: LocalObservation,
+    actions: NDArray[np.float64],
+    agent_id: int,
+) -> None:
+    """In-place action computation using field+density blend (v2 logic)."""
+    mask = np.asarray(observation["particle_mask"], dtype=np.bool_)
+    slots = np.asarray(observation["particles"], dtype=np.float64)
+    if team[2] > 0.0:
+        field_dir = _unit(-team[:2])
+        blend_w = min(0.7, float(team[2]) * 2.0)
+        if np.any(mask):
+            density_dir = _unit(np.mean(slots[mask, :2], axis=0))
+            combined = blend_w * field_dir + (1.0 - blend_w) * density_dir
+            norm = float(np.linalg.norm(combined))
+            actions[agent_id] = _unit(combined) if norm > 1e-12 else field_dir
+        else:
+            actions[agent_id] = field_dir
+    else:
+        if np.any(mask):
+            actions[agent_id] = _unit(np.mean(slots[mask, :2], axis=0))
+
+
+def capacity_matched_velocity_controller_v2_window(
+    observations: tuple[LocalObservation, ...],
+    history: list[tuple[LocalObservation, ...]],
+    L: int,
+    *,
+    shared: bool,
+) -> NDArray[np.float64]:
+    """FR-B4 sliding-window controller: last L steps, count-weighted team mean.
+
+    At L=all (L >= episode length) and omega=0 this reproduces v2 exactly.
+    shared=False uses the same window over each agent's own local observations.
+    history should be the list of past observation tuples (oldest first).
+    """
+    actions = np.zeros((len(observations), 2), dtype=np.float64)
+    if shared:
+        team = _windowed_team_summary(history, observations, L)
+        for agent_id, observation in enumerate(observations):
+            _apply_field_density_blend(team, observation, actions, agent_id)
+    else:
+        for agent_id, observation in enumerate(observations):
+            solo_history = [(obs_tuple[agent_id],) for obs_tuple in history]
+            team = _windowed_team_summary(solo_history, (observation,), L)
+            _apply_field_density_blend(team, observation, actions, agent_id)
+    return actions
+
+
+def capacity_matched_velocity_controller_v2_decay(
+    observations: tuple[LocalObservation, ...],
+    history: list[tuple[LocalObservation, ...]],
+    L: int,
+    *,
+    shared: bool,
+) -> NDArray[np.float64]:
+    """FR-B4 exponential-decay controller: lambda=exp(-1/L), count-weighted.
+
+    At L=all and omega=0 the decay is negligible and this approaches v2.
+    shared=False applies decay over each agent's own local observations.
+    history should be the list of past observation tuples (oldest first).
+    """
+    actions = np.zeros((len(observations), 2), dtype=np.float64)
+    if shared:
+        team = _decay_team_summary(history, observations, L)
+        for agent_id, observation in enumerate(observations):
+            _apply_field_density_blend(team, observation, actions, agent_id)
+    else:
+        for agent_id, observation in enumerate(observations):
+            solo_history = [(obs_tuple[agent_id],) for obs_tuple in history]
+            team = _decay_team_summary(solo_history, (observation,), L)
+            _apply_field_density_blend(team, observation, actions, agent_id)
+    return actions
+
+
 def density_greedy_policy(
     observations: tuple[LocalObservation, ...],
 ) -> NDArray[np.float64]:

@@ -1,8 +1,8 @@
 # FR-B4 Adaptive Coordination — Full Publication Plan
 
-**Target venue:** NeurIPS 2027 (primary) · ICLR 2028 (fallback)
-**Submission deadline:** NeurIPS ~February 2027 | ICLR 2028 ~October 2027
-**Realistic timeline from now:** 8–10 months to NeurIPS submission
+**Target venue:** ICLR 2028 (primary) · NeurIPS 2028 (fallback)
+**Submission deadline:** ICLR 2028 ~October 2027
+**Realistic timeline from now:** 10–12 months to ICLR submission
 
 ---
 
@@ -99,7 +99,17 @@ The capacity_matched_independent controller must use the same memory model as th
 
 ### 2d: ω=0 reproduction gate
 
-Run seeds 1001–1008 (first 8 SPS-C03 seeds) with the modified environment at ω=0, L=all steps. Require Δ̄ within ±0.5 of SPS-C03's +1.19 and sign count ≥5/8. Gate must pass before Phase 3 begins.
+Run seeds 6001–6032 (32 SPS-C03 confirmed seeds) with the modified environment
+at ω=0, L=1. Require Δ̄ ∈ [+0.69, +1.69] and sign count ≥20/32.
+
+L=1 is used (not L=all) because the FR-B4 controller is not stateless — at
+L=all it accumulates temporal observations which changes both arms' behaviour
+relative to the stateless SPS-C03 policy. L=1 uses only the current step and
+directly reproduces SPS-C03's per-step computation for the shared arm.
+
+The FR-B4 independent arm applies density blend (same as the shared arm), so Δ
+at L=1 will be slightly lower than SPS-C03's +1.19. The gate range accommodates
+this. Gate must pass before Phase 3 begins.
 
 ---
 

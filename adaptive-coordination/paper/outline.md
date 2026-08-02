@@ -1,7 +1,7 @@
 # Paper Outline: How Long Does a Rotating Field Have to Spin Before Team Communication Stops Helping?
 
-**Target:** NeurIPS 2027 (9 pages + appendix)
-**Fallback:** ICLR 2028
+**Target:** ICLR 2028 (8 pages + appendix)
+**Fallback:** NeurIPS 2028
 
 ---
 
