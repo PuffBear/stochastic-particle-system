@@ -12,7 +12,7 @@
 # Output/error logs are set dynamically by submit_all.sh via -o/-e flags.
 
 # --- Environment ---
-source "$(conda info --base)/etc/profile.d/conda.sh"
+source /apps/miniconda3/etc/profile.d/conda.sh
 conda activate marl
 
 # --- Working directory ---
