@@ -49,11 +49,12 @@ Before this revision, FR-B3 was a research sketch rather than a submission:
 - no learned generalization experiment connecting the work to ICLR's core
   audience.
 
-After this branch revision, the mathematical and software foundations are in
-place, but the paper is still early: the new registered-seed factorial has not
-run, the central result is unknown, no learned scale-transfer experiment has
-been completed, and no manuscript exists. Treat this as roughly 20% of an ICLR
-submission, not as a nearly finished paper.
+After registration and the passed scale-equivalence audit, the mathematical,
+software, and implementation-correctness foundations are in place. The paper
+is still early: the registered-seed factorial has not run, the central result
+is unknown, no learned scale-transfer experiment has been completed, and no
+manuscript exists. Treat this as roughly 24% of an ICLR submission, not as a
+nearly finished paper.
 
 ## Feasibility
 
@@ -76,7 +77,9 @@ second fails, the work is much better positioned for AAMAS than ICLR.
 
 - Advisor-check the three-group derivation, axis ranges, decision margin, and
   seed budget before changing protocol status.
-- Run the scale-equivalence audit.
+- [x] Run the scale-equivalence audit. Audit v2 passed all eight seed-policy
+  comparisons after a versioned physical-unit clipping correction; see
+  [`RESCALING_AUDIT.md`](RESCALING_AUDIT.md).
 - Run all 27 cells, 64 fresh common seeds, and four policies.
 - Generate the paired-gain surface, uncertainty, residual plots, and held-out
   two-axis versus three-axis prediction comparison.

@@ -66,9 +66,10 @@ Those values were not used by SPS-C03 and must not be cited as its anchor.
   rule calibration from the historical paired variance.
 - `tests/test_catchability.py`: anchor, transform, design, and analysis tests.
 
-The candidate protocol is deliberately labelled `proposed_not_preregistered`.
-The runner refuses a complete frozen-seed execution until that status changes
-to `registered` after advisor review and an external timestamp.
+The protocol is registered and externally timestamped. The v2
+scale-equivalence audit passed all eight frozen seed-policy comparisons; see
+[`RESCALING_AUDIT.md`](RESCALING_AUDIT.md) for the failed-first audit trail and
+versioned correctness amendment.
 
 ## Scope boundaries
 
@@ -82,4 +83,6 @@ systems were removed: no domain calibration currently supports those claims.
 
 See [PROTOCOL.md](PROTOCOL.md) for the experiment contract and
 [DESIGN_REVIEW.md](DESIGN_REVIEW.md) for the statistical sign-off package.
-[ROADMAP.md](ROADMAP.md) covers venue fit, feasibility gates, and remaining work.
+[RESCALING_AUDIT.md](RESCALING_AUDIT.md) records the completed correctness gate,
+and [ROADMAP.md](ROADMAP.md) covers venue fit, feasibility gates, and remaining
+work.
