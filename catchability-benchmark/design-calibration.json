@@ -1,0 +1,322 @@
+{
+    "anchor_gain": 1.1875,
+    "bootstrap_draws_per_trial": 1000,
+    "decision_rule": {
+        "bootstrap_rmse_improvement_lower_bound_min": 0.0,
+        "bootstrap_rmse_improvement_lower_quantile": 0.05,
+        "observed_three_to_two_axis_rmse_ratio_max": 0.8
+    },
+    "experiment_id": "FR-B3-CATCHABILITY-DESIGN-CALIBRATION",
+    "historical_paired_sd": 2.442070776496733,
+    "limitations": [
+        "Calibration uses the paired SD from the single SPS-C03 anchor.",
+        "Power applies to a broad linear eta effect, not a sparse one-cell effect.",
+        "Gaussian simulation does not reproduce discrete or heavy-tailed yields."
+    ],
+    "minimum_target_high_low_eta_effect_captures": 1.0,
+    "power_target": 0.8,
+    "recommendation_passed": true,
+    "recommended_seed_count": 64,
+    "rng_seed": 81427,
+    "scenarios": [
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.1343494421489781,
+            "observed_rmse_ratio_10_90_interval": [
+                0.9977493365995598,
+                1.2236158909224109
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.188,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.7726630276497606,
+            "observed_rmse_ratio_10_90_interval": [
+                0.6198388988683667,
+                0.9133648525167118
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.93,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.583774257066761,
+            "observed_rmse_ratio_10_90_interval": [
+                0.46288624043896776,
+                0.7117878149455331
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.1324891807661936,
+            "observed_rmse_ratio_10_90_interval": [
+                0.9740346533078778,
+                1.2409589739234805
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.496,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.6914408523844366,
+            "observed_rmse_ratio_10_90_interval": [
+                0.5602402024902506,
+                0.8500638639158364
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.986,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.5128582146823293,
+            "observed_rmse_ratio_10_90_interval": [
+                0.414545059095559,
+                0.6335073502858464
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.130577100599283,
+            "observed_rmse_ratio_10_90_interval": [
+                0.9993453734145855,
+                1.2286584193792707
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 0.82,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.6170068846680721,
+            "observed_rmse_ratio_10_90_interval": [
+                0.4853428492085203,
+                0.7609736112564354
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.4440214874776371,
+            "observed_rmse_ratio_10_90_interval": [
+                0.3536398806215431,
+                0.5526236442082261
+            ],
+            "seed_count": 32
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.1389476236088774,
+            "observed_rmse_ratio_10_90_interval": [
+                1.0040419798664884,
+                1.2261571655081083
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.558,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.6684696148385185,
+            "observed_rmse_ratio_10_90_interval": [
+                0.5410069521919896,
+                0.830610236253756
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.49705834499173623,
+            "observed_rmse_ratio_10_90_interval": [
+                0.391447024522853,
+                0.6074385775719661
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.133026444514961,
+            "observed_rmse_ratio_10_90_interval": [
+                0.9974964897323005,
+                1.2318441527911659
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.834,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.6059995759385342,
+            "observed_rmse_ratio_10_90_interval": [
+                0.47941450125476875,
+                0.7477491719999309
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.442770923112209,
+            "observed_rmse_ratio_10_90_interval": [
+                0.337138583517453,
+                0.5455727853185699
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.1349294966935597,
+            "observed_rmse_ratio_10_90_interval": [
+                1.003353624987841,
+                1.2295482526788104
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 0.984,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.5299577441886292,
+            "observed_rmse_ratio_10_90_interval": [
+                0.41382462075762766,
+                0.6502875988714164
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.36832618272545925,
+            "observed_rmse_ratio_10_90_interval": [
+                0.2889325822049271,
+                0.4559423430167875
+            ],
+            "seed_count": 48
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.1461460950305185,
+            "observed_rmse_ratio_10_90_interval": [
+                0.9805755464546027,
+                1.2309754564721107
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 0.838,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.5996780414617651,
+            "observed_rmse_ratio_10_90_interval": [
+                0.4825141878162846,
+                0.7481795358135139
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.0,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.4545696803674275,
+            "observed_rmse_ratio_10_90_interval": [
+                0.354849118026743,
+                0.549751123513175
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.127410399886029,
+            "observed_rmse_ratio_10_90_interval": [
+                0.9888336539462306,
+                1.223140927484433
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 0.95,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.5669810634555501,
+            "observed_rmse_ratio_10_90_interval": [
+                0.44100969370943516,
+                0.6883139721046792
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.25,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.3911469848137798,
+            "observed_rmse_ratio_10_90_interval": [
+                0.3061411356758238,
+                0.48177818493706803
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 0.0,
+            "high_low_eta_effect_captures": 0.0,
+            "median_observed_rmse_ratio": 1.148372439164126,
+            "observed_rmse_ratio_10_90_interval": [
+                1.0031503611131694,
+                1.2390212898783926
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.0,
+            "median_observed_rmse_ratio": 0.46906844044952983,
+            "observed_rmse_ratio_10_90_interval": [
+                0.3712849034169682,
+                0.5814592516444125
+            ],
+            "seed_count": 64
+        },
+        {
+            "cross_cell_correlation": 0.5,
+            "decision_rate": 1.0,
+            "high_low_eta_effect_captures": 1.5,
+            "median_observed_rmse_ratio": 0.32281281290534575,
+            "observed_rmse_ratio_10_90_interval": [
+                0.25590516452331996,
+                0.4026175397562724
+            ],
+            "seed_count": 64
+        }
+    ],
+    "simulation_model": "broad linear eta effect across all nine rho-kappa slices with Gaussian seed-level paired contrasts",
+    "trials_per_scenario": 500
+}

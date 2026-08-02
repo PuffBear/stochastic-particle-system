@@ -16,16 +16,20 @@ knowing `eta`.
 This is evaluated predictively, not by in-sample `R^2`. A quadratic response
 surface using `(rho, kappa)` is compared with the corresponding surface using
 `(rho, kappa, eta)` under leave-one-cell-out prediction. Common-seed bootstrap
-resampling supplies uncertainty for the RMSE ratio.
+resampling supplies uncertainty for the RMSE improvement.
 
-The proposed rejection rule is: reject the two-axis model if the upper endpoint
-of the 95% bootstrap interval for
+The proposed rejection rule requires both:
+
+1. a practically meaningful observed predictive improvement,
 
 ```text
-RMSE(three-axis) / RMSE(two-axis)
+RMSE(three-axis) / RMSE(two-axis) <= 0.80;
 ```
 
-is below `0.80`. Non-rejection is not treated as proof of sufficiency.
+2. statistical support: the one-sided 95% bootstrap lower bound for
+   `RMSE(two-axis) - RMSE(three-axis)` must exceed zero.
+
+Non-rejection is not treated as proof of sufficiency.
 
 ### C2: dimensionless rescaling correctness
 
@@ -81,11 +85,16 @@ The middle cell exactly recovers the executed SPS-C03 parameters.
 | Sensing radius | 0.16 |
 | Capture radius | 0.012 |
 | Field | uniform, random orientation per seed |
-| Factorial seeds | 7101-7132, shared across all cells |
+| Factorial seeds | 7101-7164, shared across all cells |
 
-Using the same fresh 32 seeds in every cell makes within-cell policy contrasts
+Using the same fresh 64 seeds in every cell makes within-cell policy contrasts
 and across-cell response differences paired. SPS-C03 seeds 6001-6032 remain
 historical and are not reused in the new inferential analysis.
+
+The 64-seed budget is calibrated to at least 80% simulated power for a broad
+one-capture high-versus-low `eta` effect under zero cross-cell seed correlation,
+using the historical SPS-C03 paired SD of 2.442. This does not power the study
+for an effect isolated to one cell.
 
 ## Prohibited analysis changes after registration
 

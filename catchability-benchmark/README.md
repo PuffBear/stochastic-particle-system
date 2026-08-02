@@ -62,6 +62,8 @@ Those values were not used by SPS-C03 and must not be cited as its anchor.
   validation, provenance, parallel execution, and development limits.
 - `analysis/analyze_fr_b3_catchability.py`: paired contrasts and held-out
   comparison of two-axis versus three-axis predictive models.
+- `analysis/calibrate_fr_b3_design.py`: reproducible seed-budget and decision-
+  rule calibration from the historical paired variance.
 - `tests/test_catchability.py`: anchor, transform, design, and analysis tests.
 
 The candidate protocol is deliberately labelled `proposed_not_preregistered`.
@@ -79,4 +81,5 @@ Speculative mappings to agricultural, ocean, wildfire, or search-and-rescue
 systems were removed: no domain calibration currently supports those claims.
 
 See [PROTOCOL.md](PROTOCOL.md) for the experiment contract and
-[ROADMAP.md](ROADMAP.md) for venue fit, feasibility gates, and remaining work.
+[DESIGN_REVIEW.md](DESIGN_REVIEW.md) for the statistical sign-off package.
+[ROADMAP.md](ROADMAP.md) covers venue fit, feasibility gates, and remaining work.

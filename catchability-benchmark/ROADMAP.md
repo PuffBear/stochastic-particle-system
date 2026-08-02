@@ -77,7 +77,7 @@ second fails, the work is much better positioned for AAMAS than ICLR.
 - Advisor-check the three-group derivation, axis ranges, decision margin, and
   seed budget before changing protocol status.
 - Run the scale-equivalence audit.
-- Run all 27 cells, 32 fresh common seeds, and four policies.
+- Run all 27 cells, 64 fresh common seeds, and four policies.
 - Generate the paired-gain surface, uncertainty, residual plots, and held-out
   two-axis versus three-axis prediction comparison.
 - Report the result honestly if the original two-axis claim fails.

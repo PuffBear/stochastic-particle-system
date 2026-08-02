@@ -13,6 +13,7 @@ from analysis.analyze_fr_b3_catchability import (
     paired_differences,
     validate_rescaling_audit,
 )
+from analysis.calibrate_fr_b3_design import loco_rmses
 from analysis.run_fr_b3_catchability import factorial_conditions, load_protocol
 from particle_benchmark.catchability import (
     catchability_groups,
@@ -85,6 +86,7 @@ class DimensionlessCatchabilityTests(unittest.TestCase):
         protocol = load_protocol(PROTOCOL)
         conditions = factorial_conditions(protocol)
         self.assertEqual(len(conditions), 27)
+        self.assertEqual(len(protocol["seeds"]), 64)
         anchor = conditions[13]
         groups = catchability_groups(anchor.environment)
         self.assertAlmostEqual(groups.rho, math.sqrt(0.02))
@@ -93,6 +95,20 @@ class DimensionlessCatchabilityTests(unittest.TestCase):
 
 
 class CatchabilityAnalysisTests(unittest.TestCase):
+    def test_calibration_loco_operator_rewards_true_eta_structure(self) -> None:
+        coordinates = np.asarray(
+            [
+                (x, y, z)
+                for x in (-1.0, 0.0, 1.0)
+                for y in (-1.0, 0.0, 1.0)
+                for z in (-1.0, 0.0, 1.0)
+            ]
+        )
+        outcomes = (1.0 + coordinates[:, 0] + coordinates[:, 2])[:, None]
+        two_axis, three_axis = loco_rmses(outcomes)
+        self.assertGreater(float(two_axis[0]), 0.5)
+        self.assertLess(float(three_axis[0]), 1e-10)
+
     def test_pairing_rejects_a_missing_primary_arm(self) -> None:
         rows = [
             {

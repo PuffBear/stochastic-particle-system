@@ -130,6 +130,7 @@ def _model_comparison(
 
     rng = np.random.default_rng(bootstrap_seed)
     ratios = np.empty(bootstrap_draws, dtype=np.float64)
+    improvements = np.empty(bootstrap_draws, dtype=np.float64)
     for draw in range(bootstrap_draws):
         sampled = rng.integers(0, len(seeds), size=len(seeds))
         draw_means = np.mean(matrix[:, sampled], axis=1)
@@ -140,6 +141,7 @@ def _model_comparison(
             coordinates, draw_means, anchor=anchor, include_eta=True
         )
         ratios[draw] = draw_three / draw_two if draw_two > 0 else math.inf
+        improvements[draw] = draw_two - draw_three
     ratio = rmse_three / rmse_two if rmse_two > 0 else math.inf
     return {
         "condition_ids": condition_ids,
@@ -152,6 +154,10 @@ def _model_comparison(
         "bootstrap_ratio_95_interval": [
             float(np.quantile(ratios, 0.025)),
             float(np.quantile(ratios, 0.975)),
+        ],
+        "bootstrap_rmse_improvement_90_interval": [
+            float(np.quantile(improvements, 0.05)),
+            float(np.quantile(improvements, 0.95)),
         ],
         "bootstrap_draws": bootstrap_draws,
         "bootstrap_seed": bootstrap_seed,
@@ -186,6 +192,15 @@ def analyze(
 ) -> dict[str, object]:
     differences = paired_differences(rows)
     coordinates = condition_coordinates(rows)
+    expected_seed_panel = sorted(int(seed) for seed in protocol["seeds"])
+    observed_seed_panel = sorted(next(iter(differences.values())))
+    if observed_seed_panel != expected_seed_panel:
+        raise ValueError("factorial output does not contain the frozen seed panel")
+    expected_cell_count = math.prod(
+        len(tuple(values)) for values in dict(protocol["factorial_axes"]).values()
+    )
+    if len(differences) != expected_cell_count:
+        raise ValueError("factorial output does not contain every frozen cell")
     anchor_config = dict(protocol["anchor"])
     anchor = tuple(float(anchor_config[key]) for key in ("rho", "kappa", "eta"))
     analysis_config = dict(protocol["analysis"])
@@ -197,7 +212,18 @@ def analyze(
         bootstrap_seed=int(analysis_config["bootstrap_seed"]),
     )
     threshold = float(analysis_config["two_axis_rejection_rmse_ratio"])
-    upper = float(comparison["bootstrap_ratio_95_interval"][1])
+    improvement_quantile = float(
+        analysis_config["bootstrap_improvement_lower_quantile"]
+    )
+    if improvement_quantile != 0.05:
+        raise ValueError("FR-B3 currently supports the frozen 0.05 lower quantile")
+    ratio = float(comparison["three_to_two_axis_rmse_ratio"])
+    improvement_lower = float(
+        comparison["bootstrap_rmse_improvement_90_interval"][0]
+    )
+    practically_meaningful = ratio <= threshold
+    statistically_supported = improvement_lower > 0.0
+    rejected = practically_meaningful and statistically_supported
     return {
         "experiment_id": protocol["experiment_id"],
         "analysis_status": "designed_confirmatory_analysis",
@@ -205,14 +231,18 @@ def analyze(
         "cell_summaries": _cell_summaries(differences, coordinates),
         "predictive_model_comparison": comparison,
         "decision_rule": {
-            "two_axis_rejected_if_bootstrap_upper_rmse_ratio_below": threshold,
-            "two_axis_rejected": bool(upper < threshold),
+            "observed_rmse_ratio_must_not_exceed": threshold,
+            "bootstrap_rmse_improvement_lower_quantile": improvement_quantile,
+            "bootstrap_rmse_improvement_lower_bound_must_exceed": 0.0,
+            "practically_meaningful_improvement": practically_meaningful,
+            "statistically_supported_improvement": statistically_supported,
+            "two_axis_rejected": rejected,
             "interpretation": (
                 "eta materially improves held-out prediction"
-                if upper < threshold
+                if rejected
                 else (
-                    "insufficient evidence that eta improves held-out prediction "
-                    "by the frozen margin"
+                    "the result does not meet both the predictive effect-size "
+                    "and uncertainty gates"
                 )
             ),
         },
