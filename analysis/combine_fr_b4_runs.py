@@ -21,7 +21,8 @@ from typing import Any
 
 
 OMEGA_LABELS = ["stationary", "very_slow", "slow", "mid", "fast"]
-L_LABELS     = ["L1", "L3", "L10", "L30", "Lall"]
+# Full ordered L label list including intermediate values from run_fr_b4_extra_L.py
+L_LABELS     = ["L1", "L3", "L5", "L10", "L20", "L30", "L45", "Lall"]
 METHODS      = ["window", "decay"]
 LCRIT_FRAC   = 0.60   # same as LCRIT_SIGN_MIN / n_seeds in the runner
 
@@ -41,7 +42,7 @@ def _cell_stats(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-_L_LABEL_TO_STEPS = {"L1": 1, "L3": 3, "L10": 10, "L30": 30, "Lall": 67}
+_L_LABEL_TO_STEPS = {"L1": 1, "L3": 3, "L5": 5, "L10": 10, "L20": 20, "L30": 30, "L45": 45, "Lall": 67}
 
 
 def _find_l_critical(omega_label: str, method: str, cells: dict[str, Any]) -> int | None:

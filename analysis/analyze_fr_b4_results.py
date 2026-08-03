@@ -22,8 +22,8 @@ from typing import Any
 
 OMEGA_LABELS  = ["stationary", "very_slow", "slow", "mid", "fast"]
 OMEGA_VALUES  = {"stationary": 0.0, "very_slow": 0.75, "slow": 1.5, "mid": 5.0, "fast": 17.0}
-L_LABELS      = ["L1", "L3", "L10", "L30", "Lall"]
-L_STEPS       = {"L1": 1, "L3": 3, "L10": 10, "L30": 30, "Lall": 67}
+L_LABELS      = ["L1", "L3", "L5", "L10", "L20", "L30", "L45", "Lall"]
+L_STEPS       = {"L1": 1, "L3": 3, "L5": 5, "L10": 10, "L20": 20, "L30": 30, "L45": 45, "Lall": 67}
 METHODS       = ["window", "decay"]
 LCRIT_FRAC    = 0.60
 T_CRIT_ALPHA  = 0.05  # one-sided
