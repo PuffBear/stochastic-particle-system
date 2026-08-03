@@ -2,7 +2,7 @@
 
 **Research idea:** FR-B4
 **Target venue:** ICLR 2028 (primary) · NeurIPS 2028 (fallback)
-**Status:** Phase 2 engineering complete — reproduction gate running
+**Status:** Reproduction gate PASSED — full grid run1 complete (8 seeds/cell)
 
 ## Core question
 

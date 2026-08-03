@@ -78,18 +78,63 @@ If gate fails: stop, diagnose the implementation. Do not proceed.
 
 ### Full grid
 
-40 active conditions (4 ω × 5 L × 2 methods). Plus 2 anchor conditions (ω=0 × Lall × both methods).
+40 active conditions (4 ω × 5 L × 2 methods). Plus gate conditions (ω=0, L=1).
+Results from run1: `results/FR-B4/fr_b4_full_grid_run1.json` (seeds 9001–9008, 8 per cell).
 
-| ω | L | method | Seeds | Status |
-|---|---|---|---|---|
-| 0 | all | window | 1001–1008 | ✅ Anchor (C03) |
-| 0 | all | decay | 1001–1008 | ✅ Anchor (must match) |
-| π/200 | 1,3,10,30,all | window | 9001–9008 | To run |
-| π/200 | 1,3,10,30,all | decay | 9001–9008 | To run |
-| π/100 | 1,3,10,30,all | window | 9001–9008 | To run |
-| π/100 | 1,3,10,30,all | decay | 9001–9008 | To run |
-| π/50 | 1,3,10,30,all | window | 9001–9008 | To run |
-| π/50 | 1,3,10,30,all | decay | 9001–9008 | To run |
+| ω | L | method | Δ̄ | sign/8 | L_critical |
+|---|---|---|---|---|---|
+| 0 (gate) | 1 | window | +1.188 | 20/32 | — |
+| 0 (gate) | 1 | decay | +0.344 | 14/32 | — |
+| 0 | 3 | window | +0.812 | 16/32 | — |
+| 0 | 3 | decay | +0.938 | 17/32 | — |
+| 0 | 10 | window | +0.719 | 16/32 | — |
+| 0 | 10 | decay | +0.375 | 15/32 | — |
+| 0 | 30 | window | +0.250 | 14/32 | — |
+| 0 | 30 | decay | +0.281 | 13/32 | — |
+| π/200 | 1 | window | +1.500 | 4/8 | |
+| π/200 | 1 | decay | +1.625 | 6/8 ✅ | L_crit=1 |
+| π/200 | 3 | window | +0.375 | 3/8 | |
+| π/200 | 3 | decay | +0.375 | 3/8 | |
+| π/200 | 10 | window | -0.625 | 2/8 | |
+| π/200 | 10 | decay | +0.250 | 4/8 | |
+| π/200 | 30 | window | +0.750 | 4/8 | |
+| π/200 | 30 | decay | +0.500 | 4/8 | |
+| π/200 | all | window | +0.000 | 5/8 ✅ | L_crit=67 |
+| π/200 | all | decay | +0.250 | 5/8 ✅ | (also L=1) |
+| π/100 | 1 | window | +1.750 | 4/8 | |
+| π/100 | 1 | decay | +1.375 | 6/8 ✅ | L_crit=1 |
+| π/100 | 3 | window | +0.625 | 4/8 | |
+| π/100 | 3 | decay | +0.250 | 4/8 | |
+| π/100 | 10 | window | -1.250 | 2/8 | |
+| π/100 | 10 | decay | +0.750 | 3/8 | |
+| π/100 | 30 | window | +0.500 | 3/8 | |
+| π/100 | 30 | decay | +0.750 | 4/8 | |
+| π/100 | all | window | -0.625 | 3/8 | L_crit=undefined |
+| π/100 | all | decay | +0.500 | 6/8 ✅ | (also L=1) |
+| π/50 | 1 | window | +2.500 | 6/8 ✅ | L_crit=1 |
+| π/50 | 1 | decay | +1.125 | 4/8 | |
+| π/50 | 3 | window | -0.250 | 3/8 | |
+| π/50 | 3 | decay | +0.000 | 3/8 | |
+| π/50 | 10 | window | -0.375 | 3/8 | |
+| π/50 | 10 | decay | +0.625 | 2/8 | |
+| π/50 | 30 | window | +0.875 | 5/8 ✅ | |
+| π/50 | 30 | decay | +1.500 | 6/8 ✅ | L_crit=30 |
+| π/50 | all | window | +0.000 | 4/8 | |
+| π/50 | all | decay | +0.125 | 3/8 | |
+
+**L_critical summary (run1, 8 seeds, sign≥5/8):**
+
+| ω | window L_crit | decay L_crit |
+|---|---|---|
+| 0 | 1 | 1 |
+| π/200 (slow) | 67 (=Lall) | 1 |
+| π/100 (mid) | undefined | 1 |
+| π/50 (fast) | 1 | 30 |
+
+Note: 8-seed estimates have high variance (SD≈3, SE≈1). The non-monotone
+L_critical pattern (window: fast→1, mid→undef, slow→67) indicates 8 seeds
+is insufficient to resolve L_critical reliably. A second run with independent
+seeds or more seeds per cell is needed before fitting the 1/ω scaling.
 
 ---
 

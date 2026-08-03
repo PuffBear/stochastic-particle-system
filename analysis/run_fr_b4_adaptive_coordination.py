@@ -346,7 +346,7 @@ def main() -> None:
             for method in METHODS:
                 cell = _run_cell(GATE_SEEDS, omega=0.0, L=L, method=method, jobs=jobs)
                 all_results[("stationary", L_label, method)] = cell
-                print(f"  stationary L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
+                print(f"  stationary L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/{len(GATE_SEEDS)}", file=sys.stderr)
 
     _write_output(args.output, all_results, gate_passed, started)
 
