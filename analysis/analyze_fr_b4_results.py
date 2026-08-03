@@ -122,51 +122,54 @@ def main() -> None:
             print(f"  {omega_label:12s} {method:6s}  {n:4d}  {db:+6.3f}  {se:4.3f}  {ci:>15s}  {p_str}")
 
     # ── L_critical (two criteria) ─────────────────────────────────────────────
-    print("\n=== L_critical summary ===")
-    print(f"{'omega':12s} {'method':6s}  sign≥60%  t-test p<0.05")
-    l_crit_sign: dict[str, int | None] = {}
-    l_crit_t:    dict[str, int | None] = {}
+    # L_critical = smallest L passing; L_max = largest L passing (last before degradation)
+    print("\n=== L_critical summary (min and max L passing t-test p<0.05) ===")
+    print(f"{'omega':12s} {'method':6s}  {'T_corr':>6s}  {'L_min':>5s}  {'L_max':>5s}  (L_max=last significant L)")
+    DT = 0.02
+    l_max_t: dict[str, int | None] = {}
+    l_crit_t: dict[str, int | None] = {}
     for omega_label in OMEGA_LABELS:
         for method in METHODS:
-            sc_lcrit = t_lcrit = None
+            t_lcrit = t_lmax = None
             for L_label in L_LABELS:
                 key = f"{omega_label}|{L_label}|{method}"
                 c = cells.get(key)
                 if c is None:
                     continue
-                if sc_lcrit is None and c["sign_pass"]:
-                    sc_lcrit = L_STEPS[L_label]
                 if t_lcrit is None and c["t_pass"]:
                     t_lcrit = L_STEPS[L_label]
-            l_crit_sign[f"{omega_label}|{method}"] = sc_lcrit
-            l_crit_t[f"{omega_label}|{method}"]    = t_lcrit
-            print(f"  {omega_label:12s} {method:6s}  {str(sc_lcrit):>8s}  {str(t_lcrit):>13s}")
+                if c["t_pass"]:
+                    t_lmax = L_STEPS[L_label]
+            l_crit_t[f"{omega_label}|{method}"] = t_lcrit
+            l_max_t[f"{omega_label}|{method}"]  = t_lmax
+            omega_val = OMEGA_VALUES[omega_label]
+            t_corr = f"{1/(omega_val*DT):.0f}" if omega_val > 0 else "∞"
+            print(f"  {omega_label:12s} {method:6s}  {t_corr:>6s}  {str(t_lcrit):>5s}  {str(t_lmax):>5s}")
 
-    # ── 1/omega fit ───────────────────────────────────────────────────────────
-    print("\n=== 1/omega scaling: L_critical (t-test) vs 1/omega ===")
+    # ── 1/(omega*dt) fit on L_max ─────────────────────────────────────────────
+    print("\n=== L_max scaling: L_max (last significant L) vs T_corr = 1/(omega*dt) ===")
     for method in METHODS:
         points = []
-        for omega_label in ["slow", "mid", "fast"]:
+        for omega_label in ["very_slow", "slow", "mid", "fast"]:
             omega = OMEGA_VALUES[omega_label]
-            lc = l_crit_t.get(f"{omega_label}|{method}")
-            if lc is not None:
-                points.append((1.0 / omega, lc))
+            t_corr = 1.0 / (omega * DT)
+            lm = l_max_t.get(f"{omega_label}|{method}")
+            if lm is not None:
+                points.append((t_corr, lm))
+                print(f"  {method}  {omega_label:10s}  T_corr={t_corr:.0f}  L_max={lm}")
+            else:
+                print(f"  {method}  {omega_label:10s}  T_corr={t_corr:.0f}  L_max=None (no significant L)")
         if len(points) >= 2:
             xs = [p[0] for p in points]
             ys = [p[1] for p in points]
-            x_mean = sum(xs) / len(xs)
-            y_mean = sum(ys) / len(ys)
-            ss_xy = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
-            ss_xx = sum((x - x_mean) ** 2 for x in xs)
-            c_fit = ss_xy / ss_xx if ss_xx > 0 else float("nan")
+            # force-through-origin fit: c = sum(x*y) / sum(x^2)
+            c_fit = sum(x * y for x, y in zip(xs, ys)) / sum(x * x for x in xs)
             ss_res = sum((y - c_fit * x) ** 2 for x, y in zip(xs, ys))
-            ss_tot = sum((y - y_mean) ** 2 for y in ys)
+            ss_tot = sum((y - sum(ys)/len(ys)) ** 2 for y in ys)
             r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
-            print(f"  {method}: c={c_fit:.3f}  R²={r2:.3f}  (from {len(points)} omega levels)")
-            for x, y in zip(xs, ys):
-                print(f"    1/omega={x:.1f}  L_crit={y}  predicted={c_fit*x:.1f}")
+            print(f"  {method}: L_max ≈ {c_fit:.3f} * T_corr  R²={r2:.3f}  (from {len(points)} omega levels)")
         else:
-            print(f"  {method}: fewer than 2 defined L_critical values — no fit")
+            print(f"  {method}: fewer than 2 defined L_max values — no fit")
 
 
 if __name__ == "__main__":
