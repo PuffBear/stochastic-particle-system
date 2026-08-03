@@ -13,6 +13,7 @@ dependencies = ["numpy>=1.26", "PyYAML>=6.0"]
 marl = ["torch>=2.0", "gymnasium>=0.29"]
 test = ["pytest>=8.0"]
 marl-test = ["torch>=2.0", "gymnasium>=0.29", "pytest>=8.0"]
+fr-b3-report = ["matplotlib>=3.8"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

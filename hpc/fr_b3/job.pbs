@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+#PBS -N frb3_factorial
+#PBS -l select=1:ncpus=8:mem=16gb
+#PBS -l walltime=06:00:00
+#PBS -j oe
+
+set -euo pipefail
+
+REPOSITORY_ROOT="${SPS_REPO_DIR:-$HOME/sps/stochastic-particle-system}"
+CONFIG="configs/experiments/fr_b3_catchability.yaml"
+RUN_OUTPUT="results/raw/FR-B3-CATCHABILITY-FACTORIAL"
+VALIDATION_OUTPUT="results/analysis/FR-B3-CATCHABILITY-FACTORIAL-VALIDATION.json"
+ANALYSIS_OUTPUT="results/analysis/FR-B3-CATCHABILITY-FACTORIAL.json"
+FIGURE_OUTPUT="results/figures/FR-B3-CATCHABILITY-FACTORIAL"
+JOBS="${PBS_NCPUS:-8}"
+
+cd "$REPOSITORY_ROOT"
+module load Anaconda3
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate sps-fr-b3
+export PYTHONPATH="$REPOSITORY_ROOT/src"
+export MPLBACKEND=Agg
+
+COMMIT_SHA="$(git rev-parse HEAD)"
+echo "FR-B3 factorial starting at $(date --iso-8601=seconds)"
+echo "repository=$REPOSITORY_ROOT"
+echo "commit=$COMMIT_SHA"
+echo "jobs=$JOBS"
+
+python hpc/fr_b3/preflight.py \
+  --repository-root "$REPOSITORY_ROOT" \
+  --config "$CONFIG" \
+  --run-output "$RUN_OUTPUT" \
+  --validation-output "$VALIDATION_OUTPUT" \
+  --analysis-output "$ANALYSIS_OUTPUT" \
+  --figure-output "$FIGURE_OUTPUT"
+
+python analysis/run_fr_b3_catchability.py \
+  --config "$CONFIG" \
+  --study factorial \
+  --jobs "$JOBS" \
+  --repository-commit "$COMMIT_SHA" \
+  --output "$RUN_OUTPUT"
+
+python analysis/verify_fr_b3_factorial.py \
+  --run-dir "$RUN_OUTPUT" \
+  --config "$CONFIG" \
+  --repository-root "$REPOSITORY_ROOT" \
+  --report "$VALIDATION_OUTPUT"
+
+python analysis/analyze_fr_b3_catchability.py \
+  --summaries "$RUN_OUTPUT/episode_summaries.jsonl" \
+  --config "$CONFIG" \
+  --study factorial \
+  --output "$ANALYSIS_OUTPUT"
+
+python analysis/plot_fr_b3_catchability.py \
+  --analysis "$ANALYSIS_OUTPUT" \
+  --output-dir "$FIGURE_OUTPUT"
+
+echo "FR-B3 factorial and post-processing completed at $(date --iso-8601=seconds)"

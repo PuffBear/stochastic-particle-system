@@ -50,11 +50,13 @@ Before this revision, FR-B3 was a research sketch rather than a submission:
   audience.
 
 After registration and the passed scale-equivalence audit, the mathematical,
-software, and implementation-correctness foundations are in place. The paper
-is still early: the registered-seed factorial has not run, the central result
-is unknown, no learned scale-transfer experiment has been completed, and no
-manuscript exists. Treat this as roughly 24% of an ICLR submission, not as a
-nearly finished paper.
+software, and implementation-correctness foundations are in place. A
+fail-closed HPC execution package, post-run validator, publication-figure
+pipeline, source-backed literature map, learned-transfer candidate protocol,
+and results-gated manuscript skeleton are also prepared. The paper remains
+early: the registered-seed factorial has not run, the central result is
+unknown, and no learned scale-transfer experiment has been completed. Treat
+this as roughly 30% of an ICLR submission, not as a nearly finished paper.
 
 ## Feasibility
 
@@ -81,8 +83,12 @@ second fails, the work is much better positioned for AAMAS than ICLR.
   comparisons after a versioned physical-unit clipping correction; see
   [`RESCALING_AUDIT.md`](RESCALING_AUDIT.md).
 - Run all 27 cells, 64 fresh common seeds, and four policies.
-- Generate the paired-gain surface, uncertainty, residual plots, and held-out
-  two-axis versus three-axis prediction comparison.
+- [x] Prepare a fail-closed PBS package that preflights the exact 6,912-episode
+  design and refuses dirty, wrong-branch, or overwrite-prone execution.
+- [x] Prepare a post-run completeness/provenance validator and immutable figure
+  pipeline for the paired-gain surface and held-out two-axis versus three-axis
+  comparison.
+- Generate the registered outputs by running the prepared pipeline on HPC.
 - Report the result honestly if the original two-axis claim fails.
 
 ### 2. Add the ICLR-critical representation test (10-31 August)
@@ -106,6 +112,11 @@ Minimum credible experiment:
 This experiment is necessary for strong ICLR fit. It is not needed to validate
 the scripted catchability surface itself.
 
+The unregistered, seed-firewalled design is now specified in
+[`LEARNED_TRANSFER_PROTOCOL.md`](LEARNED_TRANSFER_PROTOCOL.md). It must not run
+on candidate seeds until its remaining tuning, effect-threshold, implementation,
+and human sign-off blockers are resolved.
+
 ### 3. Robustness and ablations (17 August-5 September)
 
 - denser follow-up points near any apparent boundary;
@@ -119,6 +130,9 @@ the scripted catchability surface itself.
 ### 4. Manuscript and review (24 August-25 September)
 
 - Draft results-first; do not retain the old domain-mapping narrative.
+- [x] Prepare an anonymous ICLR-style skeleton whose scientific conclusions and
+  figures remain visibly blocked on validated outputs.
+- [x] Prepare a primary-source literature positioning memo and bibliography.
 - Position against dimensionless RL, sim-to-real/domain randomization, learned
   communication, and multi-agent benchmark literature.
 - Complete figures and appendix by 10 September.

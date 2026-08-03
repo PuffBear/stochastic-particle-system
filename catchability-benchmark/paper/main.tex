@@ -1,0 +1,224 @@
+\documentclass{article}
+
+% Download the official ICLR 2027 style files into this directory before
+% submission. The fallback keeps the research skeleton locally compilable.
+\IfFileExists{iclr2027_conference.sty}{
+  \usepackage{iclr2027_conference,times}
+}{
+  \usepackage[margin=1in]{geometry}
+}
+\usepackage{amsmath,amssymb,booktabs,graphicx,microtype,natbib,xcolor}
+\usepackage[colorlinks=true,allcolors=blue]{hyperref}
+
+\newcommand{\rhoSNR}{\rho}
+\newcommand{\kappaC}{\kappa}
+\newcommand{\etaT}{\eta}
+\newcommand{\pending}[1]{\textcolor{red!70!black}{\textbf{[PENDING]} #1}}
+
+\title{Dimensionless Catchability and Scale Transfer in\\
+Multi-Agent Stochastic Particle Collection}
+\author{Anonymous Authors}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multi-agent control in stochastic physical systems is often evaluated at one
+arbitrary choice of length and time units, obscuring whether a coordination
+effect reflects a dimensionless regime or a scale-specific policy
+representation. We study four collectors acting on diffusing particles under a
+latent drift field. A matched-seed factorial varies drift signal-to-noise
+$\rhoSNR$, drift-to-control ratio $\kappaC$, and absolute transport scale
+$\etaT$, and compares a bounded shared velocity summary against a
+capacity-matched independent controller. We evaluate whether $(\rhoSNR,
+\kappaC)$ predict held-out coordination gain without $\etaT$ using a
+pre-registered leave-one-cell-out criterion. We then train independent and
+communicating policies at one physical scale and test zero-shot transfer to
+dynamically equivalent rescalings under raw versus dimensionless observations.
+The implementation passes an exact rescaling audit after a preserved,
+versioned correction for physical-unit clipping. \pending{Insert the registered
+factorial result and learned-transfer result; do not state either conclusion
+before its frozen analysis passes.}
+\end{abstract}
+
+\section{Introduction}
+
+Changing metres to centimetres should not change a physical law, but it can
+change the numerical inputs received by a learned controller. Dimensionless
+quantities provide invariants of such unit transformations
+\citep{villar2023dimensionless}; reinforcement-learning generalization asks
+whether policies retain behavior outside their training domain
+\citep{sonar2021invariant}. The interaction becomes especially consequential in
+multi-agent systems: communication can aggregate information, yet a learned
+message may encode the accidental scale of the training environment.
+
+We use stochastic particle collection as a controlled setting in which both the
+physical scaling and the coordination intervention are explicit. Four mobile
+collectors observe only nearby particles. The treatment replaces four local
+velocity summaries with a bounded team summary while preserving action and
+message capacity. The central scientific question is not merely whether this
+summary helps at one operating point, but which dimensionless groups determine
+its causal gain.
+
+Our candidate contributions are:
+\begin{enumerate}
+  \item a matched-seed $3\times3\times3$ benchmark for the coordination-gain
+  surface over three derived catchability groups;
+  \item a held-out predictive test of whether absolute transport scale $\etaT$
+  is required beyond $(\rhoSNR,\kappaC)$;
+  \item a controlled representation intervention comparing zero-shot transfer
+  of independent and communicating policies under raw and dimensionless inputs;
+  \item an auditable execution package with immutable manifests, exact seed
+  firewalls, and failed-first rescaling provenance.
+\end{enumerate}
+
+Items 2 and 3 are conditional on the registered results. A non-rejection of the
+two-axis null is not treated as proof of sufficiency.
+
+\section{Related Work}
+
+\noindent\textbf{Dimensionless learning.}
+The Buckingham $\Pi$ theorem characterizes physical relationships through
+dimensionless groups \citep{buckingham1914}. Recent work imposes units
+equivariance by constructing dimensionless features before learning
+\citep{villar2023dimensionless}, or discovers useful groups from data under
+dimensional constraints \citep{bakarji2022buckingham}. We derive candidate
+groups from known simulator dimensions and test their predictive sufficiency
+for a multi-agent policy contrast.
+
+\paragraph{Policy transfer.}
+Invariant Policy Optimization seeks representations supporting policies that
+generalize across training domains \citep{sonar2021invariant}. Domain
+randomization instead trains across ensembles of perturbed simulators
+\citep{muratore2018domain}. Our intervention trains at one scale and compares
+representations under transformations known to preserve the dimensionless
+dynamics; it is not a new optimization algorithm or sim-to-real guarantee.
+
+\paragraph{Cooperative learning and communication.}
+IPPO and MAPPO are strong PPO-based cooperative baselines
+\citep{yu2022surprising}. CommNet jointly learns continuous, mean-pooled
+communication and behavior \citep{sukhbaatar2016commnet}. We use IPPO and
+CommNet to separate independent execution from learned communication while
+holding the representation intervention fixed.
+
+\section{Dimensionless Catchability}
+
+Let $L$ denote characteristic arena length, $\alpha$ drift speed, $\sigma$ the
+diffusion coefficient under the simulator convention, $\Delta t$ the step, and
+$v_{\max}$ collector speed. The frozen groups are
+\begin{equation}
+  \rhoSNR=\frac{\alpha\sqrt{\Delta t}}{\sigma},\qquad
+  \kappaC=\frac{\alpha}{v_{\max}},\qquad
+  \etaT=\frac{\sigma\sqrt{\Delta t}}{L}.
+\end{equation}
+They imply normalized one-step drift and control displacements
+\begin{equation}
+  \frac{\alpha\Delta t}{L}=\rhoSNR\etaT,
+  \qquad
+  \frac{v_{\max}\Delta t}{L}=\frac{\rhoSNR\etaT}{\kappaC}.
+\end{equation}
+Thus $(\rhoSNR,\kappaC)$ alone do not determine normalized transport. Whether
+$\etaT$ materially improves prediction of coordination gain is an empirical,
+held-out question.
+
+\section{Registered Scripted Benchmark}
+
+\paragraph{Environment and contrast.}
+The unit-square benchmark contains 256 particles, four collectors, a 67-step
+horizon, sensing radius $0.16$, and fixed swept-contact geometry. Common random
+numbers pair every policy within every cell and seed. The primary estimand is
+\begin{equation}
+ D(\rhoSNR,\kappaC,\etaT)
+ =\mathbb{E}[Y_{\mathrm{shared}}-Y_{\mathrm{independent}}],
+\end{equation}
+where $Y$ is unique team capture yield.
+
+\paragraph{Factorial and seed panel.}
+Each group is varied by a factor of two below and above the executed SPS-C03
+anchor, producing 27 cells. Sixty-four fresh seeds are shared across cells; two
+diagnostic policies give a total of four arms and 6,912 episodes.
+
+\paragraph{Predictive decision rule.}
+Quadratic response surfaces using $(\rhoSNR,\kappaC)$ and
+$(\rhoSNR,\kappaC,\etaT)$ are compared by leave-one-cell-out RMSE. Two-axis
+sufficiency is rejected only if the observed RMSE ratio is at most $0.80$ and
+the one-sided 95\% common-seed bootstrap lower bound for
+$\mathrm{RMSE}_{2}-\mathrm{RMSE}_{3}$ exceeds zero.
+
+\paragraph{Correctness audit.}
+Four physical rescalings preserve all three groups and normalized geometry.
+The final audit passed all eight seed-policy comparisons for capture yield and
+quantized normalized final state. The initial audit and its physical-unit
+clipping failure remain in the repository.
+
+\section{Learned Scale Transfer}
+
+We train IPPO and CommNet at the canonical scale under two observation maps.
+Raw inputs retain physical length and velocity units. Dimensionless inputs use
+$x/L$, relative positions divided by sensing radius, and $v\Delta t/r_s$.
+Both maps expose identical entities, masks, and slot counts, and both use
+standardization statistics fitted only on canonical training trajectories.
+
+Frozen checkpoints are evaluated without fine-tuning on the canonical,
+length-$\times2$, time-$\times4$, and mixed-half variants. The representation
+estimand is a paired difference-in-differences in additive capture yield; ratios
+are avoided because collapsed canonical policies make retention ratios
+unstable. CommNet is also evaluated with received messages zeroed.
+
+\section{Results}
+
+\subsection{Coordination-gain surface}
+\pending{Insert the three-panel surface, exact cell table, and signed result.
+State whether the gain changes sign or saturates; do not cherry-pick cells.}
+
+\subsection{Two-axis versus three-axis prediction}
+\pending{Insert both LOCO RMSEs, ratio, bootstrap improvement interval, and the
+pre-registered decision. A non-rejection is not equivalence.}
+
+\subsection{Zero-shot learned transfer}
+\pending{Insert canonical training validity, per-scale additive changes,
+raw-versus-dimensionless difference-in-differences, and CommNet message
+ablation. Report every training seed.}
+
+\section{Limitations}
+
+The factorial holds horizon, normalized geometry, density, team size, sensing,
+field family, and controller definitions fixed. It cannot establish a universal
+three-parameter law. Power calibration targets an $\etaT$ effect spread across
+the surface and is weaker for sparse cell-specific interactions. Exact scripted
+rescaling does not imply neural policies will transfer. The learned study uses
+one stochastic particle substrate and at most two primary architectures; any
+sim-to-real interpretation would require domain calibration not attempted here.
+
+\section{Reproducibility and Ethics}
+
+All frozen runs record source commit, source hashes, artifact hashes, software
+versions, seed panels, and complete condition-policy coverage. The environment
+is simulated and contains no human-subject or personal data. Compute and
+runtime totals will be reported with final results.
+
+\section*{AI Use Disclosure}
+
+Generative AI tools assisted with methodology review, software implementation,
+test design, literature discovery and summarization, manuscript structuring,
+and drafting. Human authors are responsible for verifying all code, sources,
+analyses, claims, and final text. \pending{Update this disclosure to the final,
+complete record of AI-assisted tasks before submission.}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\section{Registered Protocol and Amendments}
+\pending{Include protocol version history, failed-first audit, full seed
+firewalls, and immutable hashes.}
+
+\section{Complete Cell and Seed-Level Results}
+\pending{Include all 27 cell summaries and the required seed-level supplement.}
+
+\section{Learned-Policy Training Details}
+\pending{Include hyperparameters, checkpoint selection rules, learning curves,
+failed runs, and hardware/runtime accounting.}
+
+\end{document}

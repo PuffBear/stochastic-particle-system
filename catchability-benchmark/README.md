@@ -62,9 +62,16 @@ Those values were not used by SPS-C03 and must not be cited as its anchor.
   validation, provenance, parallel execution, and development limits.
 - `analysis/analyze_fr_b3_catchability.py`: paired contrasts and held-out
   comparison of two-axis versus three-axis predictive models.
+- `analysis/verify_fr_b3_factorial.py`: fail-closed completeness, pairing,
+  provenance, and artifact-integrity gate for the registered run.
+- `analysis/plot_fr_b3_catchability.py`: immutable publication figures, exact
+  plotted-data table, chart contracts, and hashes.
 - `analysis/calibrate_fr_b3_design.py`: reproducible seed-budget and decision-
   rule calibration from the historical paired variance.
-- `tests/test_catchability.py`: anchor, transform, design, and analysis tests.
+- `hpc/fr_b3/`: PBS setup, preflight, submission, run, validation, analysis,
+  and plotting package; no branch-switching or merge operation.
+- `tests/test_catchability.py` and `tests/test_fr_b3_pipeline.py`: anchor,
+  transform, design, validation, analysis, and rendering tests.
 
 The protocol is registered and externally timestamped. The v2
 scale-equivalence audit passed all eight frozen seed-policy comparisons; see
@@ -85,4 +92,7 @@ See [PROTOCOL.md](PROTOCOL.md) for the experiment contract and
 [DESIGN_REVIEW.md](DESIGN_REVIEW.md) for the statistical sign-off package.
 [RESCALING_AUDIT.md](RESCALING_AUDIT.md) records the completed correctness gate,
 and [ROADMAP.md](ROADMAP.md) covers venue fit, feasibility gates, and remaining
-work.
+work. [LEARNED_TRANSFER_PROTOCOL.md](LEARNED_TRANSFER_PROTOCOL.md) is the
+unregistered follow-on learning design; [LITERATURE_POSITIONING.md](LITERATURE_POSITIONING.md)
+defines the source-backed novelty boundary; and [paper/README.md](paper/README.md)
+explains the results-gated manuscript skeleton.
