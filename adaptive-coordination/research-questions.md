@@ -80,11 +80,48 @@ If c varies across ω levels: the 1/ω scaling is wrong. Investigate alternative
 
 **Primary kill:** Δ̄ > 0 for all (ω, L) combinations tested — including L=1 at ω=π/50. No boundary found because even a single step of memory is sufficient. This would mean the team benefit is robust to rotation at all tested speeds — scientifically interesting but kills the L_critical claim.
 
+> **STATUS: PRIMARY KILL TRIGGERED** (32 seeds/cell, runs 9001–9032).
+> Every (ω, L, method) cell has Δ̄ > 0. When pooled across L levels, all four
+> ω levels yield statistically significant coordination benefit (p<0.01):
+>   stationary: Δ̄=+0.742 [+0.51,+0.97]; slow: Δ̄=+0.706 [+0.24,+1.17]
+>   mid: Δ̄=+0.562 [+0.11,+1.02];        fast: Δ̄=+0.794 [+0.35,+1.24]
+> Per-cell t-test (p<0.05): window method passes at L=1 for all three
+> non-zero ω levels — no critical memory length exists within the tested range.
+> The L_critical ~ 1/ω hypothesis is **not confirmed**.
+>
+> **Redirect per kill criterion:** The paper narrative shifts from "identifying
+> the minimum memory length" to "coordination is more robust to field rotation
+> than the L_critical framework predicts." Key findings:
+> 1. Communication benefit persists at all tested ω and all L (L=1 through Lall).
+> 2. Effect size is modestly reduced at ω>0 (Δ̄≈0.56–0.79 vs +1.19 at ω=0) but
+>    remains positive and statistically significant.
+> 3. No monotone relationship between L and Δ̄ within any ω level — L is not
+>    the operative memory variable in this regime.
+> 4. The decay method at L=1 uses all history with λ=0.368 — it is not stateless,
+>    which complicates the "minimum memory" framing further.
+>
+> **Revised paper claim:** "Under uniform-field rotation at speeds spanning an
+> order of magnitude, the communication benefit of shared velocity summaries
+> is robust across memory lengths from one step to the full episode. The
+> effective communication channel retains value even when the field has rotated
+> substantially since the oldest shared observation."
+
 **Scaling kill:** L_critical(ω) does not scale as 1/ω and no alternative scaling is apparent. Redirect: report L_critical at each ω empirically without a scaling law.
+
+> **STATUS: ALSO TRIGGERED** — L_critical is undefined for most cells under the
+> sign-count criterion (n=32 insufficient), and under the t-test criterion
+> L_crit=1 at all ω for the window method (no scaling law possible).
 
 **Reproduction kill:** Cell (ω=0, L=all) does not reproduce SPS-C03 Δ̄ within ±0.5. Infrastructure problem in the rotating-field implementation; halt and diagnose.
 
+> **STATUS: NOT TRIGGERED** — Gate passed: ω=0, L=1, window, seeds 6001–6032:
+> Δ̄=+1.188, sign=20/32. Implementation is correct.
+
 **Team-benefit kill (Q3):** Δ̄(shared, independent) at L > L_critical does not decrease with ω — team benefit is fully robust to rotation at matched memory. Redirects the Q3 claim; other questions unaffected.
+
+> **STATUS: TRIGGERED** — Pooled Δ̄ does not decrease monotonically with ω
+> (fast has the highest pooled Δ̄=+0.794). Q3 claim that drift degrades benefit
+> is not supported by pooled data.
 
 ---
 

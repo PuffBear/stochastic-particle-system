@@ -2,7 +2,7 @@
 
 **Research idea:** FR-B4
 **Target venue:** ICLR 2028 (primary) · NeurIPS 2028 (fallback)
-**Status:** Reproduction gate PASSED — full grid run1 complete (8 seeds/cell)
+**Status:** Full grid complete (32 seeds/cell, 4 runs) — PRIMARY KILL TRIGGERED; paper redirecting to robustness result
 
 ## Core question
 
