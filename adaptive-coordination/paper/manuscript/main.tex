@@ -440,8 +440,10 @@ reproduces the SPS-C03 baseline.  Gate criterion:
 $\omega{=}0$, $L{=}1$ (stateless window), seeds 6001--6032:
 $\Dbar \in [+0.69, +1.69]$, sign count $\geq 20/32$.
 
-\textbf{Gate result:} $\Dbar{=}{+}1.188$, sign${=}20/32$
-($p{=}0.003$). \checkmark
+\textbf{Gate result:} $\Dbar{=}{+}1.188$ (SE${}=0.213$),
+sign${=}20/32$.  One-sided $t$-test (same test used for all
+$\Lmax$ cells): $t{=}5.58$, $df{=}31$, $p{<}0.001$.
+Both gate criteria satisfied. \checkmark
 
 \subsection{Pre-registered analysis}
 
@@ -970,8 +972,9 @@ $\omega$ & $L$ & $\Dbar$ & SE & $p$ \\
 \label{app:gate}
 
 Gate run: $\omega{=}0$, $L{=}1$ (stateless sliding window), seeds 6001--6032.
-$\Dbar{=}{+}1.188$ (SE${}=0.213$, 95\% CI $[+0.77, +1.61]$,
-$p{<}0.001$), sign count $20/32$.
+$\Dbar{=}{+}1.188$ (SE${}=0.213$, 95\% CI $[+0.77, +1.61]$);
+one-sided $t$-test: $t{=}5.58$, $df{=}31$, $p{<}0.001$;
+sign count $20/32$.
 This matches SPS-C03's $\Dbar{=}{+}1.19$ (SD 2.44, 20/32 positive)
 within rounding error, confirming the rotating-field implementation
 is correct at $\omega{=}0$.
