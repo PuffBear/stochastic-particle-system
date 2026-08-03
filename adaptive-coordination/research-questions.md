@@ -80,31 +80,16 @@ If c varies across ω levels: the 1/ω scaling is wrong. Investigate alternative
 
 **Primary kill:** Δ̄ > 0 for all (ω, L) combinations tested — including L=1 at ω=π/50. No boundary found because even a single step of memory is sufficient. This would mean the team benefit is robust to rotation at all tested speeds — scientifically interesting but kills the L_critical claim.
 
-> **STATUS: PRIMARY KILL TRIGGERED** (32 seeds/cell, runs 9001–9032).
-> Every (ω, L, method) cell has Δ̄ > 0. When pooled across L levels, all four
-> ω levels yield statistically significant coordination benefit (p<0.01):
->   stationary: Δ̄=+0.742 [+0.51,+0.97]; slow: Δ̄=+0.706 [+0.24,+1.17]
->   mid: Δ̄=+0.562 [+0.11,+1.02];        fast: Δ̄=+0.794 [+0.35,+1.24]
-> Per-cell t-test (p<0.05): window method passes at L=1 for all three
-> non-zero ω levels — no critical memory length exists within the tested range.
-> The L_critical ~ 1/ω hypothesis is **not confirmed**.
+> **STATUS: FALSE ALARM — original ω grid was in the wrong regime.**
+> Runs 9001–9032 at ω ∈ {π/200, π/100, π/50} triggered this criterion, but
+> the per-step rotation ω·dt at those values is {0.000314, 0.000628, 0.00126}
+> rad/step — the field rotated at most 5° over the entire 67-step episode.
+> T_corr = 1/(ω·dt) ∈ {3185, 1591, 795} steps, all >> episode length.
+> In this regime, the field is essentially stationary and "robustness" is trivial.
 >
-> **Redirect per kill criterion:** The paper narrative shifts from "identifying
-> the minimum memory length" to "coordination is more robust to field rotation
-> than the L_critical framework predicts." Key findings:
-> 1. Communication benefit persists at all tested ω and all L (L=1 through Lall).
-> 2. Effect size is modestly reduced at ω>0 (Δ̄≈0.56–0.79 vs +1.19 at ω=0) but
->    remains positive and statistically significant.
-> 3. No monotone relationship between L and Δ̄ within any ω level — L is not
->    the operative memory variable in this regime.
-> 4. The decay method at L=1 uses all history with λ=0.368 — it is not stateless,
->    which complicates the "minimum memory" framing further.
->
-> **Revised paper claim:** "Under uniform-field rotation at speeds spanning an
-> order of magnitude, the communication benefit of shared velocity summaries
-> is robust across memory lengths from one step to the full episode. The
-> effective communication channel retains value even when the field has rotated
-> substantially since the oldest shared observation."
+> **Correction:** The ω grid has been redesigned so that T_corr ∈ {67, 33, 10, 3}
+> steps (ω ∈ {0.75, 1.5, 5.0, 17.0} rad/step). The corrected experiment is now
+> running. Kill-criterion assessment deferred until corrected-grid results arrive.
 
 **Scaling kill:** L_critical(ω) does not scale as 1/ω and no alternative scaling is apparent. Redirect: report L_critical at each ω empirically without a scaling law.
 

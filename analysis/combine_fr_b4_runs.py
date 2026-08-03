@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any
 
 
-OMEGA_LABELS = ["stationary", "slow", "mid", "fast"]
+OMEGA_LABELS = ["stationary", "very_slow", "slow", "mid", "fast"]
 L_LABELS     = ["L1", "L3", "L10", "L30", "Lall"]
 METHODS      = ["window", "decay"]
 LCRIT_FRAC   = 0.60   # same as LCRIT_SIGN_MIN / n_seeds in the runner

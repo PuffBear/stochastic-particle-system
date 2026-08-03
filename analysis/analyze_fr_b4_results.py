@@ -20,8 +20,8 @@ from pathlib import Path
 from typing import Any
 
 
-OMEGA_LABELS  = ["stationary", "slow", "mid", "fast"]
-OMEGA_VALUES  = {"stationary": 0.0, "slow": math.pi/200, "mid": math.pi/100, "fast": math.pi/50}
+OMEGA_LABELS  = ["stationary", "very_slow", "slow", "mid", "fast"]
+OMEGA_VALUES  = {"stationary": 0.0, "very_slow": 0.75, "slow": 1.5, "mid": 5.0, "fast": 17.0}
 L_LABELS      = ["L1", "L3", "L10", "L30", "Lall"]
 L_STEPS       = {"L1": 1, "L3": 3, "L10": 10, "L30": 30, "Lall": 67}
 METHODS       = ["window", "decay"]

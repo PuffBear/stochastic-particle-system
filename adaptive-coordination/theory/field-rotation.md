@@ -14,11 +14,11 @@ where ω ≥ 0 is the rotation rate in radians per step (equivalently, radians /
 At ω = 0: stationary field — exactly SPS-C03.
 At ω = π/67: the field completes a half-rotation over one 67-step episode.
 
-**Autocorrelation time:** The field direction at time t and time t + τ·dt differ by ω·τ·dt radians. The cosine similarity (relevant for velocity direction estimates) decays as cos(ω·τ·dt). The e-folding autocorrelation time is:
+**Autocorrelation time:** The field direction at time t and time t + τ steps differs by ω·τ·dt radians (each step advances θ by ω·dt, not ω). The cosine similarity (relevant for velocity direction estimates) decays as cos(ω·τ·dt). The e-folding autocorrelation time is:
 ```
-T_corr = 1 / ω   (in steps)
+T_corr = 1 / (ω · dt)   (in steps)
 ```
-Observations more than T_corr steps old have cosine similarity < cos(1) ≈ 0.54 with the current field direction, and more than 2·T_corr steps old have cosine similarity < cos(2) ≈ −0.42 (potentially anti-informative).
+Note the dt factor: it is the *per-step* rotation ω·dt, not the rotation rate ω, that determines how fast field estimates go stale. Observations more than T_corr steps old have cosine similarity < cos(1) ≈ 0.54 with the current field direction, and more than 2·T_corr steps old have cosine similarity < cos(2) ≈ −0.42 (potentially anti-informative).
 
 ---
 
@@ -70,7 +70,20 @@ For ω = π/100 (mid-rotation speed) and dt = 0.02:
 L* ≈ √2 / (π/100 · 0.02) = √2 / 0.000628 ≈ 2252 steps
 ```
 
-This is much larger than our episode length (67 steps). For the rotation speeds we test, the SNR is monotone increasing in L within a single episode — the cosine penalty doesn't dominate at these ω values.
+This is much larger than our episode length (67 steps). **This is a consequence of the ω grid being in the wrong regime.** At ω=π/100 the per-step rotation ω·dt = 0.000628 rad ≈ 0.036°/step; over the full 67-step episode the field rotates only ~2.4°. For the rotation speeds originally tested ({π/200, π/100, π/50}), T_corr ∈ {3125, 1591, 795} steps — all far longer than the 67-step episode. In every tested episode the field is essentially stationary.
+
+**Implication for the original experiments:** All 4 runs (9001–9032) at the old ω grid confirmed coordination benefit at all L and ω, but this is not genuine robustness to rotation — it is robustness to near-zero rotation. The old ω grid was off by a factor of ≈1/dt = 50.
+
+**Corrected ω grid:** To put T_corr within the episode, we need ω·dt ≥ 1/67, i.e., ω ≥ 0.75 rad/step. The corrected grid targets T_corr ∈ {67, 33, 10, 3} steps:
+
+| Label | ω (rad/step) | ω·dt (rad/step) | T_corr (steps) | Total rotation (67 steps) |
+|---|---|---|---|---|
+| very_slow | 0.75 | 0.015 | 67 | 1.0 rad (57°) |
+| slow | 1.5 | 0.030 | 33 | 2.0 rad (115°) |
+| mid | 5.0 | 0.10 | 10 | 6.7 rad (383°, >1 rotation) |
+| fast | 17.0 | 0.34 | 3 | 22.4 rad (>3 rotations) |
+
+For the rotation speeds we test, the SNR is monotone increasing in L within a single episode — the cosine penalty doesn't dominate at these ω values.
 
 **Implication:** L* >> episode length for tested ω. The L_critical boundary exists not because the team estimate degrades at large L, but because the independent arm's estimate improves less with L. The coordination gain Δ̄(L, ω) = shared(L,ω) − independent(L,ω) has its own L_critical independent of the SNR maximum.
 
@@ -96,26 +109,35 @@ But this assumes agents are pooling correctly. The issue arises from angular het
 
 L_critical is where this systematic angular spread exceeds the sensing gain from pooling. A precise derivation requires knowing the distribution of per-agent observation counts and their correlation structure — this is addressed in the analysis after experiments.
 
-**Working prediction (before experiments):** The 1/ω scaling follows from the autocorrelation time T_corr = 1/ω. Observations older than T_corr are approximately anti-informative (cosine < 0). So:
+**Corrected working prediction:** Using T_corr = 1/(ω·dt):
 ```
-L_critical(ω) ≈ c / ω
+L_critical(ω) ≈ c / (ω · dt)   (in steps)
 ```
-where c ≈ T_corr at which the shared arm no longer meaningfully outperforms the independent arm. From SPS parameters, c is estimated at 8–15 steps. Experiments will measure it directly.
+equivalently c' / (ω·dt) where c' = c·dt is a dimensionless constant. From SPS parameters, the angular noise per step is approximately σ/(α·√K̄) ≈ 0.06/(0.06·√8) ≈ 0.35 rad. The bias ω·L·dt/2 exceeds the noise when L ≈ 0.7/(ω·dt), suggesting c ≈ 0.7–1.0. Experiments will measure it directly.
 
 ---
 
-## Numerical predictions
+## Numerical predictions (corrected ω grid)
 
-Using c = 10 (working estimate):
+Using c/(ω·dt) with c ≈ 1.0:
 
-| ω (rad/step) | T_corr (steps) | Predicted L_critical |
-|---|---|---|
-| 0 | ∞ | all steps (SPS-C03) |
-| π/200 ≈ 0.016 | 64 | ~30 steps |
-| π/100 ≈ 0.031 | 32 | ~10 steps |
-| π/50 ≈ 0.063 | 16 | ~3 steps |
+| ω (rad/step) | ω·dt (rad/step) | T_corr (steps) | Predicted L_critical |
+|---|---|---|---|
+| 0 | 0 | ∞ | all steps (SPS-C03) |
+| 0.75 | 0.015 | 67 | ~67 steps |
+| 1.5 | 0.030 | 33 | ~33 steps |
+| 5.0 | 0.10 | 10 | ~10 steps |
+| 17.0 | 0.34 | 3 | ~3 steps |
 
-These predictions are written before experiments. The experiment will test whether the empirical L_critical matches the predicted values and whether a single c fits all three ω levels.
+**Old grid (INCORRECT — in near-stationary regime):**
+
+| ω (rad/step) | ω·dt (rad/step) | T_corr (steps) | Why it failed |
+|---|---|---|---|
+| π/200 ≈ 0.016 | 0.000314 | 3185 | T_corr >> episode length |
+| π/100 ≈ 0.031 | 0.000628 | 1591 | T_corr >> episode length |
+| π/50 ≈ 0.063 | 0.00126 | 794 | T_corr >> episode length |
+
+These predictions are written before experiments. The corrected grid will test whether the empirical L_critical matches the predicted values and whether a single c fits all four ω levels.
 
 ---
 

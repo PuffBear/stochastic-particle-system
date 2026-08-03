@@ -72,15 +72,19 @@ SENSING_RADIUS = 0.16
 # to the stateless SPS-C03 controller.
 GATE_SEEDS = list(range(6001, 6033))   # 32 confirmed SPS-C03 seeds
 GATE_L     = 1                         # L=1 matches SPS-C03 stateless controller
-MAIN_SEEDS = list(range(9001, 9009))   # non-zero omega cells
+MAIN_SEEDS = list(range(9001, 9009))   # non-zero omega cells (8 per batch)
 
 L_ALL = STEPS  # sentinel: full episode history
 
+# Corrected omega grid: targets T_corr = 1/(omega*dt) in {67, 33, 10, 3} steps.
+# Old grid ({pi/200, pi/100, pi/50}) had T_corr >> episode length (795-3185 steps)
+# because the per-step rotation is omega*dt, not omega.  Field barely moved.
 OMEGA_LEVELS = {
     "stationary": 0.0,
-    "slow":       math.pi / 200,
-    "mid":        math.pi / 100,
-    "fast":       math.pi / 50,
+    "very_slow":  0.75,   # omega*dt=0.015, T_corr≈67 steps, total rot≈57°
+    "slow":       1.5,    # omega*dt=0.030, T_corr≈33 steps, total rot≈115°
+    "mid":        5.0,    # omega*dt=0.100, T_corr≈10 steps, total rot≈383°
+    "fast":       17.0,   # omega*dt=0.340, T_corr≈ 3 steps, total rot≈1283°
 }
 
 L_LEVELS = {
@@ -316,7 +320,7 @@ def main() -> None:
 
     # ── Phase 2: Fast rotation diagnostic ────────────────────────────────────
     if args.conditions in ("fast_diagnostic", "slow_mid", "full", "all"):
-        print("Phase 2: Fast rotation diagnostic (omega=pi/50, L in {1,3,10})", file=sys.stderr)
+        print("Phase 2: Fast rotation diagnostic (omega=17, T_corr≈3 steps, L in {1,3,10})", file=sys.stderr)
         for L_label in ["L1", "L3", "L10"]:
             L = L_LEVELS[L_label]
             for method in METHODS:
@@ -328,9 +332,9 @@ def main() -> None:
             _write_output(args.output, all_results, gate_passed, started)
             return
 
-    # ── Phase 3: Full slow and mid ────────────────────────────────────────────
+    # ── Phase 3: Full very_slow, slow, and mid ───────────────────────────────
     if args.conditions in ("slow_mid", "full", "all"):
-        for omega_label in ["slow", "mid"]:
+        for omega_label in ["very_slow", "slow", "mid"]:
             print(f"Phase 3: omega={omega_label} — all L levels", file=sys.stderr)
             for L_label, L in L_LEVELS.items():
                 for method in METHODS:
