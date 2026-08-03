@@ -72,29 +72,20 @@ fully matched experiment across four primary rotation speeds
 ($\Tcorr \in \{67, 33, 10, 3\}$ steps) plus a supplementary
 third-anchor condition ($\Tcorr{=}20$), and eight memory lengths
 ($L \in \{1,3,5,10,20,30,45,67\}$ steps).
-At two interior rotation speeds, the pre-registered
-significance-based threshold satisfies
-\[
-  \Lmax(\omega) / \Tcorr \;\approx\; 0.30,
-  \quad \Tcorr = 1/(\omdt),
-\]
-where $\Tcorr$ is the field's one-radian decorrelation timescale.
-An additional intermediate condition and multiplicity analysis
-show that this pattern is preliminary.
-A pre-experiment bias/noise-parity analysis predicts
-$L^* \propto (\omega\,dt)^{-2/3}$, a different functional form
-from the observed $\Lmax \propto (\omega\,dt)^{-1}$;
-the mechanism for the steeper empirical scaling is a policy
-nonlinearity in which the shared arm confidently drives all
-collectors toward a systematically stale direction, crowding out
-the coverage diversity that makes independent coordination
-beneficial. The exponential-decay
-controller does not follow the same scaling. For this environment
-and controller, a sliding window of $L \lesssim 0.30/(\omdt)$
-preserves the coordination benefit when the latent field drifts
-at per-step rate $\omdt$; the constant $c \approx 0.30$ is
-specific to the studied parameter regime and requires re-validation
-under different agent counts or field strengths.
+The primary finding is a \emph{stale-coordination failure
+mechanism}: once the sliding-window memory spans sufficient
+rotation, the shared arm drives all collectors confidently toward
+a systematically wrong direction, eliminating the coverage
+diversity that makes coordination beneficial.
+The significance-based threshold is consistent with
+$\Lmax \approx c\,\Tcorr$ ($\Tcorr = 1/(\omdt)$, the
+one-radian decorrelation timescale), where $c$ ranges from
+$0.15$ (Holm-corrected slow anchor) to $0.30$ (uncorrected) across
+the two clean interior rotation speeds tested; a third rotation
+speed ($\Tcorr{=}20$) did not reproduce a sharp crossover at all.
+The constant $c$ should be treated as a preliminary point estimate,
+not a settled scaling law. The exponential-decay controller does
+not show the same pattern.
 \end{abstract}
 
 \keywords{multi-agent coordination; non-stationary environments;
@@ -185,17 +176,20 @@ confident-but-wrong directions into globally poor coverage.
 
 \medskip\noindent\textbf{Contributions.}
 \begin{enumerate}
-  \item We show that $\Lmax/\Tcorr \approx 0.30$ at two interior
-  rotation speeds (slow, mid; $\Tcorr \in \{33, 10\}$), consistent
-  with a boundary very\_slow point ($\Tcorr{=}67$). A supplementary
-  $\Tcorr{=}20$ condition does not show the same ratio and is
-  discussed separately; the pattern is a preliminary two-anchor
-  observation, not a settled proportionality.
-  \item We show that the empirical $\Lmax \propto (\omega\,dt)^{-1}$
-  pattern is steeper than the bias/noise-parity prediction
-  $L^* \propto (\omega\,dt)^{-2/3}$, and that the crossover
-  occurs at lower $L$ than the theory predicts, attributable to
-  policy nonlinearity rather than information geometry.
+  \item We demonstrate a stale-coordination failure mechanism:
+  confidence in a shared but stale direction eliminates the
+  coverage diversity of independent agents, reversing the
+  coordination benefit. This is well-supported in the slow
+  rotation condition and observed, with less sharpness, in a
+  second interior speed.
+  \item We report a preliminary point estimate: the
+  significance-based threshold satisfies $\Lmax/\Tcorr \approx 0.30$
+  (uncorrected) to $0.15$ (Holm-corrected) at two interior speeds,
+  with a third tested speed not reproducing a sharp crossover.
+  This is an exploratory pattern, not a settled scaling law.
+  \item We show that the empirical crossover occurs at lower $\Lmax$
+  than the bias/noise-parity prediction ($L^* \propto (\omega\,dt)^{-2/3}$),
+  a different functional form, attributable to policy nonlinearity.
   \item We show that exponential decay does not follow the
   same $\Lmax \propto \Tcorr$ pattern at the two interior speeds,
   making the sliding window a more tractable choice in the studied regime.
@@ -883,9 +877,13 @@ In the clearest slow-rotation condition, this failure appears after
 the memory window spans approximately $0.30\;\text{rad}$ of total
 field rotation; the significance-based threshold takes the same
 value at one additional interior speed.
-The largest benefit window at these two speeds satisfies
-$\Lmax \approx 0.30 \cdot \Tcorr$, with a boundary-censored
-very\_slow point consistent but not conclusive.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
+The significance-based threshold is consistent with
+$\Lmax \approx c\,\Tcorr$, where $c$ ranges from $0.15$
+(Holm-corrected) to $0.30$ (uncorrected) across the two interior
+speeds; a boundary-censored very\_slow point is consistent but
+not conclusive; and a third tested speed did not reproduce a sharp
+crossover.  The constant $c$ is a preliminary point estimate, not
+a settled scaling law.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
 a different functional form from the observed pattern,
 and the crossover occurs at lower $L$ than the theory predicts
 because the relevant threshold is not directional MSE parity but
