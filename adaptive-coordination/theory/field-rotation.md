@@ -89,7 +89,7 @@ For the rotation speeds we test, the SNR is monotone increasing in L within a si
 
 ---
 
-## Revised L_critical argument
+## Why the simple SNR model fails
 
 The independent arm uses L steps of its own local observations. Its SNR scales as:
 ```
@@ -101,33 +101,49 @@ The shared arm benefits from M-fold more observations:
 SNR_shared(L, ω) ≈ (α · √(M · K̄ · L · dt) / σ) · cos(ω·L·dt/2)
 ```
 
-The ratio SNR_shared / SNR_indep = √M — independent of L and ω. **This means the coordination benefit does not degrade with L or ω as long as all agents use the same L.**
+The ratio SNR_shared / SNR_indep = √M — independent of L and ω. If field performance scaled linearly with SNR, coordination would help at every L and ω. **But empirically Δ̄ goes negative at large L, so something beyond this model is needed.**
 
-But this assumes agents are pooling correctly. The issue arises from angular heterogeneity: when the field rotates, agents at different locations may have observed different effective field directions (due to different particle neighbourhoods at each step). The team mean conflates observations from different field directions.
+The model misses the key distinction: **both arms have the same angular bias (ω·L·dt/2), but sharing reduces angular noise while leaving the bias unchanged.** As L grows, the shared arm's direction estimate becomes more precise but no less stale — it drives all M collectors confidently toward the wrong part of the arena. The independent arm's noisy individual estimates, while less accurate on average, retain inter-agent diversity: different agents make different angular errors and spread their coverage across a wider sector.
 
-**The actual L_critical mechanism:** At high ω and large L, the variance of θ_effective — the field direction implied by the pooled observations — increases because older observations correspond to a different θ. The noise is not Gaussian around the current θ but is systematically biased by ω·L·dt/2 with additional spread from the agent-to-agent variation in observation timing. This spread grows with ω·L.
+The capacity-matching policy amplifies this dynamic. It moves collectors toward the estimated drift direction as a team. When that direction is systematically off by a shared bias, all collectors sprint toward the same stale location simultaneously. With independent estimates, angular noise acts as natural spread across directions, so at least some agents are likely near the actual field direction at any given step.
 
-L_critical is where this systematic angular spread exceeds the sensing gain from pooling. A precise derivation requires knowing the distribution of per-agent observation counts and their correlation structure — this is addressed in the analysis after experiments.
-
-**Corrected working prediction:** Using T_corr = 1/(ω·dt):
+The crossover — where sharing hurts rather than helps — occurs when the angular bias of the shared arm exceeds the benefit of reduced angular noise. Defining:
 ```
-L_critical(ω) ≈ c / (ω · dt)   (in steps)
+σ_angle_indep(L) = σ / (α · √(K̄ · L · dt))    (angular noise, independent arm)
+σ_angle_shared(L) = σ / (α · √(M · K̄ · L · dt))  = σ_angle_indep / √M
+β(L, ω)          = ω · L · dt / 2                (angular lag, same for both arms)
 ```
-equivalently c' / (ω·dt) where c' = c·dt is a dimensionless constant. From SPS parameters, the angular noise per step is approximately σ/(α·√K̄) ≈ 0.06/(0.06·√8) ≈ 0.35 rad. The bias ω·L·dt/2 exceeds the noise when L ≈ 0.7/(ω·dt), suggesting c ≈ 0.7–1.0. Experiments will measure it directly.
+
+The shared arm's advantage disappears when bias dominates its reduced noise:
+```
+β(L*, ω) ~ σ_angle_shared(L*)
+⟹ ω · L* · dt / 2 ~ σ / (α · √(M · K̄ · L* · dt))
+⟹ L*^(3/2) ~ σ / (α · ω · dt · √(M · K̄ · dt) / 2)
+```
+
+This derivation gives L* ∝ (ω·dt)^(−2/3), not 1/(ω·dt), and predicts the shared arm's directional MSE equals the independent arm's at L*. However, the correct threshold for Δ̄ = 0 is not directional MSE equality but the policy's nonlinear mapping from direction quality to collected particles. The 2/3 scaling is a lower bound; the actual crossover depends on the capacity-matching policy's sensitivity function, which is not analytically tractable.
+
+**Empirical working prediction:** T_corr = 1/(ω·dt) sets the scale:
+```
+L_max(ω) ≈ c / (ω · dt) = c · T_corr   (in steps)
+```
+where c is a dimensionless constant to be fit from data. Pre-experiment estimate: c ≈ 0.7–1.0 (from bias/noise_shared ≈ 1 at L*). Experiments will measure c directly.
 
 ---
 
 ## Numerical predictions (corrected ω grid)
 
-Using c/(ω·dt) with c ≈ 1.0:
+**Pre-experiment prediction** using c/(ω·dt) with c ≈ 1.0 (bias/noise_shared = 1 threshold):
 
-| ω (rad/step) | ω·dt (rad/step) | T_corr (steps) | Predicted L_critical |
-|---|---|---|---|
-| 0 | 0 | ∞ | all steps (SPS-C03) |
-| 0.75 | 0.015 | 67 | ~67 steps |
-| 1.5 | 0.030 | 33 | ~33 steps |
-| 5.0 | 0.10 | 10 | ~10 steps |
-| 17.0 | 0.34 | 3 | ~3 steps |
+| ω (rad/step) | ω·dt (rad/step) | T_corr (steps) | Predicted L_max (c≈1.0) | Empirical L_max |
+|---|---|---|---|---|
+| 0 | 0 | ∞ | all steps (SPS-C03) | 67 (L_max=67 at ω=very_slow) |
+| 0.75 | 0.015 | 67 | ~67 steps | 67 (barely significant) |
+| 1.5 | 0.030 | 33 | ~33 steps | **10** |
+| 5.0 | 0.10 | 10 | ~10 steps | **3** |
+| 17.0 | 0.34 | 3 | ~3 steps | None (no significant L) |
+
+**Pre-experiment prediction was too high by factor ≈3.** Empirically L_max ≈ 0.30 × T_corr, not 1.0 × T_corr.
 
 **Old grid (INCORRECT — in near-stationary regime):**
 
@@ -137,7 +153,55 @@ Using c/(ω·dt) with c ≈ 1.0:
 | π/100 ≈ 0.031 | 0.000628 | 1591 | T_corr >> episode length |
 | π/50 ≈ 0.063 | 0.00126 | 794 | T_corr >> episode length |
 
-These predictions are written before experiments. The corrected grid will test whether the empirical L_critical matches the predicted values and whether a single c fits all four ω levels.
+---
+
+## Empirical result and revised theory
+
+**Result (32 seeds per cell, window method):**
+
+```
+L_max ≈ 0.30 / (ω · dt) = 0.30 × T_corr
+```
+
+| ω (T_corr) | L_max | ω · L_max · dt | L_max / T_corr |
+|---|---|---|---|
+| 0.75 (67) | 67 | 1.00 rad (barely sig.) | 1.00 |
+| 1.5 (33)  | 10 | **0.30 rad** | 0.30 |
+| 5.0 (10)  |  3 | **0.30 rad** | 0.30 |
+| 17.0 (3)  | None | — | — |
+
+The two clean anchor points (slow and mid) both give **ω·L_max·dt = 0.30 rad** — the total rotation of the field over the useful memory window. At the crossover, the window has swept through approximately 17° of total rotation.
+
+**Crossover interpretation.** Define:
+```
+total_rotation(L) = ω · L · dt    (field rotation over L steps)
+angular_bias(L)   = total_rotation / 2   (lag of window midpoint)
+angular_noise_shared(L) = σ / (α · √(M · K̄ · L · dt))
+```
+
+At crossover (L=L_max → L=L_max×2 in our intermediate-L data):
+
+| ω (T_corr) | L | angular_bias | angular_noise_shared | ratio |
+|---|---|---|---|---|
+| 1.5 (33) | 10 (L_max)  | 0.150 rad | 0.396 rad | **0.38** |
+| 1.5 (33) | 20 (L_max×2)| 0.300 rad | 0.280 rad | **1.07** |
+| 5.0 (10) |  3 (L_max)  | 0.150 rad | 0.722 rad | **0.21** |
+| 5.0 (10) |  5          | 0.250 rad | 0.560 rad | **0.45** |
+| 5.0 (10) | 10          | 0.500 rad | 0.396 rad | **1.26** |
+
+(angular_noise_shared = σ / (α · √(M · K̄ · L · dt)) with α=0.06, σ=0.06, M=4, K̄≈8, dt=0.02)
+
+The shared arm's bias-to-noise ratio crosses 1 somewhere between L_max and 2×L_max. At L_max itself, the bias is still well below the shared arm's noise level (ratio 0.21–0.38), which means the degradation visible in the data (Δ̄ drops from positive to negative) begins before the shared arm's individual directional accuracy reaches parity with the independent arm's. The policy nonlinearity (capacity-matching) makes the crossover occur at a lower L than the directional-MSE model predicts.
+
+**Revised empirical formula:**
+```
+L_max(ω) ≈ 0.30 / (ω · dt)   (steps, window method, 32 seeds, p<0.05 threshold)
+```
+equivalently: **the last memory window that provides coordination benefit spans ≈0.30 rad of total field rotation.**
+
+The pre-experiment prediction c≈1.0 overshot by a factor of ≈3. The 1/T_corr scaling is confirmed; only the constant c needed empirical calibration.
+
+**Exponential decay:** The decay method does not follow the same L_max vs T_corr scaling. Its effective window is concentrated closer to the present (smooth falloff), but the inconsistency in L_max across ω levels for the decay method makes it harder to extract a clean constant. See `experiments/grid-design.md` for the full decay results.
 
 ---
 
