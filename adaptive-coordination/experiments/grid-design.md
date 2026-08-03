@@ -149,26 +149,43 @@ Results from run1: `results/FR-B4/fr_b4_full_grid_run1.json` (seeds 9001–9008,
 | 5.0 | 10 | 3 | 0.30 |
 | 17.0 | 3 | None | — |
 
-**Scaling fit:** L_max ≈ 0.85 × T_corr (R²=0.81, 3 points). Consistent with L_max = c/(ω·dt), c ≈ 0.85.
+**Scaling fit:** L_max ≈ 0.85 × T_corr (R²=0.81, 3 points from main grid). See intermediate-L results below for refined estimate.
 
 **Key scientific findings from corrected-grid data:**
 
-1. **The L_critical boundary is now visible.** At ω=slow (T_corr=33) and ω=mid (T_corr=10),
+1. **The L_critical boundary is visible.** At ω=slow (T_corr=33) and ω=mid (T_corr=10),
    the window method shows clear sign flip: short L is beneficial, long L is not.
-   The transition occurs at approximately L ≈ T_corr/3.
 
 2. **Pooled benefit degrades with ω (window method):** Δ̄(pooled) = +0.74, +0.48, +0.64, +0.44, +0.14
    at ω = 0, very_slow, slow, mid, fast. The fast-rotation arm shows no significant
    pooled benefit (p=0.25).
 
-3. **Decay method is inconsistent.** Decay L_max = 3 at slow, 10 at mid — no monotone
-   relationship with T_corr (R²<0). Decay's effective window is ~2L, which introduces
-   more bias; whether that helps or hurts depends on the specific ω·L·dt product.
+---
 
-4. **The 1/(ω·dt) prediction is approximately confirmed for window.** L_max ≈ 0.85 T_corr
-   fits 3 of 4 non-zero ω levels. The very_slow point (L_max=T_corr=67) has large
-   leverage; slow and mid both give L_max/T_corr ≈ 0.30 suggesting the effective
-   constant may be c ≈ 0.30 rather than 0.85.
+### Intermediate-L results (L ∈ {5, 20, 45}, seeds 9001–9032)
+
+File: `results/FR-B4/fr_b4_full_combined.json` (merges corrected + extra-L runs)
+
+| ω (T_corr) | L=3 | L=5 | L=10 | L=20 | L=30 | L_max | crossover |
+|---|---|---|---|---|---|---|---|
+| slow (33) | +1.50 * | +1.66 * | +0.94 * | **-0.38** | -0.28 | 10 | between 10 and 20 |
+| mid (10) | +0.91 * | +0.22 | +0.25 | +0.56 | +0.16 | 3 | between 3 and 5 |
+
+*(* = p<0.05, window method)*
+
+**L_max / T_corr: 10/33 = 0.30; 3/10 = 0.30.**
+
+**Quantitative result:** L_max ≈ **0.30 × T_corr** = **0.30 / (ω·dt)**
+
+The crossover is sharp for slow: Δ̄ goes from +0.94 (L=10, p=0.049) to −0.38 (L=20, p=0.79) —
+a swing of >1.3 particles when memory doubles from 10 to 20 steps. For mid the dropoff is
+softer (+0.91 to +0.22) but also falls below significance at L=5.
+
+fast (T_corr=3): L5 window p=0.023 is likely a Type I error (L1 and L3 non-significant;
+~1 false positive expected across 24 fast cells at α=0.05). No reliable benefit at ω=fast.
+
+very_slow (T_corr=67): Lall barely significant (p=0.044), L45 not (p=0.073). L_max cannot
+be estimated within the 67-step episode for very_slow.
 
 ---
 

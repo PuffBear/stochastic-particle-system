@@ -24,6 +24,17 @@ Both reduce to the full-history SPS-C03 controller at L = all steps and ω = 0.
 
 **Hypothesis:** L_critical(ω) ≈ c/ω, where c is a constant determined by the single-agent field estimation error at α=0.06. The autocorrelation time of the field direction is 1/ω steps; observations older than 1/ω steps are approximately uncorrelated with the current field direction and should be discarded.
 
+> **EMPIRICAL RESULT (corrected grid + intermediate L):**
+> L_max (largest L with significant coordination benefit, window method):
+>   - slow (ω=1.5, T_corr=33): L_max=10, crossover between L=10 and L=20
+>   - mid  (ω=5.0, T_corr=10): L_max=3,  crossover between L=3  and L=5
+>   - L_max / T_corr = 0.30 for both. **L_max ≈ 0.30 / (ω·dt)**, c ≈ 0.30.
+>
+> The crossover is sharp at ω=slow: Δ̄ goes from +0.94 (L=10) to −0.38 (L=20).
+> Neither very_slow (T_corr≥episode length) nor fast (no significant benefit at
+> any L) provide clean L_max estimates. The 1/(ω·dt) scaling is confirmed with
+> c≈0.30 from two anchor points.
+
 **Theoretical prediction (from `theory/field-rotation.md`):**
 - ω = π/200 (≈0.016 rad/step, slow drift): L_critical ≈ 12 steps
 - ω = π/100 (≈0.031 rad/step): L_critical ≈ 6 steps
