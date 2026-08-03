@@ -22,12 +22,22 @@ cd "$HOME/sps/stochastic-particle-system"
 : "${ARCH:?Variable ARCH not set}"
 : "${SEED:?Variable SEED not set}"
 
-N_EPISODES="${N_EPISODES:-20000}"
+N_EPISODES="${N_EPISODES:-6000}"
 N_STEPS="${N_STEPS:-500000}"
 COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
 
 OUTPUT="results/raw/SPS-WO-08-MARL/${ARCH}_seed${SEED}.json"
 CKPT_DIR="results/raw/SPS-WO-08-MARL/checkpoints/${ARCH}_seed${SEED}"
+
+# Auto-detect latest checkpoint so re-submitted jobs resume rather than restart.
+RESUME_ARG=""
+if [[ -d "$CKPT_DIR" ]]; then
+    LATEST_CKPT=$(ls -t "$CKPT_DIR"/checkpoint_*.pt 2>/dev/null | head -1)
+    if [[ -n "$LATEST_CKPT" ]]; then
+        RESUME_ARG="--resume-from $LATEST_CKPT"
+        echo "  resuming from: $LATEST_CKPT"
+    fi
+fi
 
 echo "=== SPS-WO-08 MARL training ==="
 echo "  arch=${ARCH}  seed=${SEED}  n_episodes=${N_EPISODES}"
@@ -43,6 +53,7 @@ python analysis/train_single_marl.py \
     --n-steps "$N_STEPS" \
     --output "$OUTPUT" \
     --checkpoint-dir "$CKPT_DIR" \
+    $RESUME_ARG \
     --repository-base-commit "$COMMIT"
 
 echo ""
