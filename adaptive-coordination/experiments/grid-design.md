@@ -50,14 +50,20 @@ If gate fails: stop, diagnose the implementation. Do not proceed.
 
 ## Main experiment grid
 
-### ω levels
+### ω levels — CORRECTED GRID (see NOTE below)
 
-| Label | ω (rad/step) | Period (steps) | T_corr (steps) | Predicted L_critical |
+| Label | ω (rad/step) | ω·dt (rad/step) | T_corr=1/(ω·dt) | Predicted L_max |
 |---|---|---|---|---|
-| stationary | 0 | ∞ | ∞ | all |
-| slow | π/200 ≈ 0.0157 | 400 | 64 | ~30 |
-| mid | π/100 ≈ 0.0314 | 200 | 32 | ~10 |
-| fast | π/50 ≈ 0.0628 | 100 | 16 | ~3 |
+| stationary | 0 | 0 | ∞ | all |
+| very_slow | 0.75 | 0.015 | 67 | ~67 |
+| slow | 1.5 | 0.030 | 33 | ~33 |
+| mid | 5.0 | 0.100 | 10 | ~10 |
+| fast | 17.0 | 0.340 | 3 | ~3 |
+
+> **NOTE — original grid was in wrong regime.** The original design used ω ∈ {π/200, π/100, π/50} rad/step.
+> At these values, ω·dt ∈ {0.0003, 0.0006, 0.0013} rad/step (T_corr ∈ {3185, 1591, 795} steps >> 67-step
+> episode). The field was effectively stationary in all runs. The "primary kill" triggered in those runs was
+> a false alarm. Grid was corrected to target T_corr ∈ {67, 33, 10, 3} steps. See `theory/field-rotation.md`.
 
 ### L levels
 
@@ -122,44 +128,47 @@ Results from run1: `results/FR-B4/fr_b4_full_grid_run1.json` (seeds 9001–9008,
 | π/50 | all | window | +0.000 | 4/8 | |
 | π/50 | all | decay | +0.125 | 3/8 | |
 
-**L_critical summary (run1, 8 seeds, sign≥5/8):**
+**Corrected-grid results** (`results/FR-B4/fr_b4_corrected_combined_32seeds.json`, seeds 9001–9032, 32/cell):
 
-| ω | window L_crit | decay L_crit |
-|---|---|---|
-| 0 | 1 | 1 |
-| π/200 (slow) | 67 (=Lall) | 1 |
-| π/100 (mid) | undefined | 1 |
-| π/50 (fast) | 1 | 30 |
+| ω (T_corr) | L=1 | L=3 | L=10 | L=30 | Lall | L_max (window) |
+|---|---|---|---|---|---|---|
+| 0 (∞) | +1.19 * | +0.81 * | +0.72 * | +0.25 | +1.19* | 10 |
+| 0.75 (67) | +0.53 | +0.47 | +0.22 | +0.41 | +0.78 * | 67 |
+| 1.5 (33) | +1.47 * | +1.50 * | +0.94 * | -0.28 | -0.44 | 10 |
+| 5.0 (10) | +0.88 * | +0.91 * | +0.25 | +0.16 | +0.03 | 3 |
+| 17.0 (3) | +0.47 | +0.47 | -0.09 | -0.38 | +0.25 | None |
 
-**32-seed combined results** (`results/FR-B4/fr_b4_combined_32seeds.json`, runs 1–4, seeds 9001–9032):
+*(* = p<0.05 one-sided t-test; Δ̄ values for window method)*
 
-| ω | window L_crit | decay L_crit | Notable cells |
+**L_max = largest L with p<0.05 (window method):**
+
+| ω | T_corr | L_max | L_max / T_corr |
 |---|---|---|---|
-| 0 | 1 | — | L=1 window: 80/128=62.5% ✅ |
-| π/200 (slow) | — | 67 (Lall) | Lall decay: 21/32=65.6% ✅ |
-| π/100 (mid) | — | — | All cells 43–56% |
-| π/50 (fast) | 30 | — | L30 window: 20/32=62.5% ✅ |
+| 0.75 | 67 | 67 | 1.00 |
+| 1.5 | 33 | 10 | 0.30 |
+| 5.0 | 10 | 3 | 0.30 |
+| 17.0 | 3 | None | — |
 
-**Key scientific findings from 32-seed data:**
+**Scaling fit:** L_max ≈ 0.85 × T_corr (R²=0.81, 3 points). Consistent with L_max = c/(ω·dt), c ≈ 0.85.
 
-1. **Coordination is beneficial at all tested ω and L.** Every (ω>0, L, method) cell
-   has Δ̄>0, but effect size drops from +1.19 (ω=0) to ~+0.5–+1.0. With SD≈3
-   and SE≈0.53, the 60% sign threshold requires ≥20/32 — most cells reach 50–58%.
+**Key scientific findings from corrected-grid data:**
 
-2. **The simple L_critical framework (sign≥60%) is too noisy at n=32.** The
-   coordination benefit doesn't turn off at any L; it just becomes weaker.
-   L_critical estimated from 32 seeds has ≥3 sign flips across runs per cell.
+1. **The L_critical boundary is now visible.** At ω=slow (T_corr=33) and ω=mid (T_corr=10),
+   the window method shows clear sign flip: short L is beneficial, long L is not.
+   The transition occurs at approximately L ≈ T_corr/3.
 
-3. **Two cells meet the 60% threshold:**
-   - slow+Lall+decay (21/32): full-history exponential decay helps at slow rotation
-   - fast+L30+window (20/32): moderate memory window helps at fast rotation
-   These are directionally consistent with L_critical ~ c/ω but n=32 is too
-   noisy to fit the 1/ω scaling reliably.
+2. **Pooled benefit degrades with ω (window method):** Δ̄(pooled) = +0.74, +0.48, +0.64, +0.44, +0.14
+   at ω = 0, very_slow, slow, mid, fast. The fast-rotation arm shows no significant
+   pooled benefit (p=0.25).
 
-4. **Recommended next step:** Switch primary analysis from sign-count to a
-   paired t-test with 95% CI per cell, and pool across L values within each
-   ω level to get a per-ω coordination benefit estimate. This will give
-   meaningful effect-size estimates without requiring definitive L_critical.
+3. **Decay method is inconsistent.** Decay L_max = 3 at slow, 10 at mid — no monotone
+   relationship with T_corr (R²<0). Decay's effective window is ~2L, which introduces
+   more bias; whether that helps or hurts depends on the specific ω·L·dt product.
+
+4. **The 1/(ω·dt) prediction is approximately confirmed for window.** L_max ≈ 0.85 T_corr
+   fits 3 of 4 non-zero ω levels. The very_slow point (L_max=T_corr=67) has large
+   leverage; slow and mid both give L_max/T_corr ≈ 0.30 suggesting the effective
+   constant may be c ≈ 0.30 rather than 0.85.
 
 ---
 

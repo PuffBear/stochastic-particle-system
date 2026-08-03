@@ -93,9 +93,13 @@ If c varies across ω levels: the 1/ω scaling is wrong. Investigate alternative
 
 **Scaling kill:** L_critical(ω) does not scale as 1/ω and no alternative scaling is apparent. Redirect: report L_critical at each ω empirically without a scaling law.
 
-> **STATUS: ALSO TRIGGERED** — L_critical is undefined for most cells under the
-> sign-count criterion (n=32 insufficient), and under the t-test criterion
-> L_crit=1 at all ω for the window method (no scaling law possible).
+> **STATUS: NOT TRIGGERED (corrected-grid data)** — Under the t-test criterion,
+> L_max (largest L with p<0.05, window method) follows T_corr = 1/(ω·dt):
+>   very_slow: L_max=67 = T_corr; slow: L_max=10 ≈ 0.30·T_corr=33;
+>   mid: L_max=3 ≈ 0.30·T_corr=10; fast: L_max=None (T_corr=3).
+> Scaling fit: L_max ≈ 0.85·T_corr (R²=0.81, 3 points). The scaling law
+> is approximately confirmed. Previous "TRIGGERED" status applied to the wrong
+> ω grid (near-stationary regime); this is superseded by corrected-grid results.
 
 **Reproduction kill:** Cell (ω=0, L=all) does not reproduce SPS-C03 Δ̄ within ±0.5. Infrastructure problem in the rotating-field implementation; halt and diagnose.
 
@@ -104,9 +108,13 @@ If c varies across ω levels: the 1/ω scaling is wrong. Investigate alternative
 
 **Team-benefit kill (Q3):** Δ̄(shared, independent) at L > L_critical does not decrease with ω — team benefit is fully robust to rotation at matched memory. Redirects the Q3 claim; other questions unaffected.
 
-> **STATUS: TRIGGERED** — Pooled Δ̄ does not decrease monotonically with ω
-> (fast has the highest pooled Δ̄=+0.794). Q3 claim that drift degrades benefit
-> is not supported by pooled data.
+> **STATUS: TRIGGERED (corrected-grid data)** — Pooled Δ̄ (window, all L) does
+> not decrease monotonically with ω: very_slow=+0.48, slow=+0.64, mid=+0.44,
+> fast=+0.14. The slow arm has higher pooled Δ̄ than very_slow, violating the
+> predicted monotone decrease. However, at ω=fast the pooled benefit is
+> non-significant (p=0.25), which is partially consistent with Q3. The strict
+> monotone-decrease claim is not supported; the "no benefit at high ω" claim
+> has marginal support only at the fastest tested speed.
 
 ---
 
