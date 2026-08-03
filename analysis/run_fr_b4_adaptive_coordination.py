@@ -270,8 +270,20 @@ def main() -> None:
         default=1,
         help="Number of parallel worker processes (default: 1). Use os.cpu_count() for all cores.",
     )
+    parser.add_argument(
+        "--main-seeds",
+        type=str,
+        default=None,
+        help="Override MAIN_SEEDS as 'start:stop' range (e.g. '9009:9017' for seeds 9009-9016).",
+    )
     args = parser.parse_args()
     jobs = args.jobs if args.jobs > 0 else (os.cpu_count() or 1)
+
+    if args.main_seeds is not None:
+        start_s, stop_s = args.main_seeds.split(":")
+        main_seeds_override = list(range(int(start_s), int(stop_s)))
+    else:
+        main_seeds_override = MAIN_SEEDS
 
     if args.output.exists():
         raise FileExistsError(f"output already exists: {args.output}")
@@ -300,15 +312,17 @@ def main() -> None:
         _write_output(args.output, all_results, gate_passed, started)
         return
 
+    n_main = len(main_seeds_override)
+
     # ── Phase 2: Fast rotation diagnostic ────────────────────────────────────
     if args.conditions in ("fast_diagnostic", "slow_mid", "full", "all"):
         print("Phase 2: Fast rotation diagnostic (omega=pi/50, L in {1,3,10})", file=sys.stderr)
         for L_label in ["L1", "L3", "L10"]:
             L = L_LEVELS[L_label]
             for method in METHODS:
-                cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS["fast"], L=L, method=method, jobs=jobs)
+                cell = _run_cell(main_seeds_override, omega=OMEGA_LEVELS["fast"], L=L, method=method, jobs=jobs)
                 all_results[("fast", L_label, method)] = cell
-                print(f"  fast L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
+                print(f"  fast L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/{n_main}", file=sys.stderr)
 
         if args.conditions == "fast_diagnostic":
             _write_output(args.output, all_results, gate_passed, started)
@@ -320,9 +334,9 @@ def main() -> None:
             print(f"Phase 3: omega={omega_label} — all L levels", file=sys.stderr)
             for L_label, L in L_LEVELS.items():
                 for method in METHODS:
-                    cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS[omega_label], L=L, method=method, jobs=jobs)
+                    cell = _run_cell(main_seeds_override, omega=OMEGA_LEVELS[omega_label], L=L, method=method, jobs=jobs)
                     all_results[(omega_label, L_label, method)] = cell
-                    print(f"  {omega_label} L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
+                    print(f"  {omega_label} L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/{n_main}", file=sys.stderr)
 
         if args.conditions == "slow_mid":
             _write_output(args.output, all_results, gate_passed, started)
@@ -334,9 +348,9 @@ def main() -> None:
         for L_label in ["L30", "Lall"]:
             L = L_LEVELS[L_label]
             for method in METHODS:
-                cell = _run_cell(MAIN_SEEDS, omega=OMEGA_LEVELS["fast"], L=L, method=method, jobs=jobs)
+                cell = _run_cell(main_seeds_override, omega=OMEGA_LEVELS["fast"], L=L, method=method, jobs=jobs)
                 all_results[("fast", L_label, method)] = cell
-                print(f"  fast L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/8", file=sys.stderr)
+                print(f"  fast L={L_label} method={method} Δ̄={cell['delta_bar']:+.3f} sign={cell['sign_count']}/{n_main}", file=sys.stderr)
 
     # ── Phase 5: omega=0 at non-all L levels ─────────────────────────────────
     if args.conditions == "all":
