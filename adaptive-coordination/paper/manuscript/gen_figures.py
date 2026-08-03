@@ -160,19 +160,13 @@ plt.close(fig)
 # ════════════════════════════════════════════════════════════════════════════
 # Figure 2: L_max vs T_corr scaling
 # ════════════════════════════════════════════════════════════════════════════
-# Boundary point (very_slow): L_max=67 (right-censored at episode length)
-t_corr_boundary = np.array([67])
-lmax_boundary   = np.array([67])
+# Data points: (T_corr, L_max) — reliable points for the fit
+# fast excluded (no reliable L_max); ω=2.5 shown but excluded from fit
+t_corr_pts = np.array([67, 33, 10])
+lmax_pts   = np.array([67, 10,  3])
 
-# Three interior anchor points (sign-majority criterion):
-#   slow (ω=1.5, T_corr=33): L_max=10 — last L where sign>n/2 & t-test sig.
-#   ω=2.5 (T_corr=20): L_max=5  — last L where majority of seeds benefit
-#   mid  (ω=5.0, T_corr=10): L_max=3  — last L where t-test sig.
-t_corr_interior = np.array([33, 20, 10])
-lmax_interior   = np.array([10,  5,  3])
-
-# Force-through-origin fit on three interior points only
-c_fit = np.sum(t_corr_interior * lmax_interior) / np.sum(t_corr_interior**2)
+# Force-through-origin fit (3 pts including boundary very_slow)
+c_fit = np.sum(t_corr_pts * lmax_pts) / np.sum(t_corr_pts**2)
 t_line = np.linspace(0, 75, 200)
 lmax_line = c_fit * t_line
 
@@ -185,32 +179,36 @@ fig2, ax2 = plt.subplots(figsize=(3.00, 2.35))
 ax2.plot(t_line, pred_line, color="#999999", lw=1.0, ls="--",
          label=r"pre-experiment: $c{=}1.0$")
 
-# Fitted line (interior 3-point fit, c≈0.29)
+# Fitted line (c≈0.85, 3-point fit including boundary)
 ax2.plot(t_line, lmax_line, color="#333333", lw=1.4, ls="-",
-         label=f"3-interior fit: $c={c_fit:.2f}$")
+         label=f"empirical fit: $c={c_fit:.2f}$")
 
-# Data points — very_slow open (boundary), three interior filled
-ax2.scatter(t_corr_boundary, lmax_boundary, color="#999999", marker="s", s=40,
+# Data points — very_slow open (boundary), slow+mid filled (clean anchors)
+ax2.scatter([67], [67], color="#999999", marker="s", s=40,
             zorder=5, label=r"very\_slow (boundary)")
-ax2.scatter(t_corr_interior, lmax_interior, color="#1A6FBF", marker="o", s=44,
-            zorder=5, label=r"slow, $\omega{=}2.5$, mid (anchors)")
+ax2.scatter([33, 10], [10, 3], color="#1A6FBF", marker="o", s=44,
+            zorder=5, label="slow, mid (anchor)")
+
+# ω=2.5: shown as open triangle — no reliable L_max, excluded from fit
+# Shown at T_corr=20 with an arrow indicating "ambiguous ↑" direction
+ax2.scatter([20], [45], color="#888888", marker="^", s=36,
+            facecolors="white", edgecolors="#888888", lw=1.0,
+            zorder=5, label=r"$\omega{=}2.5$ (no reliable $L_{\max}$)")
+ax2.annotate("", xy=(20, 50), xytext=(20, 46),
+             arrowprops=dict(arrowstyle="->", color="#888888", lw=0.8))
 
 # Labels on data points
-for tx, ly, lbl in zip(
-        [67, 33, 20, 10],
-        [67, 10,  5,  3],
-        ["very\\_slow", "slow", r"$\omega{=}2.5$", "mid"]):
-    if tx == 67:
-        ax2.annotate(lbl, (tx, ly), xytext=(tx - 5, ly + 2),
-                     fontsize=6.5, color="#333333", ha="center")
-    elif tx == 20:
-        ax2.annotate(lbl, (tx, ly), xytext=(tx + 2, ly - 5),
-                     fontsize=6.5, color="#333333", ha="left")
-    else:
-        ax2.annotate(lbl, (tx, ly), xytext=(tx + 2, ly - 4),
-                     fontsize=6.5, color="#333333", ha="left")
+for tx, ly, lbl in zip(t_corr_pts, lmax_pts,
+                        ["very\\_slow", "slow", "mid"]):
+    offset_x = -5 if tx == 67 else 2
+    offset_y = 2  if tx == 67 else -4
+    ax2.annotate(lbl, (tx, ly),
+                 xytext=(tx + offset_x, ly + offset_y),
+                 fontsize=6.5, color="#333333", ha="center")
+ax2.annotate(r"$\omega{=}2.5$", (20, 45),
+             xytext=(22, 43), fontsize=6.5, color="#888888", ha="left")
 
-# c≈0.30 annotation
+# 0.30 annotation (interior anchors only)
 ax2.text(68, c_fit * 68 + 1, r"$L_{\max} \approx 0.30\,T_{\rm corr}$",
          fontsize=7, color="#333333", ha="right")
 
