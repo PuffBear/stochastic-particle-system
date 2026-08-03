@@ -51,8 +51,8 @@ Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
 \newcommand{\angbias}{\beta}
 
 % ── AAMAS metadata ───────────────────────────────────────────
-\title{When Shared Memory Hurts: Stale-Coordination Failure and Memory-Window\\
-       Scaling in Multi-Agent Particle Collection under a Rotating Latent Field}
+\title{When Shared Memory Hurts: Stale-Coordination Failure in\\
+       Multi-Agent Particle Collection under a Rotating Latent Field}
 
 \author{Anonymous Authors}
 \affiliation{%
@@ -202,8 +202,8 @@ confident-but-wrong directions into globally poor coverage.
   of three, attributable to policy nonlinearity rather than
   information geometry.
   \item We show that exponential decay does not follow the
-  same scaling, making the sliding window more predictable for
-  memory-window selection under known $\omega$.
+  same $\Lmax \propto \Tcorr$ pattern at the two interior speeds,
+  making the sliding window a more tractable choice in the studied regime.
   \item We provide a pre-registered, reproducible experiment with
   event-keyed matched counterfactuals and an explicit reproduction
   gate anchored to SPS-C03.
@@ -231,10 +231,10 @@ bias/variance logic to non-stationary bandit problems:
 a window of length $L \approx \sqrt{n/\Delta}$ is near-optimal
 under a known breakpoint rate $\Delta$. Our sliding-window controller
 is the cooperative analogue of SW-UCB applied to field-direction
-estimation across agents. We confirm that the $1/\omega$ scaling
-of SW-UCB extends to the multi-agent coordination benefit, but
-with a significantly smaller constant ($c \approx 0.30$) than the
-directional-MSE prediction ($c \approx 1.0$).
+estimation across agents. We find a pattern consistent with $1/\omega$ scaling
+at two interior rotation speeds, with a smaller empirical constant
+($c \approx 0.30$) than the directional-MSE prediction ($c \approx 1.0$);
+this pattern is preliminary and requires further validation.
 
 \paragraph{Communication under information constraints.}
 TarMAC~\cite{das2019tarmac} and IC3Net~\cite{singh2019ic3net}
@@ -480,9 +480,13 @@ $\Dbar$ goes from $+0.94$ ($L{=}10$, $p{=}0.049$) to
 $-0.38$ ($L{=}20$, $p{=}0.79$), a swing of $>1.3$ particles
 when the window doubles from 10 to 20 steps.
 
-For $\omega{=}\text{mid}$ ($\Tcorr{=}10$) the drop is similar:
-$\Dbar{=}{+}0.91$ at $L{=}3$ ($p{=}0.004$) versus
-$+0.22$ at $L{=}5$ ($p{=}0.30$, not significant).
+For $\omega{=}\text{mid}$ ($\Tcorr{=}10$) significance is lost
+earlier but the character differs from slow: $\Dbar{=}{+}0.91$ at
+$L{=}3$ ($p{=}0.004$) falls to $+0.22$ at $L{=}5$ (NS) and the
+estimated mean remains positive through $L{=}30$.  The mean does
+not turn negative until $L{=}45$ ($\Dbar{=}{-}0.25$).  The mid
+condition therefore primarily demonstrates \emph{loss of detectable
+advantage} at $L{>}3$, not the sharp sign reversal seen in slow.
 
 For $\omega{=}\text{fast}$ ($\Tcorr{=}3$) no $L$ value achieves
 consistent significance.  The isolated $p{=}0.023$ at $L{=}5$
@@ -723,11 +727,13 @@ the present.  The two effects partially offset each other in a
 $L$-dependent and $\omega$-dependent way that resists a simple
 scaling prediction.
 
-\textbf{Practical recommendation:} The sliding-window controller
-provides a \emph{predictable} $\Lmax \propto \Tcorr$ relationship;
-the exponential-decay controller does not, making it less suitable
-for principled memory-window selection when $\omega$ is known or
-estimated.
+\textbf{Practical observation:} At the two interior speeds studied,
+the sliding-window controller gives a $\Lmax \propto \Tcorr$
+relationship; the exponential-decay controller does not show a
+consistent pattern across the same conditions.
+Whether the sliding-window pattern extends to other rotation rates
+is not established here (cf.\ the $\omega{=}2.5$ anomaly,
+Section~\ref{sec:lmax-scaling}).
 
 \begin{table}[t]
 \centering
@@ -855,9 +861,9 @@ but require a systematic parameter sweep to validate.
 preliminary pattern, not a law: the borderline slow anchor
 ($p{=}0.049$) does not survive uniform Holm correction, and the
 supplementary $\omega{=}2.5$ condition does not conform to the
-$c{=}0.30$ prediction (Section~\ref{sec:anchor-robustness}).
+$c{=}0.30$ prediction (Section~\ref{sec:lmax-scaling}).
 Additional, non-borderline anchors are needed before the
-scaling constant can be treated as reliable (see Anchor robustness paragraph above).
+scaling constant can be treated as reliable.
 
 % ------------------------------------------------------------
 \section{Conclusion}
@@ -887,8 +893,9 @@ the borderline slow anchor ($p{=}0.049$) and the anomalous
 $\omega{=}2.5$ condition both motivate further validation before
 this constant is used prescriptively.  The exponential-decay
 controller does not follow the same scaling, making the sliding
-window the more predictable choice for memory-window selection
-under known $\omega$ in this setting.
+window the more tractable choice for memory-window selection
+in the studied setting, where the decay controller showed no
+consistent pattern.
 
 % ── Appendix ─────────────────────────────────────────────────
 \appendix
@@ -975,18 +982,26 @@ At step $t$, the window estimate $\hat{v}(t, L)$
 $\hat{\theta} = \theta(t) - \omega L\,dt/2$ (lag of window
 midpoint) and sinc-attenuated magnitude
 $\alpha\,\mathrm{sinc}(\omega L\,dt/2)$.
+The direction formula $\hat{\theta} = \theta(t) - \omega L\,dt/2$
+and the sinc-attenuation approximation are valid only while the sinc
+factor is positive, i.e.\ $\omega L\,dt/2 < \pi$ (equivalently
+$L < \pi/(\omega\,dt)$).
 In the crossover region (cells at or below $\Lmax$,
 where $\omega L\,dt \leq 0.30\;\text{rad}$) the
 argument is at most $0.15\;\text{rad}$, giving
 $\mathrm{sinc}(0.15) \approx 0.996$ ($< 0.5\%$ amplitude loss),
-so sinc attenuation is negligible \emph{in this region}.
-Beyond $\Lmax$, the approximation breaks down: at
-$(\omega{=}5, L{=}67)$ the argument is $5{\times}67{\times}0.02/2 = 3.35\;\text{rad}$,
-and $\mathrm{sinc}(3.35) = \sin(3.35)/3.35 \approx -0.06$, which
-is not negligible.  However, these cells are already in the
-degraded regime where $\Dbar < 0$; the mechanism there is angular
-bias, not sinc attenuation.
-The dominant factor throughout is the angular lag $\angbias = \omega L\,dt/2$.
+so sinc attenuation is negligible and the direction formula holds.
+Beyond $\Lmax$, and in particular at very large $L$, the sinc
+factor can become negative: at $(\omega{=}5, L{=}67)$ the argument
+is $3.35\;\text{rad}$ and $\mathrm{sinc}(3.35) \approx -0.06$.
+A negative sinc factor means the expected averaged vector
+\emph{flips direction by $\pi$}, so the directional formula
+no longer holds for such cells. No mechanistic claim is made
+here about the large-$L$ regime; it is outside the scope of this
+analysis, and those cells are empirically in the degraded region
+($\Dbar \leq 0$).
+The dominant factor in the crossover region is the angular lag
+$\angbias = \omega L\,dt/2$.
 
 The SNR of the direction estimate for $M$ agents is approximately
 \[
