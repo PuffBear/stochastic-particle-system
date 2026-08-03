@@ -7,7 +7,7 @@
 \documentclass{aamas}
 
 % ── Core packages ────────────────────────────────────────────
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath,amsthm}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -15,9 +15,6 @@
 \usepackage{balance}        % balanced columns on last page
 \usepackage{multirow}
 
-% ── Theorem environments ─────────────────────────────────────
-\newtheorem{proposition}{Proposition}
-\newtheorem{definition}{Definition}
 
 % ── Notation macros ──────────────────────────────────────────
 \newcommand{\Dbar}{\bar{\Delta}}
@@ -310,7 +307,7 @@ it moves collectors as a team toward the estimated drift, so
 shared-arm confidence in a stale direction eliminates coverage.
 
 The bias/noise-parity threshold ($\angbias \approx
-\sigma_{\theta,\mathrm{shared}}$) gives $L^* \propto (ω\,dt)^{-2/3}$
+\sigma_{\theta,\mathrm{shared}}$) gives $L^* \propto (\omega\,dt)^{-2/3}$
 and a crossover constant $c \approx 1.0$.  Because the actual
 threshold is set by the \emph{policy}'s nonlinear sensitivity
 rather than directional MSE, the empirical $c$ is smaller.
@@ -507,7 +504,7 @@ $\omega$ & $\Tcorr$ & $\Lmax$ & $\omega\Lmax dt$ & $\Lmax/\Tcorr$ \\
 The two interior rotation speeds (slow and mid) give exactly
 $\Lmax/\Tcorr = 0.30$.  The very\_slow condition ($\Tcorr{=}67$)
 gives $\Lmax{=}67$ — the full episode — which is consistent with
-the 1/ω scaling but does not sharpen the constant because any
+the $1/\omega$ scaling but does not sharpen the constant because any
 true $\Lmax$ between 45 and 67 would produce the same reported
 value within our $L$ grid.  The fast condition ($\Tcorr{=}3$)
 has no reliable $\Lmax$.
@@ -736,9 +733,10 @@ select $L$ from a known or estimated rotation rate.
 \section{Full Per-Cell Results}
 \label{app:full-table}
 
-Table~\ref{tab:full-window} and Table~\ref{tab:full-decay} report
-$\Dbar$, SE, and $p$-values for all window and decay cells
-respectively. Significance at $p{<}0.05$ is marked with (*).
+Table~\ref{tab:full-window} reports $\Dbar$, SE, and $p$-values
+for all window-method cells.  Decay-method $\Lmax$ results are
+summarised in Table~\ref{tab:decay-lmax} in the main text.
+Significance at $p{<}0.05$ is marked with (*).
 
 \begin{table}[h]
 \centering
