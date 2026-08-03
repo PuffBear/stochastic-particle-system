@@ -177,7 +177,7 @@ fig2, ax2 = plt.subplots(figsize=(3.00, 2.35))
 
 # Prediction band (c=1.0, dashed gray)
 ax2.plot(t_line, pred_line, color="#999999", lw=1.0, ls="--",
-         label=r"pre-experiment: $c{=}1.0$")
+         label=r"$L{=}T_{\rm corr}$ reference")
 
 # Interior-anchor-only line (c=0.30, thin blue dotted)
 c_interior = 0.30

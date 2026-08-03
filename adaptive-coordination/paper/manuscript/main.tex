@@ -81,12 +81,14 @@ significance-based threshold satisfies
 where $\Tcorr$ is the field's one-radian decorrelation timescale.
 An additional intermediate condition and multiplicity analysis
 show that this pattern is preliminary.
-A pre-experiment analytical
-prediction of $c \approx 1.0$ overshot by a factor of three;
-the mechanism is a policy nonlinearity in which the shared arm
-confidently drives all collectors toward a systematically stale
-direction, crowding out the coverage diversity that makes
-independent coordination beneficial. The exponential-decay
+A pre-experiment bias/noise-parity analysis predicts
+$L^* \propto (\omega\,dt)^{-2/3}$, a different functional form
+from the observed $\Lmax \propto (\omega\,dt)^{-1}$;
+the mechanism for the steeper empirical scaling is a policy
+nonlinearity in which the shared arm confidently drives all
+collectors toward a systematically stale direction, crowding out
+the coverage diversity that makes independent coordination
+beneficial. The exponential-decay
 controller does not follow the same scaling. For this environment
 and controller, a sliding window of $L \lesssim 0.30/(\omdt)$
 preserves the coordination benefit when the latent field drifts
@@ -153,18 +155,16 @@ memory window $L$ should agents use, and (ii)~how does the best
 achievable $L$ scale with the rotation rate $\omega$?
 
 \medskip\noindent\textbf{Main result.}
-The last memory window that provides a statistically significant
-coordination benefit scales as
+At two interior rotation speeds ($\Tcorr \in \{33, 10\}$),
+the pre-registered significance-based threshold satisfies
 \[
-  \Lmax(\omega) \approx 0.30 \cdot \Tcorr, \quad
+  \Lmax(\omega) / \Tcorr \approx 0.30, \quad
   \Tcorr = \frac{1}{\omdt},
 \]
-where $\Tcorr$ is the one-radian decorrelation timescale of the
-field (the time to rotate by one radian).
-At crossover, the total field rotation over the window is
-$\omega \cdot \Lmax \cdot dt \approx 0.30\;\mathrm{rad}$,
-a pattern observed at two interior rotation speeds
-($\Tcorr \in \{33, 10\}$) under the pre-registered per-cell criterion.
+where $\Tcorr$ is the one-radian decorrelation timescale.
+At these two speeds the window spans $\approx 0.30\;\mathrm{rad}$
+of total field rotation at the threshold.
+The pattern is preliminary (see Section~\ref{sec:lmax-scaling}).
 The constant $c \approx 0.30$ is preliminary; the borderline
 slow anchor ($p{=}0.049$) motivates further validation.
 A sliding window longer than $\Lmax$ reverses the benefit:
@@ -185,18 +185,17 @@ confident-but-wrong directions into globally poor coverage.
 
 \medskip\noindent\textbf{Contributions.}
 \begin{enumerate}
-  \item We demonstrate $\Lmax \propto \Tcorr$ at two interior
-  rotation speeds (slow, mid; $\Tcorr \in \{33, 10\}$), with
-  the proportionality constant $c \approx 0.30$ consistent
-  across these two anchors (plus a boundary very\_slow point at
-  $\Tcorr{=}67$). A supplementary $\Tcorr{=}20$ condition shows
-  anomalous breadth without a sharp crossover and is discussed
-  separately; the headline $c \approx 0.30$ is a preliminary
-  two-anchor result, not a settled universal constant.
-  \item We show that the constant $c \approx 0.30$ differs from
-  the bias/noise-parity prediction ($c \approx 1.0$) by a factor
-  of three, attributable to policy nonlinearity rather than
-  information geometry.
+  \item We show that $\Lmax/\Tcorr \approx 0.30$ at two interior
+  rotation speeds (slow, mid; $\Tcorr \in \{33, 10\}$), consistent
+  with a boundary very\_slow point ($\Tcorr{=}67$). A supplementary
+  $\Tcorr{=}20$ condition does not show the same ratio and is
+  discussed separately; the pattern is a preliminary two-anchor
+  observation, not a settled proportionality.
+  \item We show that the empirical $\Lmax \propto (\omega\,dt)^{-1}$
+  pattern is steeper than the bias/noise-parity prediction
+  $L^* \propto (\omega\,dt)^{-2/3}$, and that the crossover
+  occurs at lower $L$ than the theory predicts, attributable to
+  policy nonlinearity rather than information geometry.
   \item We show that exponential decay does not follow the
   same $\Lmax \propto \Tcorr$ pattern at the two interior speeds,
   making the sliding window a more tractable choice in the studied regime.
@@ -228,8 +227,8 @@ a window of length $L \approx \sqrt{n/\Delta}$ is near-optimal
 under a known breakpoint rate $\Delta$. Our sliding-window controller
 is the cooperative analogue of SW-UCB applied to field-direction
 estimation across agents. We find a pattern consistent with $1/\omega$ scaling
-at two interior rotation speeds, with a smaller empirical constant
-($c \approx 0.30$) than the directional-MSE prediction ($c \approx 1.0$);
+at two interior rotation speeds ($\Lmax/\Tcorr \approx 0.30$),
+steeper than the bias/noise-parity prediction ($L^* \propto \omega^{-2/3}$);
 this pattern is preliminary and requires further validation.
 
 \paragraph{Communication under information constraints.}
@@ -351,10 +350,13 @@ it moves collectors as a team toward the estimated drift, so
 shared-arm confidence in a stale direction eliminates coverage.
 
 The bias/noise-parity threshold ($\angbias \approx
-\sigma_{\theta,\mathrm{shared}}$) gives $L^* \propto (\omega\,dt)^{-2/3}$
-and a crossover constant $c \approx 1.0$.  Because the actual
-threshold is set by the \emph{policy}'s nonlinear sensitivity
-rather than directional MSE, the empirical $c$ is smaller.
+\sigma_{\theta,\mathrm{shared}}$) gives $L^* \propto (\omega\,dt)^{-2/3}$.
+This is a different functional form from the empirical
+$\Lmax \propto (\omega\,dt)^{-1}$: the ratio $L^*/\Tcorr$
+scales as $(\omega\,dt)^{1/3}$ and is therefore not a universal
+constant.  Because the actual threshold is set by the
+\emph{policy}'s nonlinear sensitivity rather than directional MSE,
+the empirical crossover is earlier and follows a steeper scaling.
 
 \begin{table}[t]
 \centering
@@ -520,8 +522,9 @@ discussed in Section~\ref{sec:lmax-scaling}.
          The SPS-C03 baseline ($\Dbar{=}{+}1.19$) is reproduced
          by the $\omega{=}0$, $L{=}1$ reproduction gate
          (Section~\ref{sec:setup}, App.~\ref{app:gate}); the $L{=}67$
-         stationary cell coincidentally yields the same value because
-         field stationarity makes the window length irrelevant.
+         stationary cell coincidentally yields the same value;
+         field stationarity removes temporal bias, reducing but not
+         eliminating the effect of window length on estimator variance.
          $\omega{=}2.5$: supplementary condition; see Sec.~\ref{sec:lmax-scaling}.}
 \label{tab:main}
 \setlength\tabcolsep{5pt}
@@ -641,7 +644,7 @@ give $c{=}0.30$ exactly.
 $\Tcorr = 1/(\omdt)$.  Filled circles: two clean interior anchors
 (slow, mid); square: very\_slow (boundary); triangle: $\omega{=}2.5$
 (shown for reference — no reliable $\Lmax$, excluded from fit).
-Dashed: pre-experiment prediction ($c{=}1.0$); solid:
+Dashed: $L{=}\Tcorr$ reference line (not a theoretical prediction — see text); solid:
 force-through-origin fit on three reliable points including
 boundary very\_slow ($c{=}0.85$, inflated by boundary censoring);
 the two interior anchors alone give $c{=}0.30$ exactly.
@@ -754,12 +757,17 @@ $17.0\;(3)$  & --- & ---  & ---  & --- \\
 
 \subsection{Theoretical prediction vs.\ empirical result}
 
-The pre-experiment bias/noise-parity prediction was $c \approx 1.0$
-(Section~\ref{sec:theory-fail}); the empirical value is $c \approx
-0.30$, a factor of~3 lower.  Table~\ref{tab:bias-noise} shows why:
-at $L{=}\Lmax$ the ratio $\angbias/\sigma_{\theta,s}$ is
-$0.38$ and $0.21$ for slow and mid respectively — far below the
-$\approx1.0$ threshold at which directional MSE parity is achieved.
+The pre-experiment bias/noise-parity analysis
+(Section~\ref{sec:theory-fail}) predicts $L^* \propto (\omega\,dt)^{-2/3}$,
+a different functional form from the observed
+$\Lmax \propto (\omega\,dt)^{-1}$.  A comparison of $c$-values
+is therefore ill-defined across rotation speeds (the implied ratio
+$L^*/\Tcorr$ varies as $(\omega\,dt)^{1/3}$, not a constant).
+Pointwise: the bias/noise threshold
+predicts crossover at $\angbias/\sigma_{\theta,\mathrm{shared}} \approx 1$,
+but Table~\ref{tab:bias-noise} shows this ratio at the observed
+$\Lmax$ is only $0.38$ (slow) and $0.21$ (mid) — the empirical
+crossover is earlier than the theory predicts.
 The policy nonlinearity (capacity-matching sends all collectors
 toward a single estimated direction) means the coordination benefit
 collapses well before the shared arm's individual directional
@@ -877,12 +885,14 @@ field rotation; the significance-based threshold takes the same
 value at one additional interior speed.
 The largest benefit window at these two speeds satisfies
 $\Lmax \approx 0.30 \cdot \Tcorr$, with a boundary-censored
-very\_slow point consistent but not conclusive.  The theoretical
-prediction ($c \approx 1.0$) overshot by a factor of three because
-the relevant threshold is not directional MSE parity but the point
-at which shared-arm confidence in a stale direction outweighs the
-coverage diversity of independent agents — a policy nonlinearity
-inaccessible to information-geometric arguments.
+very\_slow point consistent but not conclusive.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
+a different functional form from the observed pattern,
+and the crossover occurs at lower $L$ than the theory predicts
+because the relevant threshold is not directional MSE parity but
+the point at which shared-arm confidence in a stale direction
+outweighs the coverage diversity of independent agents —
+a policy nonlinearity inaccessible to information-geometric
+arguments.
 
 Within the specific parameter regime studied ($\alpha{=}0.06$,
 $\sigma{=}0.06$, $M{=}4$, $dt{=}0.02$, sliding-window controller),
