@@ -179,15 +179,20 @@ fig2, ax2 = plt.subplots(figsize=(3.00, 2.35))
 ax2.plot(t_line, pred_line, color="#999999", lw=1.0, ls="--",
          label=r"pre-experiment: $c{=}1.0$")
 
+# Interior-anchor-only line (c=0.30, thin blue dotted)
+c_interior = 0.30
+ax2.plot(t_line, c_interior * t_line, color="#1A6FBF", lw=1.0, ls=":",
+         label=r"interior anchors only: $c{=}0.30$", zorder=1)
+
 # Fitted line (c≈0.85, 3-point fit including boundary)
 ax2.plot(t_line, lmax_line, color="#333333", lw=1.4, ls="-",
-         label=f"empirical fit: $c={c_fit:.2f}$")
+         label=f"3-point fit (incl. boundary): $c={c_fit:.2f}$")
 
 # Data points — very_slow open (boundary), slow+mid filled (clean anchors)
 ax2.scatter([67], [67], color="#999999", marker="s", s=40,
             zorder=5, label=r"very\_slow (boundary)")
 ax2.scatter([33, 10], [10, 3], color="#1A6FBF", marker="o", s=44,
-            zorder=5, label="slow, mid (anchor)")
+            zorder=5, label="slow, mid (interior anchors)")
 
 # ω=2.5: shown as open triangle — no reliable L_max, excluded from fit
 # Shown at T_corr=20 with an arrow indicating "ambiguous ↑" direction
@@ -208,11 +213,11 @@ for tx, ly, lbl in zip(t_corr_pts, lmax_pts,
 ax2.annotate(r"$\omega{=}2.5$", (20, 45),
              xytext=(22, 43), fontsize=6.5, color="#888888", ha="left")
 
-# 0.30 annotation (interior anchors only)
-ax2.text(68, c_fit * 68 + 1, r"$L_{\max} \approx 0.30\,T_{\rm corr}$",
-         fontsize=7, color="#333333", ha="right")
+# 0.30 annotation — label the interior-anchor dotted line
+ax2.text(60, c_interior * 60 + 2, r"$c{=}0.30$",
+         fontsize=7, color="#1A6FBF", ha="left", va="bottom")
 
-ax2.set_xlabel(r"$T_{\rm corr} = 1/(\omega\cdot dt)$ (steps)")
+ax2.set_xlabel(r"$T_{\rm corr} = 1/(\omega\cdot dt)$, one-radian decorr.\ timescale (steps)")
 ax2.set_ylabel(r"$L_{\max}$ (steps)")
 ax2.set_xlim(-2, 75)
 ax2.set_ylim(-3, 75)

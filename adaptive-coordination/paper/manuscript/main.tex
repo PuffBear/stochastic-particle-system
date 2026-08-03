@@ -51,8 +51,8 @@ Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
 \newcommand{\angbias}{\beta}
 
 % ── AAMAS metadata ───────────────────────────────────────────
-\title{Autocorrelation Time Governs the Useful Memory Window for\\
-       Multi-Agent Coordination under a Rotating Latent Field}
+\title{When Shared Memory Hurts: Stale-Coordination Failure and Memory-Window\\
+       Scaling in Multi-Agent Particle Collection under a Rotating Latent Field}
 
 \author{Anonymous Authors}
 \affiliation{%
@@ -79,19 +79,24 @@ provides a statistically significant coordination benefit
   \Lmax(\omega) \;\approx\; 0.30 \cdot \Tcorr \;=\;
   \frac{0.30}{\omdt},
 \]
-where $\Tcorr = 1/(\omdt)$ is the field autocorrelation time
-in steps. At crossover the memory window spans approximately
+where $\Tcorr = 1/(\omdt)$ is the field's one-radian decorrelation
+timescale in steps (the time for the field to rotate by one radian).
+At crossover the memory window spans approximately
 $17^\circ$ ($0.30\;\text{rad}$) of total field rotation — verified
 at two interior rotation speeds (slow, mid); a supplementary
-third condition shows complex behaviour discussed in the paper. A pre-experiment analytical
+third condition shows complex behaviour discussed in the paper.
+A pre-experiment analytical
 prediction of $c \approx 1.0$ overshot by a factor of three;
 the mechanism is a policy nonlinearity in which the shared arm
 confidently drives all collectors toward a systematically stale
 direction, crowding out the coverage diversity that makes
 independent coordination beneficial. The exponential-decay
-controller does not follow the same scaling. For practitioners:
-set $L \leq 0.30/(\omdt)$ to preserve coordination benefit
-when the latent field drifts at per-step rate $\omdt$.
+controller does not follow the same scaling. For this environment
+and controller, a sliding window of $L \lesssim 0.30/(\omdt)$
+preserves the coordination benefit when the latent field drifts
+at per-step rate $\omdt$; the constant $c \approx 0.30$ is
+specific to the studied parameter regime and requires re-validation
+under different agent counts or field strengths.
 \end{abstract}
 
 \keywords{multi-agent coordination; non-stationary environments;
@@ -156,11 +161,16 @@ The last memory window that provides a statistically significant
 coordination benefit scales as
 \[
   \Lmax(\omega) \approx 0.30 \cdot \Tcorr, \quad
-  \Tcorr = \frac{1}{\omdt}.
+  \Tcorr = \frac{1}{\omdt},
 \]
+where $\Tcorr$ is the one-radian decorrelation timescale of the
+field (the time to rotate by one radian).
 At crossover, the total field rotation over the window is
 $\omega \cdot \Lmax \cdot dt \approx 0.30\;\mathrm{rad}$,
-a condition verified at two independent rotation speeds.
+a pattern observed at two interior rotation speeds
+($\Tcorr \in \{33, 10\}$) under the pre-registered per-cell criterion.
+The constant $c \approx 0.30$ is preliminary; the borderline
+slow anchor ($p{=}0.049$) motivates further validation.
 A sliding window longer than $\Lmax$ reverses the benefit:
 $\Dbar$ goes negative (e.g.\ from $+0.94$ at $L{=}10$ to $-0.38$
 at $L{=}20$ for $\omega{=}1.5\;\text{rad/step}$).
@@ -179,12 +189,14 @@ confident-but-wrong directions into globally poor coverage.
 
 \medskip\noindent\textbf{Contributions.}
 \begin{enumerate}
-  \item We establish $\Lmax \propto \Tcorr$ empirically with
-  matched counterfactuals across an order-of-magnitude range of
-  rotation speeds ($\Tcorr \in \{33, 10\}$ clean interior anchors,
-  plus boundary very\_slow at $\Tcorr{=}67$; a supplementary
-  $\Tcorr{=}20$ condition shows anomalous breadth without a sharp
-  crossover and is discussed separately).
+  \item We demonstrate $\Lmax \propto \Tcorr$ at two interior
+  rotation speeds (slow, mid; $\Tcorr \in \{33, 10\}$), with
+  the proportionality constant $c \approx 0.30$ consistent
+  across these two anchors (plus a boundary very\_slow point at
+  $\Tcorr{=}67$). A supplementary $\Tcorr{=}20$ condition shows
+  anomalous breadth without a sharp crossover and is discussed
+  separately; the headline $c \approx 0.30$ is a preliminary
+  two-anchor result, not a settled universal constant.
   \item We show that the constant $c \approx 0.30$ differs from
   the bias/noise-parity prediction ($c \approx 1.0$) by a factor
   of three, attributable to policy nonlinearity rather than
@@ -275,8 +287,10 @@ The latent field direction evolves deterministically:
   \quad \theta(0) \sim \mathrm{Uniform}[0, 2\pi).
 \]
 At $\omega{=}0$ the task reduces to SPS-C03 exactly.
-The field autocorrelation time—the lag at which cosine similarity
-with the current direction drops to $\cos(1) \approx 0.54$—is
+The field rotates deterministically, so its cosine similarity
+with the current direction oscillates rather than decaying; nonetheless
+the one-radian decorrelation timescale—the lag at which cosine similarity
+first drops to $\cos(1) \approx 0.54$—is a natural staleness timescale:
 \[
   \Tcorr = \frac{1}{\omdt} \quad (\text{steps}).
 \]
@@ -472,11 +486,12 @@ $+0.22$ at $L{=}5$ ($p{=}0.30$, not significant).
 
 For $\omega{=}\text{fast}$ ($\Tcorr{=}3$) no $L$ value achieves
 consistent significance.  The isolated $p{=}0.023$ at $L{=}5$
-does not survive multiple-comparison correction: applying Holm's
-procedure across the 24 fast cells yields an adjusted
+is an outlier: adjacent cells $L{\in}\{1,3,10\}$ are all
+non-significant.  As additional post-hoc analysis (not required
+by the pre-registered per-cell criterion), applying Holm's
+step-down procedure across the 24 fast cells yields an adjusted
 $p_{\mathrm{adj}} = 0.023 \times 24 = 0.55$ for the minimum
-raw $p$, so no fast cell is significant after correction.
-Adjacent cells $L{\in}\{1,3,10\}$ are also non-significant.
+raw $p$, confirming no fast cell survives even relaxed correction.
 Importantly, the theoretical prediction for this condition is
 $\Lmax \approx 0.30 \times 3 = 0.9$ steps, which falls \emph{below}
 the minimum grid value of $L{=}1$.  The null result is therefore
@@ -500,8 +515,13 @@ discussed in Section~\ref{sec:lmax-scaling}.
          $\Dbar$ = mean shared$-$independent captures;
          ($*$) = $p{<}0.05$ one-sided $t$-test.
          Dashes: intermediate $L$ not run for that $\omega$.
-         $\dagger$Stationary $L{=}67$: SPS-C03 baseline
-         ($n{=}8$ seeds, reproduced by gate; see App.~\ref{app:gate}).
+         $\dagger$Stationary $L{=}67$: full-history ($L{=}H$)
+         sliding-window cell included for comparison ($n{=}8$ seeds).
+         The SPS-C03 baseline ($\Dbar{=}{+}1.19$) is reproduced
+         by the $\omega{=}0$, $L{=}1$ reproduction gate
+         (Section~\ref{sec:setup}, App.~\ref{app:gate}); the $L{=}67$
+         stationary cell coincidentally yields the same value because
+         field stationarity makes the window length irrelevant.
          $\omega{=}2.5$: supplementary condition; see Sec.~\ref{sec:lmax-scaling}.}
 \label{tab:main}
 \setlength\tabcolsep{5pt}
@@ -536,8 +556,15 @@ $17.0\;(3)$
 \subsection{$\Lmax$ versus $\Tcorr$}
 \label{sec:lmax-scaling}
 
-Table~\ref{tab:lmax} summarises $\Lmax$ (last significant $L$,
+Table~\ref{tab:lmax} summarises $\Lmax$ (last significant $L$
+under the pre-registered per-cell $p{<}0.05$ criterion,
 window method) per rotation speed and the ratio $\Lmax/\Tcorr$.
+An alternative operationalisation is the zero-crossing $L^*$
+where $\Dbar$ first turns negative: for slow, $L^* \in (10, 20)$
+(sign change between adjacent grid values); for mid, $L^* \in (30, 45)$.
+The significance-based $\Lmax$ and the zero-crossing $L^*$
+bracket the true crossover from different directions; we use $\Lmax$
+throughout as the pre-registered quantity.
 
 \begin{table}[b]
 \centering
@@ -742,18 +769,27 @@ is driven by coverage loss, not by information loss.
 \label{sec:discussion}
 % ------------------------------------------------------------
 
-\paragraph{Practical memory-window prescription.}
-If the latent field rotates at known or estimated per-step rate
-$\omdt$, set $L \leq 0.30/(\omdt)$.  If $\omega$ is unknown,
-estimate it from the rate of change of the team velocity estimate
-and adjust $L$ online.
+\paragraph{Practical memory-window heuristic.}
+For the specific parameter regime studied here
+($\alpha{=}0.06$, $\sigma{=}0.06$, $M{=}4$, $dt{=}0.02$,
+sliding-window controller), setting $L \lesssim 0.30/(\omdt)$
+avoids the stale-coordination failure demonstrated in this work.
+The constant $c \approx 0.30$ is a two-anchor preliminary value;
+re-validation is needed before applying it to different agent
+counts, field strengths, or coordination protocols.
+If $\omega$ is unknown, estimating it from the rate of change
+of the team velocity estimate and adjusting $L$ online is a
+natural but unvalidated extension.
 
 \paragraph{Connection to SW-UCB.}
 SW-UCB sets $L \propto 1/\Delta$ where $\Delta$ is a breakpoint
-rate~\cite{garivier2011swucb}.  Our result establishes the
-cooperative analogue: $L \propto 1/(\omdt)$ with $c \approx 0.30$.
-The constant is smaller than the single-agent SW-UCB optimum because
-multi-agent sharing amplifies the consequence of directional bias.
+rate~\cite{garivier2011swucb}.  Our results are consistent with a
+cooperative analogue $L \propto 1/(\omdt)$ with $c \approx 0.30$
+in the studied setting.
+The constant is smaller than the single-agent SW-UCB optimum
+because multi-agent sharing amplifies the consequence of directional
+bias; whether this analogy holds under other coordination protocols
+or reward structures is an open question.
 
 \paragraph{The exponential-decay controller.}
 Despite its theoretical appeal (smooth weighting, no hard cutoff),
@@ -768,11 +804,20 @@ interaction is left for future work.
 The slow anchor ($\Dbar{=}{+}0.94$, $p{=}0.049$) is borderline:
 a single additional seed going the opposite direction would push
 $p$ above 0.05 and shift the reported $\Lmax$ from 10 to 5 steps.
-This is acknowledged; 32 seeds gives approximately 80\% power at
-$|\Dbar|{=}0.9$ (Section~\ref{sec:setup}).  Validation at
-additional rotation speeds with confirmed, non-borderline $\Lmax$
-values is the appropriate follow-on rather than adding seeds
-post-hoc to a borderline cell.
+Furthermore, applying Holm's step-down procedure uniformly across
+slow's eight cells—as was done post-hoc for the fast condition
+(Section~\ref{sec:results})—the adjusted threshold at $L{=}10$'s
+rank (4th-smallest $p$ of 8) is $0.05/5 = 0.01$; the borderline
+$p{=}0.049$ fails this threshold, shifting $\Lmax(\text{slow})$
+from 10 to 5 steps (ratio $5/33 \approx 0.15$).  The mid anchor
+($L{=}3$, $p{=}0.004$) survives Holm correction (threshold
+$0.05/8 = 0.00625$).  Under strict uniform Holm the two anchors
+give $c = 0.15$ and $c = 0.30$ respectively — no longer a
+consistent constant. The pre-registered criterion
+($p{<}0.05$ per cell, uncorrected) is the basis for the
+$c \approx 0.30$ claim; this sensitivity should be viewed as
+motivation for validation at additional rotation speeds with
+non-borderline $\Lmax$ values rather than adding seeds post-hoc.
 
 \paragraph{Generality and functional dependence of $c$.}
 The $c \approx 0.30$ constant is specific to
@@ -800,31 +845,50 @@ profiles.
 (iv)~32 seeds per cell provides approximately 80\% power for
 $|\Dbar| \approx 0.9$; smaller effects at the boundary may require
 more seeds.
+(v)~The constant $c \approx 0.30$ is measured at a single
+parameter point ($\alpha{=}0.06$, $\sigma{=}0.06$, $M{=}4$,
+$\bar{K}{\approx}8$, $dt{=}0.02$). Its functional dependence on
+these parameters is not established here; back-of-envelope
+arguments for the scaling are given in Section~\ref{sec:discussion}
+but require a systematic parameter sweep to validate.
+(vi)~The two-anchor result ($\Tcorr \in \{33,10\}$) is a
+preliminary pattern, not a law: the borderline slow anchor
+($p{=}0.049$) does not survive uniform Holm correction, and the
+supplementary $\omega{=}2.5$ condition does not conform to the
+$c{=}0.30$ prediction (Section~\ref{sec:anchor-robustness}).
+Additional, non-borderline anchors are needed before the
+scaling constant can be treated as reliable (see Anchor robustness paragraph above).
 
 % ------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclusion}
 % ------------------------------------------------------------
 
-We showed that the largest observation-memory window providing
-a positive coordination benefit scales as
-$\Lmax \approx 0.30 \cdot \Tcorr = 0.30/(\omdt)$ for a sliding-
-window multi-agent controller in a stochastic particle-collection
-task with a linearly rotating latent field.  At crossover, the
-memory window spans $\approx 0.30\;\text{rad}$ of total field
-rotation.  The theoretical prediction ($c \approx 1.0$) overshot
-by a factor of three because the relevant threshold is not
-directional MSE parity but the point at which shared-arm confidence
-in a stale direction outweighs the coverage diversity of
-independent agents — a policy nonlinearity inaccessible to
-information-geometric arguments.
+We demonstrated a stale-coordination failure mechanism: once the
+sliding-window memory spans more than $\approx 0.30\;\text{rad}$
+of total field rotation, the shared arm drives all collectors
+confidently toward a systematically stale direction, eliminating
+the coverage diversity that makes coordination beneficial.  The
+largest memory window providing a positive benefit scales as
+$\Lmax \approx 0.30 \cdot \Tcorr = 0.30/(\omdt)$ at two interior
+rotation speeds ($\Tcorr \in \{33, 10\}$), with a boundary
+consistent but censored very\_slow point.  The theoretical
+prediction ($c \approx 1.0$) overshot by a factor of three because
+the relevant threshold is not directional MSE parity but the point
+at which shared-arm confidence in a stale direction outweighs the
+coverage diversity of independent agents — a policy nonlinearity
+inaccessible to information-geometric arguments.
 
-The result provides a tractable design rule: set $L \leq
-0.30/(\omdt)$ to preserve coordination benefit when the environment
-drifts at known per-step rate $\omdt$.  The exponential-decay
+Within the specific parameter regime studied ($\alpha{=}0.06$,
+$\sigma{=}0.06$, $M{=}4$, $dt{=}0.02$, sliding-window controller),
+the heuristic $L \lesssim 0.30/(\omdt)$ avoids this failure mode.
+The constant $c \approx 0.30$ is a preliminary two-anchor result;
+the borderline slow anchor ($p{=}0.049$) and the anomalous
+$\omega{=}2.5$ condition both motivate further validation before
+this constant is used prescriptively.  The exponential-decay
 controller does not follow the same scaling, making the sliding
-window the more predictable choice for practitioners who need to
-select $L$ from a known or estimated rotation rate.
+window the more predictable choice for memory-window selection
+under known $\omega$ in this setting.
 
 % ── Appendix ─────────────────────────────────────────────────
 \appendix
@@ -891,12 +955,17 @@ $\omega$ & $L$ & $\Dbar$ & SE & $p$ \\
 \section{Reproduction Gate Details}
 \label{app:gate}
 
-Gate run: $\omega{=}0$, $L{=}1$, window method, seeds 6001--6032.
+Gate run: $\omega{=}0$, $L{=}1$ (stateless sliding window), seeds 6001--6032.
 $\Dbar{=}{+}1.188$ (SE${}=0.213$, 95\% CI $[+0.77, +1.61]$,
 $p{<}0.001$), sign count $20/32$.
 This matches SPS-C03's $\Dbar{=}{+}1.19$ (SD 2.44, 20/32 positive)
 within rounding error, confirming the rotating-field implementation
 is correct at $\omega{=}0$.
+Note: the reproduction gate uses $L{=}1$, not $L{=}H{=}67$.
+The $L{=}67$ stationary cell in Table~\ref{tab:main} is a
+separate full-history sliding-window cell that coincidentally
+yields $\Dbar{=}{+}1.19$ because field stationarity makes window
+length irrelevant; it is \emph{not} the gate cell.
 
 \section{Proof Sketch: SNR under Angular Bias}
 \label{app:theory}
@@ -905,10 +974,19 @@ At step $t$, the window estimate $\hat{v}(t, L)$
 (Equation~\ref{eq:window}) has expected direction
 $\hat{\theta} = \theta(t) - \omega L\,dt/2$ (lag of window
 midpoint) and sinc-attenuated magnitude
-$\alpha\,\mathrm{sinc}(\omega L\,dt/2)$.  For all
-$(\omega, L)$ in our experiment the sinc factor exceeds 0.959
-($< 1\%$ amplitude loss), so sinc attenuation is negligible.
-The dominant factor is the angular lag $\angbias = \omega L\,dt/2$.
+$\alpha\,\mathrm{sinc}(\omega L\,dt/2)$.
+In the crossover region (cells at or below $\Lmax$,
+where $\omega L\,dt \leq 0.30\;\text{rad}$) the
+argument is at most $0.15\;\text{rad}$, giving
+$\mathrm{sinc}(0.15) \approx 0.996$ ($< 0.5\%$ amplitude loss),
+so sinc attenuation is negligible \emph{in this region}.
+Beyond $\Lmax$, the approximation breaks down: at
+$(\omega{=}5, L{=}67)$ the argument is $5{\times}67{\times}0.02/2 = 3.35\;\text{rad}$,
+and $\mathrm{sinc}(3.35) = \sin(3.35)/3.35 \approx -0.06$, which
+is not negligible.  However, these cells are already in the
+degraded regime where $\Dbar < 0$; the mechanism there is angular
+bias, not sinc attenuation.
+The dominant factor throughout is the angular lag $\angbias = \omega L\,dt/2$.
 
 The SNR of the direction estimate for $M$ agents is approximately
 \[
