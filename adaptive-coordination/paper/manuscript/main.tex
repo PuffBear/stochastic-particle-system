@@ -1,10 +1,37 @@
 % ============================================================
 %  FR-B4 manuscript — AAMAS 2027 submission
-%  Template: aamas.cls (AAMAS 2025/2026/2027 proceedings)
-%  Obtain from: https://aamas2027.org/authors/formatting-instructions/
-%  Compile: latexmk -pdf main  (or: pdflatex → bibtex → pdflatex × 2)
+%  Template: official AAMAS 2027 aamas.cls
+%  https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/
+%  Compile: pdflatex → bibtex → pdflatex × 2
 % ============================================================
-\documentclass{aamas}
+
+%%% For anonymized submission (replace with \documentclass[sigconf]{aamas} for camera-ready)
+\documentclass[sigconf,anonymous]{aamas}
+
+% ── AAMAS 2027 copyright block (do not change!) ──────────────
+\makeatletter
+\gdef\@copyrightpermission{%
+  \begin{minipage}{0.2\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{\includegraphics[width=0.90\textwidth]{by}}
+  \end{minipage}\hfill
+  \begin{minipage}{0.8\columnwidth}
+   \href{https://creativecommons.org/licenses/by/4.0/}{This work is licensed under a Creative Commons Attribution International 4.0 License.}
+  \end{minipage}
+  \vspace{5pt}
+}
+\makeatother
+
+\setcopyright{ifaamas}
+\acmConference[AAMAS 2027]{Proc.\@ of the 26th International Conference
+on Autonomous Agents and Multiagent Systems (AAMAS 2027)}{3--7 May 2027}{Hanoi,
+Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
+\copyrightyear{2027}
+\acmYear{2027}
+\acmDOI{}
+\acmISBN{}
+
+\acmSubmissionID{<<OpenReview submission id>>}
+\submissionType{Research Paper Track}
 
 % ── Core packages ────────────────────────────────────────────
 \usepackage{amsmath,amsthm}
@@ -28,7 +55,10 @@
        Multi-Agent Coordination under a Rotating Latent Field}
 
 \author{Anonymous Authors}
-\affiliation{\institution{Anonymous Institution}}
+\affiliation{%
+  \institution{Anonymous Institution}
+  \city{Anonymous City}
+  \country{Anonymous Country}}
 \email{anonymous@example.org}
 
 \begin{abstract}
@@ -543,6 +573,7 @@ fit on the three reliable points gives $\Lmax \approx 0.31\,\Tcorr$.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_scaling}
+\Description{Scatter plot of L-max versus T-corr with two fitted lines (pre-experiment c=1.0 dashed, empirical c=0.85 solid) and three data points: very-slow (open square at T=67), slow (filled circle at T=33, L=10), mid (filled circle at T=10, L=3).}
 \caption{$\Lmax$ (last significant $L$, window method) vs.\
 $\Tcorr = 1/(\omdt)$.  Filled circles: two clean interior points
 (slow, mid); square: very\_slow (boundary — any $\Lmax \in [45,67]$
@@ -568,6 +599,7 @@ $L{=}5$ (NS) and does not turn strongly negative until $L{=}45$
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_crossover}
+\Description{Line plot of mean delta-bar versus memory window L for two rotation speeds (slow in blue, mid in orange), with 95-percent confidence intervals, filled markers for significant cells and open markers for non-significant cells, and dashed vertical lines at L-max.}
 \caption{$\Dbar$ (mean shared $-$ independent captures, $\pm$95\%~CI)
 vs.\ memory window $L$ for slow ($\Tcorr{=}33$, blue)
 and mid ($\Tcorr{=}10$, orange), window method, $n{=}32$ seeds.
