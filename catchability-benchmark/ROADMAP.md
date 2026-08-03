@@ -114,8 +114,14 @@ the scripted catchability surface itself.
 
 The unregistered, seed-firewalled design is now specified in
 [`LEARNED_TRANSFER_PROTOCOL.md`](LEARNED_TRANSFER_PROTOCOL.md). It must not run
-on candidate seeds until its remaining tuning, effect-threshold, implementation,
+on candidate seeds until its remaining tuning, effect-threshold, training-budget,
 and human sign-off blockers are resolved.
+
+- [x] Implement slot-matched raw and dimensionless observation adapters.
+- [x] Implement immutable canonical-statistics and deterministic IPPO/CommNet
+  checkpoint evaluation, with a fail-closed unregistered-protocol guard.
+- Run tuning-only stability pilots and register the final training budget and
+  practical-effect threshold before any final training/evaluation seed runs.
 
 ### 3. Robustness and ablations (17 August-5 September)
 

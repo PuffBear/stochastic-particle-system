@@ -51,6 +51,8 @@ MAPPO is a robustness extension, not part of the minimum ICLR gate.
 The candidate design contains 20 training runs (`2 x 2 x 5`) and 5,120 primary
 evaluation episodes (`20 x 4 x 64`). Training and evaluation budgets must be
 calibrated on the tuning panel before the status changes to registered.
+The CommNet zero-message control adds 2,560 secondary evaluation episodes, for
+7,680 evaluations after all 20 frozen checkpoints exist.
 
 ## Representation contract
 
@@ -157,10 +159,34 @@ than overstating an ICLR representation contribution.
 
 ## Registration blockers
 
-- implement raw and dimensionless adapters with equality-under-rescaling tests;
-- add deterministic checkpoint evaluation for IPPO and CommNet;
+- [x] implement raw and dimensionless adapters with equality-under-rescaling,
+  mask-preservation, and slot-parity tests;
+- [x] add hash-checked deterministic checkpoint evaluation for IPPO and
+  CommNet, including the zero-message execution control;
 - run tuning-panel budget and stability pilots;
 - calibrate the practical-effect threshold and final number of training seeds;
 - [x] confirm that candidate seed ranges do not overlap any existing experiment
   as of branch commit used for registration;
 - obtain human sign-off and an external timestamp.
+
+## Implemented execution guard
+
+The machine-readable candidate design is
+`configs/experiments/fr_b3_learned_transfer.yaml`. Inspect it without PyTorch or
+episode execution using:
+
+```bash
+PYTHONPATH=src python analysis/evaluate_fr_b3_transfer.py \
+  --config configs/experiments/fr_b3_learned_transfer.yaml --dry-run
+```
+
+The dry-run derives 20 required checkpoint bundles, 5,120 primary episodes,
+2,560 CommNet ablations, and 7,680 total evaluations. Outside `--dry-run`, the
+runner exits before loading a checkpoint or resetting an environment while the
+protocol status remains `candidate_not_registered`.
+
+Each future checkpoint bundle must contain a model, canonical-training frozen
+standardizer, and metadata recording the adapter contract, representation,
+architecture, training seed, checkpoint episode, canonical-environment hash,
+and artifact hashes. Evaluation uses clipped deterministic action means; it
+does not sample from the PPO action distribution or update normalization.

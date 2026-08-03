@@ -70,8 +70,17 @@ Those values were not used by SPS-C03 and must not be cited as its anchor.
   rule calibration from the historical paired variance.
 - `hpc/fr_b3/`: PBS setup, preflight, submission, run, validation, analysis,
   and plotting package; no branch-switching or merge operation.
-- `tests/test_catchability.py` and `tests/test_fr_b3_pipeline.py`: anchor,
-  transform, design, validation, analysis, and rendering tests.
+- `src/particle_benchmark/marl/representations.py`: slot-matched raw-physical
+  and dimensionless observation adapters, canonical-only frozen statistics,
+  and an environment wrapper usable by existing trainers.
+- `src/particle_benchmark/marl/transfer.py` and
+  `analysis/evaluate_fr_b3_transfer.py`: hash-checked IPPO/CommNet bundles and
+  deterministic-mean scale evaluation with a CommNet zero-message ablation.
+- `configs/experiments/fr_b3_learned_transfer.yaml`: unregistered candidate
+  matrix whose runner refuses to execute until the remaining blockers clear.
+- `tests/test_catchability.py`, `tests/test_fr_b3_pipeline.py`, and
+  `tests/test_fr_b3_transfer.py`: anchor, transform, invariance, bundle,
+  fail-closed execution, validation, analysis, and rendering tests.
 
 The protocol is registered and externally timestamped. The v2
 scale-equivalence audit passed all eight frozen seed-policy comparisons; see

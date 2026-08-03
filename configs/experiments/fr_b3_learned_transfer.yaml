@@ -1,0 +1,59 @@
+experiment_id: FR-B3-LEARNED-TRANSFER
+protocol_status: candidate_not_registered
+
+# These ranges are reserved candidates only. The evaluation runner refuses to
+# execute them until this config is registered after tuning and human sign-off.
+training_seeds: [8301, 8302, 8303, 8304, 8305]
+evaluation_seeds: [8601, 8602, 8603, 8604, 8605, 8606, 8607, 8608,
+                   8609, 8610, 8611, 8612, 8613, 8614, 8615, 8616,
+                   8617, 8618, 8619, 8620, 8621, 8622, 8623, 8624,
+                   8625, 8626, 8627, 8628, 8629, 8630, 8631, 8632,
+                   8633, 8634, 8635, 8636, 8637, 8638, 8639, 8640,
+                   8641, 8642, 8643, 8644, 8645, 8646, 8647, 8648,
+                   8649, 8650, 8651, 8652, 8653, 8654, 8655, 8656,
+                   8657, 8658, 8659, 8660, 8661, 8662, 8663, 8664]
+tuning_seeds: [8701, 8702, 8703, 8704, 8705, 8706, 8707, 8708,
+               8709, 8710, 8711, 8712, 8713, 8714, 8715, 8716]
+
+architectures: [ippo, commnet]
+representations: [raw_physical, dimensionless]
+training_scale: canonical
+
+canonical_environment:
+  arena_size: [1.0, 1.0]
+  dt: 0.02
+  horizon: 67
+  particle_count: 256
+  collector_count: 4
+  diffusion_sigma: 0.06
+  collector_max_speed: 0.12
+  sensing_radius: 0.16
+  collector_radius: 0.012
+  particle_radius: 0.0
+  field_family: uniform
+  signal_strength: 0.06
+  capture_geometry: fixed
+  nearest_particles_k: 32
+  include_particle_velocity: true
+  include_teammates: true
+
+evaluation_scales:
+  - {id: canonical, length_scale: 1.0, time_scale: 1.0}
+  - {id: length_x2, length_scale: 2.0, time_scale: 1.0}
+  - {id: time_x4, length_scale: 1.0, time_scale: 4.0}
+  - {id: mixed_half, length_scale: 0.5, time_scale: 0.25}
+
+evaluation:
+  action_rule: deterministic_mean
+  update_normalization_at_evaluation: false
+  target_scale_fine_tuning: false
+  commnet_zero_message_ablation: true
+
+registration_blockers:
+  adapter_and_invariance_tests: complete
+  deterministic_checkpoint_evaluation: complete
+  tuning_panel_budget_pilot: pending
+  practical_effect_threshold: pending
+  training_seed_count_confirmation: pending
+  human_sign_off: pending
+  external_timestamp: pending
