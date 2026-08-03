@@ -131,10 +131,35 @@ Results from run1: `results/FR-B4/fr_b4_full_grid_run1.json` (seeds 9001–9008,
 | π/100 (mid) | undefined | 1 |
 | π/50 (fast) | 1 | 30 |
 
-Note: 8-seed estimates have high variance (SD≈3, SE≈1). The non-monotone
-L_critical pattern (window: fast→1, mid→undef, slow→67) indicates 8 seeds
-is insufficient to resolve L_critical reliably. A second run with independent
-seeds or more seeds per cell is needed before fitting the 1/ω scaling.
+**32-seed combined results** (`results/FR-B4/fr_b4_combined_32seeds.json`, runs 1–4, seeds 9001–9032):
+
+| ω | window L_crit | decay L_crit | Notable cells |
+|---|---|---|---|
+| 0 | 1 | — | L=1 window: 80/128=62.5% ✅ |
+| π/200 (slow) | — | 67 (Lall) | Lall decay: 21/32=65.6% ✅ |
+| π/100 (mid) | — | — | All cells 43–56% |
+| π/50 (fast) | 30 | — | L30 window: 20/32=62.5% ✅ |
+
+**Key scientific findings from 32-seed data:**
+
+1. **Coordination is beneficial at all tested ω and L.** Every (ω>0, L, method) cell
+   has Δ̄>0, but effect size drops from +1.19 (ω=0) to ~+0.5–+1.0. With SD≈3
+   and SE≈0.53, the 60% sign threshold requires ≥20/32 — most cells reach 50–58%.
+
+2. **The simple L_critical framework (sign≥60%) is too noisy at n=32.** The
+   coordination benefit doesn't turn off at any L; it just becomes weaker.
+   L_critical estimated from 32 seeds has ≥3 sign flips across runs per cell.
+
+3. **Two cells meet the 60% threshold:**
+   - slow+Lall+decay (21/32): full-history exponential decay helps at slow rotation
+   - fast+L30+window (20/32): moderate memory window helps at fast rotation
+   These are directionally consistent with L_critical ~ c/ω but n=32 is too
+   noisy to fit the 1/ω scaling reliably.
+
+4. **Recommended next step:** Switch primary analysis from sign-count to a
+   paired t-test with 95% CI per cell, and pool across L values within each
+   ω level to get a per-ω coordination benefit estimate. This will give
+   meaningful effect-size estimates without requiring definitive L_critical.
 
 ---
 
