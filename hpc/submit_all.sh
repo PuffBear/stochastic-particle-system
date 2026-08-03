@@ -15,7 +15,7 @@ cd "$HOME/sps/stochastic-particle-system"
 
 ALL_ARCHS=(ippo mappo commnet coma vdn maddpg)
 ALL_SEEDS=(8001 8002 8003 8004 8005 8006 8007 8008)
-N_EPISODES=6000
+N_EPISODES=20000
 N_STEPS=500000
 DRY_RUN=0
 SELECTED_ARCHS=()
