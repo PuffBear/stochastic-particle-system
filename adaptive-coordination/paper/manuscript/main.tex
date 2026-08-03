@@ -49,10 +49,9 @@ provides a statistically significant coordination benefit
   \frac{0.30}{\omdt},
 \]
 where $\Tcorr = 1/(\omdt)$ is the field autocorrelation time
-in steps. At crossover, the memory window spans approximately
-$\omega \cdot \Lmax \cdot dt \approx 0.30\;\text{rad}$ of total
-field rotation—a condition satisfied simultaneously by two
-independent rotation speeds. A pre-experiment analytical
+in steps. At crossover the memory window spans approximately
+$17^\circ$ ($0.30\;\text{rad}$) of total field rotation — verified
+independently at two different rotation speeds. A pre-experiment analytical
 prediction of $c \approx 1.0$ overshot by a factor of three;
 the mechanism is a policy nonlinearity in which the shared arm
 confidently drives all collectors toward a systematically stale
@@ -323,7 +322,7 @@ at lower $L$ than the directional-MSE model predicts.}
 \setlength\tabcolsep{5pt}
 \begin{tabular}{lrrrr}
 \toprule
-$\omega\;(\Tcorr)$ & $L$ & $\omega L\,dt$ & $\angbias$ & $\angbias/\sigma_{\theta,s}$\\
+$\omega\;(\Tcorr)$ & $L$ & $\omega L\,dt$ & $\angbias$ & $\angbias/\sigma_{\theta,\mathrm{shared}}$\\
 \midrule
 $1.5\;(33)$ & 10 (=$\Lmax$) & 0.30 rad & 0.15 rad & 0.38 \\
 $1.5\;(33)$ & 20            & 0.60 rad & 0.30 rad & 1.07 \\
@@ -367,6 +366,11 @@ sliding window and exponential decay.
 This yields 40 active conditions (4 non-stationary $\omega \times$
 5 primary $L \times$ 2 methods), plus 24 intermediate-$L$ cells
 for slow and mid only, plus stationary-$\omega$ cells.
+Intermediate $L$ values were concentrated at the two interior
+rotation speeds (slow, mid) by design: very\_slow has
+$\Lmax{=}67$ (boundary, unresolvable within the grid) and fast
+has predicted $\Lmax{<}1$ step (below grid resolution); additional
+$L$ cells at those conditions would not sharpen the $\Lmax$ estimate.
 
 \subsection{Matched counterfactuals}
 
@@ -435,8 +439,13 @@ does not survive multiple-comparison correction: applying Holm's
 procedure across the 24 fast cells yields an adjusted
 $p_{\mathrm{adj}} = 0.023 \times 24 = 0.55$ for the minimum
 raw $p$, so no fast cell is significant after correction.
-Adjacent cells $L{\in}\{1,3,10\}$ are also non-significant,
-further ruling out a real coordination effect at $\omega{=}17.0$.
+Adjacent cells $L{\in}\{1,3,10\}$ are also non-significant.
+Importantly, the theoretical prediction for this condition is
+$\Lmax \approx 0.30 \times 3 = 0.9$ steps, which falls \emph{below}
+the minimum grid value of $L{=}1$.  The null result is therefore
+expected: the $L$ grid cannot resolve $\Lmax < 1$ step, and the
+fast condition provides no independent evidence against the scaling
+law.
 
 \begin{table*}[t]
 \centering
@@ -509,11 +518,15 @@ true $\Lmax$ between 45 and 67 would produce the same reported
 value within our $L$ grid.  The fast condition ($\Tcorr{=}3$)
 has no reliable $\Lmax$.
 
-The force-through-origin OLS fit on all four non-stationary
-$\omega$ levels (treating the fast~$L{=}5$ as a point) gives
-$\Lmax \approx 0.86 \cdot \Tcorr$ ($R^2{=}0.83$), inflated by
-the two boundary points.  Restricting to the two interior anchor
-points yields $c = 0.30$ exactly.
+The force-through-origin OLS fit on the three rotation speeds with
+defined $\Lmax$ (very\_slow, slow, mid) gives $\Lmax \approx 0.85
+\cdot \Tcorr$ ($R^2{=}0.80$), inflated by the boundary-censored
+very\_slow point.  \textbf{Restricting to the two interior anchor
+points (slow, mid) yields $c = 0.30$ exactly.}  The headline
+constant $c \approx 0.30$ therefore rests on two anchor points; we
+report it as a precise preliminary value requiring validation at
+additional rotation speeds, not as an asymptotically established
+constant.
 
 \medskip
 \noindent\textbf{Crossover condition.}  Both anchor speeds satisfy
@@ -535,7 +548,8 @@ $\Tcorr = 1/(\omdt)$.  Filled circles: two clean interior points
 (slow, mid); square: very\_slow (boundary — any $\Lmax \in [45,67]$
 maps to 67 in our $L$ grid).  Dashed: pre-experiment prediction
 ($c{=}1.0$); solid: force-through-origin fit on three points
-($c{=}0.31$, restricted to interior: $c{=}0.30$ exactly).
+including the boundary very\_slow ($c{=}0.85$, inflated by boundary
+censoring); the two interior anchors alone give $c{=}0.30$ exactly.
 fast ($\Tcorr{=}3$) has no reliable $\Lmax$ and is omitted.}
 \label{fig:scaling}
 \end{figure}
@@ -681,14 +695,30 @@ the $n_i(\tau)$ distribution (which varies with field rotation) in
 a way the window controller does not.  A detailed analysis of this
 interaction is left for future work.
 
-\paragraph{Generality.}
+\paragraph{Anchor robustness.}
+The slow anchor ($\Dbar{=}{+}0.94$, $p{=}0.049$) is borderline:
+a single additional seed going the opposite direction would push
+$p$ above 0.05 and shift the reported $\Lmax$ from 10 to 5 steps.
+This is acknowledged; 32 seeds gives approximately 80\% power at
+$|\Dbar|{=}0.9$ (Section~\ref{sec:setup}).  Validation at
+additional rotation speeds with confirmed, non-borderline $\Lmax$
+values is the appropriate follow-on rather than adding seeds
+post-hoc to a borderline cell.
+
+\paragraph{Generality and functional dependence of $c$.}
 The $c \approx 0.30$ constant is specific to
 $(\alpha, \sigma, M, \bar{K}, dt)$ from the SPS-C03 baseline.
-Teams with stronger signals (larger $\alpha/\sigma$) or more
-collectors (larger $M$) will have lower angular noise, which may
-shift $c$.  The scaling $\Lmax \propto \Tcorr$ should hold for
-any memory-based cooperative controller; $c$ needs re-estimation
-for different system parameters.
+A back-of-envelope argument for the dominant dependences:
+the angular noise of the shared arm scales as
+$\sigma_{\theta,\mathrm{shared}} \propto \sigma/(\alpha\sqrt{M\bar{K}L\,dt})$,
+so larger $\alpha/\sigma$ or larger $M$ reduces noise and allows
+the shared arm to remain beneficial to a longer lag before
+coverage loss dominates.  This implies $c$ is a decreasing
+function of $\alpha/\sigma$ and (weakly) of $M$ — larger or
+stronger teams tolerate more staleness.  The scaling
+$\Lmax \propto \Tcorr$ should hold for any memory-based cooperative
+controller with a fixed-direction prior; quantifying $c(\alpha/\sigma, M)$
+requires a parameter sweep outside the scope of this paper.
 
 \paragraph{Limitations.}
 (i)~The field rotation is deterministic and uniform; stochastic
