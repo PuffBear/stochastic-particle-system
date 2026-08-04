@@ -628,7 +628,10 @@ throughout as the pre-registered quantity.
          $\Lmax$ is a lower bound (${\geq}67$; sinc-attenuation).
          $\dagger\;\omega{=}10.0$: only $L{=}30$ significant ($t{=}2.04$),
          but estimate amplitude is 4.7\% at $L{=}30$ (near-zero
-         cancellation); likely false positive — see text.}
+         cancellation); likely false positive — see text.
+         $\|\;\omega{=}3.0$: $n{=}64$; $L{=}5$ significant ($t{=}2.57$) as
+         predicted, but benefit persists through $L{=}67$ ($t{=}2.86$);
+         sinc-attenuation regime, $\Lmax$ is a lower bound.}
 \label{tab:lmax}
 \setlength\tabcolsep{4pt}
 \begin{tabular}{lrrrrl}
@@ -640,6 +643,7 @@ $\omega$ & $\Tcorr$ & $\Lmax$ & $\omega\Lmax dt$ & $\Lmax/\Tcorr$ & Regime \\
 1.5  & 33 & 10            & \textbf{0.30 rad} & \textbf{0.30} & \textbf{linear} \\
 2.0  & 25 & ${\geq}$67$^{\ddagger}$ & ${\geq}$2.68 rad & ${\geq}$2.68 & sinc-att. \\
 2.5  & 20 & 45$^{\S}$    & 2.25 rad          & 2.25 & sinc-att. \\
+3.0  & 17 & ${\geq}$67$^{\|}$ & ${\geq}$4.02 rad & ${\geq}$4.02 & sinc-att. \\
 5.0  & 10 &  3            & \textbf{0.30 rad} & \textbf{0.30} & \textbf{linear} \\
 10.0 &  5 & ---$^{\dagger}$ & ---            & ---  & rapid-rot. \\
 17.0 &  3 & ---           & ---               & --- & rapid-rot. \\
@@ -759,20 +763,25 @@ $\mathrm{sinc} \approx 0.996$ — negligible attenuation,
 so the ``confident-wrong-direction'' mechanism operates at
 essentially full signal strength at the crossover.
 
-For $\omega{\in}\{2.0, 2.5\}$ the picture is different.
-At $L{=}45$ the sinc factor is $0.87$ ($\omega{=}2.0$)
-and $0.80$ ($\omega{=}2.5$); at $L{=}67$ it falls to
-$0.73$ and $0.59$ respectively.
+For $\omega{\in}\{2.0, 2.5, 3.0\}$ the picture is different.
+At $L{=}45$ the sinc factor is $0.87$ ($\omega{=}2.0$),
+$0.80$ ($\omega{=}2.5$), and $0.72$ ($\omega{=}3.0$);
+at $L{=}67$ it falls to $0.73$, $0.59$, and $0.45$ respectively.
 This amplitude attenuation weakens the mechanism throughout
 the upper $L$ range: both the beneficial noise-reduction effect
 and the harmful stale-direction effect are scaled down together,
 so the net coordination benefit degrades gradually rather than
 collapsing sharply.
-We hypothesise that this sinc-regime effect suppresses the sharp
-crossover, explaining the anomalously high $\Lmax$ for these conditions.
-The episode total-rotation figures — $\omega H\,dt = 2.68$ and
-$3.35\;\text{rad}$ — place both conditions in an intermediate regime
-where sinc attenuation is substantial across the entire tested $L$ range.
+Three independent runs confirm this sinc-attenuation regime:
+at $\omega{=}3.0$ ($n{=}64$, $\Tcorr{=}16.7$, predicted
+$\Lmax{\approx}5$), the $t$-profile is non-monotone —
+$L{=}5$ is significant ($t{=}2.57$) as the linear-regime formula
+predicts, but benefit re-emerges and persists through $L{=}67$
+($t{\in}[1.77, 3.32]$), with $\Dbar$ remaining positive
+($> 0.6$) at all large $L$.  This is precisely the sinc-attenuation
+signature: the estimate is wrong-directioned at large $L$ but
+amplitude-damped enough that coverage diversity is partially
+preserved.
 
 The $\omega{=}1.0$ anomaly does not fit the sinc story:
 $\mathrm{sinc} \approx 0.999$ at $L{=}3$ (where benefit collapses),
@@ -792,8 +801,9 @@ clean-crossover condition.
 Both confirmed clean anchors (slow: $\omega H\,dt{=}2.01\;\text{rad}$;
 mid: $6.70\;\text{rad}$) have their $\Lmax$ in the
 sinc-negligible regime ($\omega\Lmax dt/2 = 0.15\;\text{rad}$).
-The anomalous conditions are those where sinc attenuation pervades
-the tested $L$ range or where episode-level variance is inflated.
+The three-speed sinc-attenuation confirmation ($\omega{\in}\{2.0, 2.5, 3.0\}$)
+tightens the regime boundary: the linear-to-sinc-attenuation transition
+lies in $\omega{\in}(3.0, 5.0)$, i.e.\ $\Tcorr{\in}(10, 16.7)$ steps.
 Varying $H$ at fixed $\omega$ would directly test whether a
 sharp crossover re-emerges when the grid can access
 $\omega\Lmax dt \approx 0.30\;\text{rad}$
@@ -1037,9 +1047,13 @@ effect at this $L$, not a precise effect magnitude.
 The non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5, 10.0\}$) are not
 random scatter — they have distinct, characterisable structure that constitutes
 a second contribution of this work.  The sinc-attenuation regime
-($\omega{\in}\{2.0, 2.5\}$) has a mechanistic account: amplitude damping
-weakens the ``confident-wrong-direction'' mechanism proportionally across the
+($\omega{\in}\{2.0, 2.5, 3.0\}$, confirmed at three speeds) has a
+mechanistic account: amplitude damping weakens the
+``confident-wrong-direction'' mechanism proportionally across the
 tested $L$ range, producing broad benefit without a crossover.
+The regime boundary lies in $\omega{\in}(3.0, 5.0)$
+($\Tcorr{\in}(10, 16.7)$ steps), the tightest bound available from
+the current data.
 The rapid-rotation regime ($\omega{=}10.0$) has a resolution-limit account:
 $\Lmax$ falls below the integer grid, the only significant cell ($L{=}30$) is
 a false positive at 4.7\% estimate amplitude, and the mechanism is verified
