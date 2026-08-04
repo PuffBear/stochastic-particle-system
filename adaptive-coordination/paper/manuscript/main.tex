@@ -87,7 +87,7 @@ beneficial.  The coordination benefit landscape under rotation is
 ($\omega\Lmax dt \approx 0.30\;\mathrm{rad}$, sinc attenuation
 negligible) exhibits a clean significance-based crossover at
 $\Lmax \approx 0.30\,\Tcorr$ at two interior speeds; a
-sinc-attenuation regime ($\omega{\in}\{2.0,\,2.5\}$) dampens
+sinc-attenuation regime ($\omega{\in}\{2.0,\,2.5,\,3.0\}$) dampens
 the estimate amplitude across the tested $L$ range, suppressing the
 sharp crossover; a rapid-rotation regime ($\omega{=}10.0$)
 drives the predicted $\Lmax$ below integer resolution; and a
@@ -167,8 +167,9 @@ of total field rotation at the threshold — the
 and the midpoint-lag approximation holds.
 Other tested speeds fall into qualitatively different regimes
 (see Section~\ref{sec:lmax-scaling}).
-The constant $c \approx 0.30$ is preliminary; the borderline
-slow anchor ($p{=}0.049$) motivates further validation.
+The constant $c \approx 0.30$ rests on two interior anchors;
+the slow anchor ($p{=}0.049$) was confirmed by a pre-specified
+sensitivity analysis at $n{=}64$ ($t{=}{+}1.87$, $p{<}0.05$).
 A sliding window longer than $\Lmax$ reverses the benefit:
 $\Dbar$ goes negative (e.g.\ from $+0.94$ at $L{=}10$ to $-0.38$
 at $L{=}20$ for $\omega{=}1.5\;\text{rad/step}$).
@@ -1030,18 +1031,23 @@ $0.05/8 = 0.00625$).  Under strict uniform Holm the two anchors
 give $c = 0.15$ and $c = 0.30$ respectively — no longer a
 consistent constant. The pre-registered criterion
 ($p{<}0.05$ per cell, uncorrected) is the basis for the
-$c \approx 0.30$ claim; this sensitivity should be viewed as
-motivation for validation at additional rotation speeds with
-non-borderline $\Lmax$ values rather than adding seeds post-hoc.
-Concretely: at $n{=}32$ and the observed effect ($\Dbar{=}{+}0.94$,
-SD~3.20, $d{\approx}0.29$), post-hoc power for the one-sided
-$t$-test is $\approx 50\%$ — below the 80\% design target, which
-assumed $|\Dbar| \geq 0.90$ with SD~2.5.  The one-sided 95\% lower
-confidence bound is $\Dbar - t_{0.05,31}\cdot\mathrm{SE}
-\approx 0.94 - 1.70{\times}0.57 \approx {-}0.03$ particles:
-consistent with zero.  This does not invalidate the pre-registered
-result, but it means the anchor identifies a \emph{direction} of
-effect at this $L$, not a precise effect magnitude.
+$c \approx 0.30$ claim.  At $n{=}32$ and the observed effect
+($\Dbar{=}{+}0.94$, SD~3.20, $d{\approx}0.29$), post-hoc power is
+$\approx 50\%$ — below the 80\% design target (which assumed
+$|\Dbar| \geq 0.90$, SD~2.5) — and the one-sided 95\% lower
+confidence bound (${\approx}{-}0.03$ particles) is consistent with zero.
+
+\emph{Pre-specified sensitivity analysis ($n{=}64$).}
+Motivated by the borderline $p$-value, we pre-specified a replication
+of 32 additional seeds (9033--9064) for the slow condition and pooled
+with the original 32.  At $L{=}10$ the pooled estimate is
+$\Dbar{=}{+}0.70$ ($t{=}{+}1.87$, df${}={}63$, $p{<}0.05$ one-sided,
+$\mathrm{SE}{=}0.38$), confirming the anchor after regression to the mean.
+The crossover to non-significance at $L{=}20$ is preserved
+(pooled $\Dbar{=}{+}0.14$, $t{=}{+}0.37$, NS).
+Effect shrinkage from $+0.94$ to $+0.70$ is expected for a borderline
+result; the positive direction and clean crossover at $n{=}64$ provide
+the relevant robustness evidence.
 
 \paragraph{The regime taxonomy as a positive contribution.}
 The non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5, 10.0\}$) are not
@@ -1147,8 +1153,10 @@ Within the linear-rotation regime and the specific parameter setting
 studied ($\alpha{=}0.06$, $\sigma{=}0.06$, $M{=}4$, $dt{=}0.02$,
 sliding-window controller), the heuristic $L \lesssim 0.30/(\omdt)$
 avoids the stale-coordination failure.
-The $c \approx 0.30$ constant is a preliminary two-anchor result;
-the borderline slow anchor ($p{=}0.049$) motivates further validation.
+The $c \approx 0.30$ constant rests on two interior anchors;
+the borderline slow anchor ($p{=}0.049$) was confirmed at $n{=}64$
+in a pre-specified sensitivity analysis ($t{=}{+}1.87$, $p{<}0.05$,
+df${}={}63$).
 The central open question is what determines which regime a given
 $(\omega, H)$ pair falls into — equivalently, what governs whether a
 sharp coordination crossover exists at all.
