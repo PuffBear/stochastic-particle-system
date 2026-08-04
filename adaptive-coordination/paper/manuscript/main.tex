@@ -714,6 +714,38 @@ At $L{=}45$ and $L{=}67$ the benefit is negative ($\Dbar < 0$),
 confirming the mechanism still operates; the failure is that
 $\Lmax$ is below integer resolution, not that the mechanism is
 absent.
+Table~\ref{tab:omega10} shows the full $t$-profile; the spike at
+$L{=}30$ is visually isolated and the two adjacent cells
+($L{=}45$, $L{=}67$) are both negative.
+
+\begin{table}[h]
+\centering
+\caption{$\omega{=}10.0$ window-method per-cell results ($n{=}32$).
+  Amplitude of the $L{=}30$ estimate: $4.7\%$ (near-zero cancellation,
+  direction $-166^\circ$).  The sole significant cell is consistent
+  with the 0.4 false positives expected from eight $\alpha{=}0.05$
+  tests; $L{=}1$ (predicted $\Lmax$ under $c{=}0.30$) is
+  non-significant despite a high-quality estimate (amplitude~1.0,
+  $0^\circ$ lag).}
+\label{tab:omega10}
+\setlength\tabcolsep{4pt}
+{\small
+\begin{tabular}{rrrrl}
+\toprule
+$L$ & $\Dbar$ & SE & $t$ & \\
+\midrule
+ 1  & $+0.56$ & 0.44 & $+1.27$ & \\
+ 3  & $+0.22$ & 0.39 & $+0.56$ & \\
+ 5  & $+0.50$ & 0.47 & $+1.06$ & \\
+10  & $+0.41$ & 0.45 & $+0.91$ & \\
+20  & $+0.44$ & 0.42 & $+1.03$ & \\
+30  & $+1.03$ & 0.51 & $+2.04$ & $*$ \\
+45  & $-0.19$ & 0.63 & $-0.30$ & \\
+67  & $-0.16$ & 0.55 & $-0.29$ & \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
 
 \medskip
 \noindent\textbf{Episode-rotation regime and sinc attenuation.}
@@ -1120,7 +1152,8 @@ Significance at $p{<}0.05$ is marked with (*).
 
 \begin{table}[h]
 \centering
-\caption{Window method: all 40 non-gate cells ($n{=}32$ each).}
+\caption{Window method: all 40 primary non-gate cells plus
+  $\omega{=}10.0$ exploratory cells ($n{=}32$ each).}
 \label{tab:full-window}
 \setlength\tabcolsep{3pt}
 {\small
@@ -1164,6 +1197,16 @@ $\omega$ & $L$ & $\Dbar$ & SE & $p$ \\
   & L30 & $-0.38$ & 0.49 & 0.777 \\
   & L45 & $+0.13$ & 0.53 & 0.406 \\
   & L67 & $+0.25$ & 0.50 & 0.310 \\
+\midrule
+\multirow{8}{*}{$\omega{=}10.0$}
+  & L1  & $+0.56$ & 0.44 & 0.107 \\
+  & L3  & $+0.22$ & 0.39 & 0.290 \\
+  & L5  & $+0.50$ & 0.47 & 0.149 \\
+  & L10 & $+0.41$ & 0.45 & 0.185 \\
+  & L20 & $+0.44$ & 0.42 & 0.155 \\
+  & L30 & $+1.03^*$ & 0.51 & 0.025 \\
+  & L45 & $-0.19$ & 0.63 & 0.616 \\
+  & L67 & $-0.16$ & 0.55 & 0.612 \\
 \bottomrule
 \end{tabular}
 }
