@@ -41,6 +41,7 @@ Vietnam}{M.~Baldoni, F.~Fang, W.~Yeoh, N.~Yorke-Smith (eds.)}
 \usepackage{microtype}
 \usepackage{balance}        % balanced columns on last page
 \usepackage{multirow}
+\usepackage{enumitem}
 
 
 % ── Notation macros ──────────────────────────────────────────
@@ -77,12 +78,15 @@ and measure the last memory window $\Lmax$ that maintains a
 statistically significant benefit, across an order-of-magnitude
 range of rotation speeds and eight window lengths.
 
-The central result is a \emph{stale-coordination failure
+The central finding is evidence for a \emph{stale-coordination failure
 mechanism}: the shared arm reduces angular noise but leaves angular
 bias unchanged, so beyond a critical window length it drives all
 collectors confidently toward a systematically wrong direction,
-eliminating the coverage diversity that makes coordination
-beneficial.  The coordination benefit landscape under rotation is
+reducing the inter-agent angular diversity that makes coordination
+beneficial.  Instrumented runs directly show the mechanism's two
+directional signatures (U-shaped shared-arm error minimised at
+$\Lmax$; inter-agent angular dispersion zero for the shared arm,
+non-zero for the independent arm).  The coordination benefit landscape under rotation is
 \emph{regime-dependent}: a linear-rotation regime
 ($\Lmax/\Tcorr \approx 0.30$, sinc attenuation
 negligible) exhibits a clean significance-based crossover at
@@ -190,14 +194,15 @@ confident-but-wrong directions into globally poor coverage.
 
 \medskip\noindent\textbf{Contributions.}
 \begin{enumerate}
-  \item We demonstrate and directly isolate a stale-coordination
-  failure mechanism: confidence in a shared but stale direction
-  eliminates the coverage diversity of independent agents, reversing
-  the coordination benefit.  We verify this mechanistically with
-  instrumented runs that simultaneously show a U-shaped error curve
-  (minimum at $\Lmax$) and inter-agent angular dispersion collapsing
-  to zero in the shared arm while the independent arm retains
-  directional diversity (Figure~\ref{fig:dispersion}).
+  \item We provide direct measurement evidence for a stale-coordination
+  failure mechanism: instrumented runs simultaneously show a U-shaped
+  shared-arm angular error (minimum at exactly $\Lmax$) and inter-agent
+  directional dispersion collapsing to zero in the shared arm while the
+  independent arm retains diversity (Figure~\ref{fig:dispersion}).
+  These two directional signatures are consistent with the proposed
+  mechanism.  We do not measure spatial trajectory overlap, spatial
+  coverage directly, or provide a formal mediation analysis connecting
+  angular dispersion to captures; those remain open.
   This is well-supported in the slow rotation condition and observed,
   with less sharpness, in a second interior speed.
   \item We identify a four-regime taxonomy of the coordination
@@ -511,6 +516,29 @@ rotation speeds with defined $\Lmax$.
 \section{Results}
 \label{sec:results}
 % ------------------------------------------------------------
+
+\noindent\textbf{Terminology.}  Three distinct $L$-based thresholds appear
+in this section; they coincide only under specific conditions:
+\begin{itemize}[noitemsep,topsep=2pt]
+  \item \emph{Significance threshold} ($\Lmax$): the largest $L$ with
+        $p{<}0.05$ in the pre-registered one-sided $t$-test.  This is
+        a statistical-detectability threshold, not a behavioural reversal.
+  \item \emph{Zero-crossing threshold} ($L^*$): the value of $L$ at which
+        $\mathbb{E}[\Delta]$ changes sign, estimated by interpolation between
+        adjacent grid points.
+  \item \emph{Coordination-collapse boundary}: the $L$ at which the expected
+        number of captures under the shared arm falls below the independent
+        arm — equivalent to the zero-crossing.  We use this phrase only when
+        the evidence supports a genuine sign reversal, i.e.\ when
+        $\Lmax \approx L^*$.
+\end{itemize}
+For the slow condition ($\omega{=}1.5$), $\Lmax{=}10$ and
+$L^*{\in}(10,20)$ are in the same interval:
+$\Lmax$ is an approximate coordination-collapse boundary.
+For the mid condition ($\omega{=}5.0$), $\Lmax{=}3$ but
+$L^*{\in}(30,45)$: $\Lmax$ marks only statistical detectability;
+mid does not exhibit a coordination-collapse boundary within the
+tested grid.
 
 \subsection{Per-cell coordination benefit}
 
@@ -1067,13 +1095,16 @@ $L^*/\Tcorr$ varies as $(\omega\,dt)^{1/3}$, not a constant).
 Pointwise: the bias/noise threshold
 predicts crossover at $\angbias/\sigma_{\theta,\mathrm{shared}} \approx 1$,
 but Table~\ref{tab:bias-noise} shows this ratio at the observed
-$\Lmax$ is only $0.38$ (slow) and $0.21$ (mid) — the empirical
-crossover is earlier than the theory predicts.
-The policy nonlinearity (capacity-matching sends all collectors
-toward a single estimated direction) means the coordination benefit
-collapses well before the shared arm's individual directional
-accuracy drops to parity with the independent arm.  The crossover
-is driven by coverage loss, not by information loss.
+$\Lmax$ is only $0.34$ (slow) and $0.14$ (mid) — the empirical
+significance threshold is earlier than the theory predicts.
+We label the cause ``policy nonlinearity'' (capacity-matching sends all
+collectors toward a single estimated direction, so the coordination
+benefit collapses well before the shared arm's individual directional
+accuracy drops to parity), but this is a qualitative label, not a
+derived functional form.  Why the policy sensitivity produces
+$\Lmax \propto \omega^{-1}$ rather than the $L^* \propto \omega^{-2/3}$
+from bias/noise parity is an open problem: the exponent difference is
+observed but not formally modelled in this work.
 
 % ------------------------------------------------------------
 \section{Discussion}
@@ -1148,10 +1179,17 @@ Effect shrinkage from $+0.94$ to $+0.70$ is expected for a borderline
 result; the positive direction and clean crossover at $n{=}64$ provide
 the relevant robustness evidence.
 
-\paragraph{The regime taxonomy as a positive contribution.}
-The non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5, 10.0\}$) are not
-random scatter — they have distinct, characterisable structure that constitutes
-a second contribution of this work.  The sinc-attenuation regime
+\paragraph{The regime taxonomy: post-hoc structure with mechanistic accounts.}
+The four-regime taxonomy was constructed from the data, not pre-specified:
+the non-conforming speeds were observed first, then classified.
+A sceptical reader may therefore read the taxonomy as an explanation
+built around counterexamples rather than an independently tested prediction.
+We accept that framing; the taxonomy's value is not as a prior but as
+a compact description of the observed diversity of outcomes, each with
+a mechanistic account.
+The non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5, 10.0\}$)
+are not random scatter — they have distinct, characterisable structure.
+The sinc-attenuation regime
 ($\omega{\in}\{2.0, 2.5, 3.0\}$, confirmed at three speeds) has a
 mechanistic account: amplitude damping weakens the
 ``confident-wrong-direction'' mechanism proportionally across the
@@ -1207,30 +1245,39 @@ these parameters is not established here; back-of-envelope
 arguments for the scaling are given in Section~\ref{sec:discussion}
 but require a systematic parameter sweep to validate.
 (vi)~The $c \approx 0.30$ result holds within the linear-rotation
-regime ($\Lmax/\Tcorr \approx 0.30$) and is the significance-based
-threshold at two interior speeds.  The slow anchor ($p{=}0.049$)
-does not survive uniform Holm correction, and the $n{=}64$
-sensitivity analysis confirms the anchor after effect shrinkage.
+regime and is the significance-based threshold at two interior speeds.
 The slow condition exhibits a genuine sign reversal ($\Lmax \approx L^*$);
 the mid condition's $\Lmax{=}3$ marks statistical detectability rather
-than coordination collapse ($L^*{\in}(30, 45)$).
-The quantitative constant $c{\approx}0.30$ is primarily anchored on
-the slow condition, where the two operationalisations agree.
-Four tested speeds fall into three other regimes (sinc-attenuation,
-rapid-rotation, long-episode; see Sec.~\ref{sec:lmax-scaling}), each
-with its own account of why a sharp crossover does not appear.
-The central open question is what governs regime membership for a
-given $(\omega, H)$ pair (Sec.~\ref{sec:discussion}).
+than coordination collapse ($L^*{\in}(30,45)$).
+The quantitative constant $c{\approx}0.30$ is primarily anchored on the
+slow condition, where the two operationalisations agree.
+(vii)~The mechanism isolation (Figure~\ref{fig:dispersion}) directly
+measures inter-agent angular dispersion and shared-arm angular bias.
+It does not measure spatial trajectory overlap, spatial coverage, or
+provide a formal mediation chain from angular dispersion to capture
+counts; that causal chain is consistent with the evidence but not
+directly tested.
+(viii)~The discrepancy between the theoretical $L^* \propto (\omdt)^{-2/3}$
+and the observed $\Lmax \propto (\omdt)^{-1}$ is attributed to policy
+nonlinearity, but the functional form of that nonlinearity is not derived
+or measured.  This exponent discrepancy is an open problem.
+(ix)~The four-regime taxonomy is data-derived, not pre-specified.  A
+predictive rule for regime membership from $(\omega, H)$ alone — the
+central open question of this work — has not been established.
 
 % ------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclusion}
 % ------------------------------------------------------------
 
-We demonstrated a stale-coordination failure mechanism in which the
-shared arm drives all collectors confidently toward a systematically
-stale direction, eliminating the coverage diversity that makes
-coordination beneficial.  The coordination benefit landscape under
+We provided evidence for a stale-coordination failure mechanism in
+which the shared arm drives all collectors toward a systematically stale
+direction, reducing the inter-agent angular diversity that makes
+coordination beneficial.  Instrumented runs directly show the
+mechanism's two directional signatures (Figure~\ref{fig:dispersion});
+the causal chain from reduced angular diversity to reduced captures
+is supported by the performance crossover but not isolated by a formal
+mediation analysis.  The coordination benefit landscape under
 rotation is \emph{regime-dependent}: different rotation speeds produce
 qualitatively different phenomena, and identifying which regime applies
 is as important as the within-regime scaling constant.
