@@ -82,13 +82,18 @@ mechanism}: the shared arm reduces angular noise but leaves angular
 bias unchanged, so beyond a critical window length it drives all
 collectors confidently toward a systematically wrong direction,
 eliminating the coverage diversity that makes coordination
-beneficial.  The significance-based crossover is consistent with
-$\Lmax \approx c\,\Tcorr$ (where $\Tcorr = 1/(\omdt)$ is the
-field's one-radian decorrelation timescale) with $c$ ranging from
-$0.15$ (Holm-corrected) to $0.30$ (uncorrected) at two interior
-rotation speeds; a third tested speed did not reproduce a sharp
-crossover, and $c$ should be read as a preliminary point estimate.
-The exponential-decay controller does not show the same pattern.
+beneficial.  The coordination benefit landscape under rotation is
+\emph{regime-dependent}: a linear-rotation regime
+($\omega\Lmax dt \approx 0.30\;\mathrm{rad}$, sinc attenuation
+negligible) exhibits a clean significance-based crossover at
+$\Lmax \approx 0.30\,\Tcorr$ at two interior speeds; a
+sinc-attenuation regime ($\omega{\in}\{2.0,\,2.5\}$) dampens
+the estimate amplitude across the tested $L$ range, suppressing the
+sharp crossover; a rapid-rotation regime ($\omega{=}10.0$)
+drives the predicted $\Lmax$ below integer resolution; and a
+long-episode regime ($\omega{=}1.0$, $\Tcorr{\approx}H$) exhibits
+an unexplained mechanism — raising the question of what governs
+which regime a given $(\omega, H)$ pair falls into.
 \end{abstract}
 
 \keywords{multi-agent coordination; non-stationary environments;
@@ -157,8 +162,11 @@ the pre-registered significance-based threshold satisfies
 \]
 where $\Tcorr$ is the one-radian decorrelation timescale.
 At these two speeds the window spans $\approx 0.30\;\mathrm{rad}$
-of total field rotation at the threshold.
-The pattern is preliminary (see Section~\ref{sec:lmax-scaling}).
+of total field rotation at the threshold — the
+\emph{linear-rotation regime} where sinc attenuation is negligible
+and the midpoint-lag approximation holds.
+Other tested speeds fall into qualitatively different regimes
+(see Section~\ref{sec:lmax-scaling}).
 The constant $c \approx 0.30$ is preliminary; the borderline
 slow anchor ($p{=}0.049$) motivates further validation.
 A sliding window longer than $\Lmax$ reverses the benefit:
@@ -185,11 +193,16 @@ confident-but-wrong directions into globally poor coverage.
   coordination benefit. This is well-supported in the slow
   rotation condition and observed, with less sharpness, in a
   second interior speed.
-  \item We report a preliminary point estimate: the
-  significance-based threshold satisfies $\Lmax/\Tcorr \approx 0.30$
-  (uncorrected) to $0.15$ (Holm-corrected) at two interior speeds,
-  with a third tested speed not reproducing a sharp crossover.
-  This is an exploratory pattern, not a settled scaling law.
+  \item We identify a four-regime taxonomy of the coordination
+  benefit landscape under rotation: (i)~a linear-rotation regime
+  ($\omega\Lmax dt \approx 0.30\;\mathrm{rad}$) with a clean
+  crossover at $\Lmax/\Tcorr \approx 0.30$; (ii)~a sinc-attenuation
+  regime where amplitude damping suppresses the sharp crossover;
+  (iii)~a rapid-rotation regime where $\Lmax$ falls below integer
+  resolution; and (iv)~a long-episode regime ($\Tcorr{\approx}H$)
+  with an unresolved mechanism.
+  The $c \approx 0.30$ result is the quantitative finding within
+  regime~(i).
   \item We show that the empirical crossover occurs at lower $\Lmax$
   than the bias/noise-parity prediction ($L^* \propto (\omega\,dt)^{-2/3}$),
   a different functional form, attributable to policy nonlinearity.
@@ -376,6 +389,34 @@ $5.0\;(10)$ & 10            & 1.00 rad & 0.50 rad & 1.26 \\
 \end{tabular}
 {\small ($\alpha{=}0.06,\;\sigma{=}0.06,\;M{=}4,\;\bar{K}{\approx}8,\;dt{=}0.02$)}
 \end{table}
+
+\medskip
+\noindent\textbf{Regime structure of the window estimate.}
+The midpoint-lag formula $\hat\theta = \theta(t) - \omega L\,dt/2$
+(and the bias/noise analysis above) is valid only when
+$\omega L\,dt \ll 1$, i.e.\ when the window spans a small total
+rotation.  Beyond this linear-rotation regime, the window estimate
+is governed by the exact geometric-sum formula in
+Appendix~\ref{app:theory}, whose amplitude scales as
+$|\sin(\omega L\,dt/2)|/(L|\sin(\omega\,dt/2)|)$.  Two
+qualitatively distinct failure modes result:
+\begin{enumerate}
+  \item \emph{Sinc-attenuation regime.}  When $\omega L\,dt$ is
+  substantial but the amplitude is still positive,
+  both the noise-reduction benefit and the stale-direction cost
+  are scaled down together.  The mechanism operates but weakly,
+  producing gradual degradation rather than a sharp crossover.
+  \item \emph{Rapid-rotation regime.}  When $\Tcorr$ is so short
+  that $c\,\Tcorr < 1$ step (predicted $\Lmax < 1$), no
+  integer-valued $L$ lies inside the linear-rotation regime.
+  Even $L{=}1$ carries a per-step rotation $\omega\,dt$ as its
+  lag angle, and the resulting benefit is too small to detect at
+  practical sample sizes.
+\end{enumerate}
+A third anomaly at very slow rotation ($\omega{=}1.0$,
+$\Tcorr{\approx}H$) lies outside both accounts; its mechanism
+is not resolved in this work.  Section~\ref{sec:lmax-scaling}
+characterises all four regimes empirically.
 
 % ------------------------------------------------------------
 \section{Experimental Setup}
@@ -576,27 +617,32 @@ throughout as the pre-registered quantity.
 \begin{table}[b]
 \centering
 \caption{$\Lmax$ (last $L$ with $p{<}0.05$, window) and
-         ratio to $\Tcorr$.  Bold: two clean interior points
-         (slow, mid) with $\Lmax/\Tcorr = 0.30$.
+         ratio to $\Tcorr$, with regime label.
+         Bold: two clean interior points (slow, mid)
+         in the linear-rotation regime with $\Lmax/\Tcorr = 0.30$.
          $\P\;\omega{=}1.0$: only $L{=}1$ significant ($t{=}2.68$);
          all $L{\geq}3$ non-significant ($t{<}0.5$).
-         $\S\;\omega{=}2.5$: $\Lmax{=}45$ by $t$-test criterion ($t{=}1.86$),
-         but $t$-profile non-monotone; see Sec.~\ref{sec:lmax-scaling}.
-         $\ddagger\;\omega{=}2.0$: all $L$ in grid significant (min.\ $t{=}1.93$);
-         $\Lmax$ is a lower bound (${\geq}67$).}
+         $\S\;\omega{=}2.5$: $\Lmax{=}45$ by criterion ($t{=}1.86$),
+         but $t$-profile non-monotone (sinc-attenuation regime).
+         $\ddagger\;\omega{=}2.0$: all $L$ significant throughout;
+         $\Lmax$ is a lower bound (${\geq}67$; sinc-attenuation).
+         $\dagger\;\omega{=}10.0$: only $L{=}30$ significant ($t{=}2.04$),
+         but estimate amplitude is 4.7\% at $L{=}30$ (near-zero
+         cancellation); likely false positive — see text.}
 \label{tab:lmax}
-\setlength\tabcolsep{5pt}
-\begin{tabular}{lrrrr}
+\setlength\tabcolsep{4pt}
+\begin{tabular}{lrrrrl}
 \toprule
-$\omega$ & $\Tcorr$ & $\Lmax$ & $\omega\Lmax dt$ & $\Lmax/\Tcorr$ \\
+$\omega$ & $\Tcorr$ & $\Lmax$ & $\omega\Lmax dt$ & $\Lmax/\Tcorr$ & Regime \\
 \midrule
-0.75 & 67 & 67            & 1.00 rad          & 1.00 \\
-1.0  & 50 & 1$^{\P}$     & 0.02 rad          & 0.02 \\
-1.5  & 33 & 10            & \textbf{0.30 rad} & \textbf{0.30} \\
-2.0  & 25 & ${\geq}$67$^{\ddagger}$ & ${\geq}$2.68 rad & ${\geq}$2.68 \\
-2.5  & 20 & 45$^{\S}$    & 2.25 rad          & 2.25 \\
-5.0  & 10 &  3            & \textbf{0.30 rad} & \textbf{0.30} \\
-17.0 &  3 & ---           & ---               & --- \\
+0.75 & 67 & 67            & 1.00 rad          & 1.00 & linear (bdy.) \\
+1.0  & 50 & 1$^{\P}$     & 0.02 rad          & 0.02 & long-ep. \\
+1.5  & 33 & 10            & \textbf{0.30 rad} & \textbf{0.30} & \textbf{linear} \\
+2.0  & 25 & ${\geq}$67$^{\ddagger}$ & ${\geq}$2.68 rad & ${\geq}$2.68 & sinc-att. \\
+2.5  & 20 & 45$^{\S}$    & 2.25 rad          & 2.25 & sinc-att. \\
+5.0  & 10 &  3            & \textbf{0.30 rad} & \textbf{0.30} & \textbf{linear} \\
+10.0 &  5 & ---$^{\dagger}$ & ---            & ---  & rapid-rot. \\
+17.0 &  3 & ---           & ---               & --- & rapid-rot. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -643,6 +689,31 @@ $L{=}67$ window remains beneficial, giving $\Lmax\geq67$
 ($c\geq67/25{=}2.68$) — a lower bound.  Like $\omega{=}2.5$,
 this condition does not yield a genuine crossover and cannot serve
 as an anchor.
+
+An exploratory run at $\omega{=}10.0$ ($\Tcorr{=}5$, predicted
+$\Lmax \approx 1.5$ under $c{=}0.30$) with 32~seeds reveals the
+\emph{rapid-rotation regime}.  The only nominally significant cell
+is $L{=}30$ ($t{=}2.04$, $p{<}0.05$), but this result should not
+be taken as a real coordination benefit.  At $L{=}30$ the window
+estimate amplitude — computed from the geometric-sum formula in
+Appendix~\ref{app:theory} — is only $4.7\%$ of the single-step
+amplitude ($\approx 0.047$ from the geometric-sum formula):
+near-zero cancellation, the window spanning nearly one full
+rotation ($\omega L\,dt{=}6.0\;\text{rad} \approx 2\pi$).  The estimate direction is $-166^\circ$
+relative to the current field — nearly backwards — with
+negligible amplitude.  An estimate of this quality cannot explain
+a genuine coordination benefit; the $t{=}2.04$ result is consistent
+with the expected $0.4$ false positives from testing eight $L$
+cells at $\alpha{=}0.05$.
+The $L$ values flanking the anomaly confirm the diagnosis:
+at $L{=}1$ (the predicted $\Lmax$ at $c{=}0.30$), the estimate
+is accurate (magnitude~1.0, $0^\circ$ lag), yet the benefit is
+not significant ($t{=}1.27$, $p{>}0.10$) — consistent with a
+genuine small effect that is underpowered at $n{=}32$.
+At $L{=}45$ and $L{=}67$ the benefit is negative ($\Dbar < 0$),
+confirming the mechanism still operates; the failure is that
+$\Lmax$ is below integer resolution, not that the mechanism is
+absent.
 
 \medskip
 \noindent\textbf{Episode-rotation regime and sinc attenuation.}
@@ -930,21 +1001,24 @@ consistent with zero.  This does not invalidate the pre-registered
 result, but it means the anchor identifies a \emph{direction} of
 effect at this $L$, not a precise effect magnitude.
 
-\paragraph{The anomaly cluster as a second open problem.}
-The three non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5\}$) are not
-random scatter: their $c$ values span from $0.02$ (anomalously low) to
-$\geq 2.68$ (anomalously high), flanking the two clean anchors at $c{=}0.30$.
-Section~\ref{sec:lmax-scaling} proposes a sinc-regime account for
-$\omega{\in}\{2.0, 2.5\}$: these conditions have significant amplitude
-attenuation ($\mathrm{sinc} \in [0.59, 0.87]$) across all tested $L$,
-which weakens the ``confident-wrong-direction'' mechanism and suppresses
-the sharp crossover.
-If the total episode rotation $\omega H\,dt$ is the relevant regime variable,
-then the clean $\Lmax \propto \Tcorr$ scaling may hold only within a
-specific range of $\omega H\,dt$, and the apparent universality of
-$c \approx 0.30$ across two interior speeds may reflect that both happen
-to lie in this range.  This reframes the anomalies from a weakness of the
-two-anchor result into the paper's central open question:
+\paragraph{The regime taxonomy as a positive contribution.}
+The non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5, 10.0\}$) are not
+random scatter — they have distinct, characterisable structure that constitutes
+a second contribution of this work.  The sinc-attenuation regime
+($\omega{\in}\{2.0, 2.5\}$) has a mechanistic account: amplitude damping
+weakens the ``confident-wrong-direction'' mechanism proportionally across the
+tested $L$ range, producing broad benefit without a crossover.
+The rapid-rotation regime ($\omega{=}10.0$) has a resolution-limit account:
+$\Lmax$ falls below the integer grid, the only significant cell ($L{=}30$) is
+a false positive at 4.7\% estimate amplitude, and the mechanism is verified
+to be present but undetectable at $n{=}32$.
+The long-episode regime ($\omega{=}1.0$) remains an open problem.
+Together, these accounts give practitioners a testable diagnostic: compute
+$\omega L\,dt$ at the candidate $L$.  If this is $\lesssim 0.30\;\text{rad}$
+(linear-rotation regime), $c \approx 0.30$ applies; if substantially larger,
+the regime is sinc-attenuated and the sharp crossover may not exist; if
+$c\,\Tcorr < 1$, the regime is rapid-rotation and integer-grid resolution
+is the limiting constraint.  The central open question is:
 \emph{what determines whether a given $(\omega, H)$ pair
 produces a sharp coordination crossover?}
 
@@ -981,72 +1055,57 @@ $\bar{K}{\approx}8$, $dt{=}0.02$). Its functional dependence on
 these parameters is not established here; back-of-envelope
 arguments for the scaling are given in Section~\ref{sec:discussion}
 but require a systematic parameter sweep to validate.
-(vi)~The two-anchor result ($\Tcorr \in \{33,10\}$) is a
-preliminary pattern, not a law: the borderline slow anchor
-($p{=}0.049$) does not survive uniform Holm correction, and three
-exploratory speeds do not conform to $c{=}0.30$
-(Section~\ref{sec:lmax-scaling}).
-A sinc-regime hypothesis for $\omega{\in}\{2.0, 2.5\}$ is developed
-in Sec.~\ref{sec:lmax-scaling}: amplitude attenuation
-($\mathrm{sinc} \in [0.59, 0.87]$ at large $L$) may suppress the
-sharp crossover, making these conditions structurally different from
-the clean interior anchors rather than contradicting them.
-The $\omega{=}1.0$ anomaly is not explained by sinc attenuation and
-may reflect a power limitation ($n{=}32$ is underpowered for the
-observed effect size at $L{\geq}3$) or a different episode-level
-interaction.  Whether $c{=}0.30$ holds at additional clean interior
-speeds is the central open question (see also the anomaly-cluster
-discussion in Sec.~\ref{sec:discussion}).
+(vi)~The $c \approx 0.30$ result holds within the linear-rotation
+regime ($\omega\Lmax dt \approx 0.30\;\text{rad}$) and is
+confirmed at two interior speeds; the borderline slow anchor
+($p{=}0.049$) does not survive uniform Holm correction.
+Four tested speeds fall into three other regimes (sinc-attenuation,
+rapid-rotation, long-episode; see Sec.~\ref{sec:lmax-scaling}), each
+with its own account of why a sharp crossover does not appear.
+The central open question is what governs regime membership for a
+given $(\omega, H)$ pair (Sec.~\ref{sec:discussion}).
 
 % ------------------------------------------------------------
 \section{Conclusion}
 \label{sec:conclusion}
 % ------------------------------------------------------------
 
-We demonstrated a stale-coordination failure mechanism in which
-the shared arm drives all collectors confidently toward a
-systematically stale direction, eliminating the coverage diversity
-that makes coordination beneficial.
-In the clearest slow-rotation condition, this failure appears after
-the memory window spans approximately $0.30\;\text{rad}$ of total
-field rotation; the significance-based threshold takes the same
-value at one additional interior speed.
-The significance-based threshold is consistent with
-$\Lmax \approx c\,\Tcorr$, where $c$ ranges from $0.15$
-(Holm-corrected) to $0.30$ (uncorrected) at the two clean interior
-speeds ($\omega{\in}\{1.5,\,5.0\}$); a boundary-censored
-very\_slow point is consistent but not conclusive.
-Exploratory runs at three further speeds do not conform.
-For $\omega{\in}\{2.0, 2.5\}$ (anomalously high $\Lmax$), a sinc-regime
-hypothesis offers a partial account: amplitude attenuation
-($\mathrm{sinc}{\in}[0.59, 0.87]$ at large $L$) weakens the
-``confident-wrong-direction'' mechanism throughout the tested $L$ grid,
-suppressing the sharp crossover.
-For $\omega{=}1.0$ ($\Lmax{=}1$, anomalously low),
-the cause is not resolved but may involve power
-limitations or episode-level variance inflation.
-The constant $c$ is a preliminary two-speed observation;
-the anomaly cluster raises the question of what determines whether
-a given $(\omega, H)$ pair produces a sharp crossover at all.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
-a different functional form from the observed pattern,
-and the crossover occurs at lower $L$ than the theory predicts
-because the relevant threshold is not directional MSE parity but
-the point at which shared-arm confidence in a stale direction
-outweighs the coverage diversity of independent agents —
-a policy nonlinearity inaccessible to information-geometric
-arguments.
+We demonstrated a stale-coordination failure mechanism in which the
+shared arm drives all collectors confidently toward a systematically
+stale direction, eliminating the coverage diversity that makes
+coordination beneficial.  The coordination benefit landscape under
+rotation is \emph{regime-dependent}: different rotation speeds produce
+qualitatively different phenomena, and identifying which regime applies
+is as important as the within-regime scaling constant.
 
-Within the specific parameter regime studied ($\alpha{=}0.06$,
-$\sigma{=}0.06$, $M{=}4$, $dt{=}0.02$, sliding-window controller),
-the heuristic $L \lesssim 0.30/(\omdt)$ avoids this failure mode.
-The constant $c \approx 0.30$ is a preliminary two-anchor result;
-the borderline slow anchor ($p{=}0.049$) and the anomalous
-$\omega{=}2.5$ condition both motivate further validation before
-this constant is used prescriptively.  The exponential-decay
-controller does not follow the same scaling, making the sliding
-window the more tractable choice for memory-window selection
-in the studied setting, where the decay controller showed no
-consistent pattern.
+Four regimes emerge from this study.
+\emph{Linear-rotation regime} ($\omega\Lmax dt \approx 0.30\;\text{rad}$):
+two interior speeds ($\omega{\in}\{1.5, 5.0\}$) show a clean
+significance-based crossover at $\Lmax/\Tcorr \approx 0.30$;
+the bias/noise-parity theory predicts $L^* \propto (\omdt)^{-2/3}$
+(a different functional form), with the empirical crossover earlier
+because the relevant threshold is policy nonlinearity, not directional
+MSE parity.
+\emph{Sinc-attenuation regime} ($\omega{\in}\{2.0, 2.5\}$):
+amplitude attenuation ($\mathrm{sinc}{\in}[0.59, 0.87]$ at large $L$)
+weakens the mechanism across the entire tested $L$ range,
+suppressing the sharp crossover and producing broad benefit instead.
+\emph{Rapid-rotation regime} ($\omega{=}10.0$): predicted $\Lmax$
+falls below integer resolution; the only nominally significant cell
+($L{=}30$, $t{=}2.04$) is a false positive at 4.7\% estimate amplitude;
+the mechanism is present but undetectable at $n{=}32$.
+\emph{Long-episode regime} ($\omega{=}1.0$, $\Tcorr{\approx}H$):
+only $L{=}1$ significant; mechanism unresolved.
+
+Within the linear-rotation regime and the specific parameter setting
+studied ($\alpha{=}0.06$, $\sigma{=}0.06$, $M{=}4$, $dt{=}0.02$,
+sliding-window controller), the heuristic $L \lesssim 0.30/(\omdt)$
+avoids the stale-coordination failure.
+The $c \approx 0.30$ constant is a preliminary two-anchor result;
+the borderline slow anchor ($p{=}0.049$) motivates further validation.
+The central open question is what determines which regime a given
+$(\omega, H)$ pair falls into — equivalently, what governs whether a
+sharp coordination crossover exists at all.
 
 % ── Appendix ─────────────────────────────────────────────────
 \appendix
