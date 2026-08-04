@@ -417,6 +417,9 @@ Intermediate $L$ values were concentrated at the interior rotation
 speeds (slow, mid, $\omega{=}2.5$) by design: very\_slow has
 $\Lmax{=}67$ (boundary, unresolvable within the grid) and fast has
 predicted $\Lmax{<}1$ step (below grid resolution).
+Post-hoc exploratory runs at $\omega{=}1.0$ ($\Tcorr{=}50$) and
+$\omega{=}2.0$ ($\Tcorr{=}25$), each 8 $L$ levels $\times$ 32 seeds
+(window method), are reported in Sec.~\ref{sec:lmax-scaling}.
 
 \subsection{Matched counterfactuals}
 
@@ -504,9 +507,11 @@ A supplementary condition $\omega{=}2.5$ ($\Tcorr{=}20$ steps,
 between slow and mid) was run with 32~seeds across all 8~$L$~levels
 to probe the scaling at an intermediate rotation speed.  $\Dbar$
 remains positive at every~$L$ (range $+0.69$ to $+1.72$), with a
-local minimum of $+0.78$ at $L{=}10$.  No crossover to negative was
-observed; the interpretation of $\Lmax$ for this condition is
-discussed in Section~\ref{sec:lmax-scaling}.
+local minimum of $+0.78$ at $L{=}10$ ($t{=}1.91$).  The one-sided
+$t$-test is significant ($p{<}0.05$) at every $L$ through $L{=}45$
+($t{=}1.86$) but not at $L{=}67$ ($t{=}1.67$); no crossover to
+negative $\Dbar$ was observed.  The interpretation of $\Lmax$ for
+this condition is discussed in Section~\ref{sec:lmax-scaling}.
 
 \begin{table*}[t]
 \centering
@@ -571,22 +576,27 @@ throughout as the pre-registered quantity.
 \begin{table}[b]
 \centering
 \caption{$\Lmax$ (last $L$ with $p{<}0.05$, window) and
-         ratio to $\Tcorr$.  The two clean interior points
-         (slow, mid) both give $\Lmax/\Tcorr = 0.30$.
-         $\dagger\omega{=}2.5$: no reliable $\Lmax$ — positive
-         benefit persists across the full $L$ grid without a
-         sharp crossover; see Sec.~\ref{sec:lmax-scaling}.}
+         ratio to $\Tcorr$.  Bold: two clean interior points
+         (slow, mid) with $\Lmax/\Tcorr = 0.30$.
+         $\P\;\omega{=}1.0$: only $L{=}1$ significant ($t{=}2.68$);
+         all $L{\geq}3$ non-significant ($t{<}0.5$).
+         $\S\;\omega{=}2.5$: $\Lmax{=}45$ by $t$-test criterion ($t{=}1.86$),
+         but $t$-profile non-monotone; see Sec.~\ref{sec:lmax-scaling}.
+         $\ddagger\;\omega{=}2.0$: all $L$ in grid significant (min.\ $t{=}1.93$);
+         $\Lmax$ is a lower bound (${\geq}67$).}
 \label{tab:lmax}
 \setlength\tabcolsep{5pt}
 \begin{tabular}{lrrrr}
 \toprule
 $\omega$ & $\Tcorr$ & $\Lmax$ & $\omega\Lmax dt$ & $\Lmax/\Tcorr$ \\
 \midrule
-0.75 & 67 & 67  & 1.00 rad & 1.00 \\
-1.5  & 33 & 10  & \textbf{0.30 rad} & \textbf{0.30} \\
-2.5  & 20 & ${\dagger}$ & --- & --- \\
-5.0  & 10 &  3  & \textbf{0.30 rad} & \textbf{0.30} \\
-17.0 &  3 & --- & --- & --- \\
+0.75 & 67 & 67            & 1.00 rad          & 1.00 \\
+1.0  & 50 & 1$^{\P}$     & 0.02 rad          & 0.02 \\
+1.5  & 33 & 10            & \textbf{0.30 rad} & \textbf{0.30} \\
+2.0  & 25 & ${\geq}$67$^{\ddagger}$ & ${\geq}$2.68 rad & ${\geq}$2.68 \\
+2.5  & 20 & 45$^{\S}$    & 2.25 rad          & 2.25 \\
+5.0  & 10 &  3            & \textbf{0.30 rad} & \textbf{0.30} \\
+17.0 &  3 & ---           & ---               & --- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -602,20 +612,37 @@ has no reliable $\Lmax$.
 
 The supplementary condition $\omega{=}2.5$ ($\Tcorr{=}20$, predicted
 $\Lmax\approx6$) was run with 32~seeds to test whether $c{=}0.30$
-holds at an intermediate rotation speed.  The result is anomalous:
-positive mean $\Dbar$ at every $L$ in the grid (Table~\ref{tab:main}),
-with sign-majority (${>}n/2$ seeds benefiting) maintained through
-$L{=}30$ and the $t$-test significant through $L{=}45$.  Under the
-same sequential stopping rule used for slow and mid — last $L$ where
-sign count ${>}n/2$ before the first failure — this gives $\Lmax{=}30$
-($c{=}30/20{=}1.50$), well above the $c{=}0.30$ prediction.  The
-$\omega{=}2.5$ condition therefore \emph{cannot serve as a clean third
-anchor}: the coordination benefit is too broad and flat to resolve a
-sharp $\Lmax$ within our grid.  \textbf{The headline $c \approx 0.30$
+holds at an intermediate rotation speed.  Applying the same
+pre-registered criterion used for slow and mid (last $L$ with one-sided
+$t$-test $p{<}0.05$, $n{=}32$), we obtain $\Lmax(\omega{=}2.5){=}45$
+($t{=}1.86$, $p{<}0.05$); $L{=}67$ falls below threshold
+($t{=}1.67$, $p{>}0.05$).  This gives $c{=}45/20{=}2.25$ —
+$7.5\times$ above the two-anchor value.  However, the $t$-profile is
+\emph{non-monotone}: after peaking at $L{=}1$ ($t{=}3.07$) it dips
+at $L{=}10$ ($t{=}1.91$), recovers at $L{=}20$ ($t{=}2.38$) and
+$L{=}30$ ($t{=}1.97$), then declines through $L{=}45$ ($t{=}1.86$)
+to $L{=}67$ ($t{=}1.67$).  A genuine sharp crossover — as at slow,
+where $\Dbar$ drops from $+0.94$ to $-0.38$ across a single $L$
+doubling — produces a monotone decline and a clear sign reversal; the
+$\omega{=}2.5$ profile shows neither.  The $\omega{=}2.5$ condition
+therefore \emph{cannot serve as a clean third anchor}: the stopping
+criterion delivers a technical $\Lmax{=}45$, but not a genuine sharp
+crossover.  \textbf{The headline $c \approx 0.30$
 continues to rest on the two interior anchor points (slow, mid).}
 We report it as a preliminary value; the $\omega{=}2.5$ result
 suggests that the true relationship may be more complex — in
 particular, that the crossover sharpness itself depends on $\omega$.
+
+An exploratory run at $\omega{=}2.0$ ($\Tcorr{=}25$, predicted
+$\Lmax\approx7.5$) with 32~seeds (window method) reveals a second
+broad-benefit anomaly: the one-sided $t$-test is significant at
+every $L$ in the grid, with $t$-statistics ranging from $t{=}5.57$
+at $L{=}1$ to a minimum of $t{=}1.93$ at $L{=}45$, and recovering
+to $t{=}2.07$ at $L{=}67$ ($p{<}0.05$ throughout).  The full-episode
+$L{=}67$ window remains beneficial, giving $\Lmax\geq67$
+($c\geq67/25{=}2.68$) — a lower bound.  Like $\omega{=}2.5$,
+this condition does not yield a genuine crossover and cannot serve
+as an anchor.
 
 \medskip
 \noindent\textbf{Crossover condition.}  Both clean interior anchors satisfy
@@ -624,12 +651,13 @@ particular, that the crossover sharpness itself depends on $\omega$.
 \]
 The memory window that preserves coordination benefit spans
 approximately $17^\circ$ of total field rotation.  The
-$\omega{=}2.5$ condition does not yield a reliable $\Lmax$
-estimate and is excluded from this calculation.
+$\omega{=}2.0$ and $\omega{=}2.5$ conditions do not yield
+reliable $\Lmax$ estimates and are excluded from this calculation.
 
-Figure~\ref{fig:scaling} plots $\Lmax$ versus $\Tcorr$ for the
-two clean interior anchors and the boundary very\_slow point
-($\omega{=}2.5$ is shown but excluded from the fit; see caption).
+Figure~\ref{fig:scaling} plots $\Lmax$ versus $\Tcorr$, including
+the two clean interior anchors, the boundary very\_slow point, and
+the three exploratory conditions ($\omega{\in}\{1.0,\,2.0,\,2.5\}$,
+all excluded from the fit; see caption).
 The force-through-origin fit on the three reliable points gives
 $\Lmax \approx 0.85\,\Tcorr$ ($R^2{=}0.80$), inflated by the
 boundary-censored very\_slow point; the two interior anchors alone
@@ -638,16 +666,17 @@ give $c{=}0.30$ exactly.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_scaling}
-\Description{Scatter plot of L-max versus T-corr with two fitted lines (pre-experiment c=1.0 dashed, empirical c=0.85 solid) and four data points: very-slow (open square at T=67, L=67), slow (filled circle at T=33, L=10), mid (filled circle at T=10, L=3), and omega=2.5 (open triangle at T=20, L-max ambiguous, shown for reference but excluded from the fit).}
+\Description{Scatter plot of L-max versus T-corr with two fitted lines and six data points. Filled circles at (T=33, L=10) and (T=10, L=3) are the two clean interior anchors. Open square at (T=67, L=67) is the boundary very-slow point. Open upward triangles at (T=20, L=45) and (T=25, L=67) are omega=2.5 and omega=2.0 (anomalously high L-max, excluded from fit). Open downward triangle at (T=50, L=1) is omega=1.0 (anomalously low L-max, excluded from fit).}
 \caption{$\Lmax$ (last significant $L$, window method) vs.\
 $\Tcorr = 1/(\omdt)$.  Filled circles: two clean interior anchors
-(slow, mid); square: very\_slow (boundary); triangle: $\omega{=}2.5$
-(shown for reference — no reliable $\Lmax$, excluded from fit).
-Dashed: $L{=}\Tcorr$ reference line (not a theoretical prediction — see text); solid:
-force-through-origin fit on three reliable points including
-boundary very\_slow ($c{=}0.85$, inflated by boundary censoring);
-the two interior anchors alone give $c{=}0.30$ exactly.
-fast ($\Tcorr{=}3$) has no reliable $\Lmax$ and is omitted.}
+(slow, mid) on the $c{=}0.30$ line; open square: very\_slow (boundary,
+consistent with $c{=}0.30$ but censored); open upward triangles:
+$\omega{=}2.5$ and $\omega{=}2.0$ (anomalously high $\Lmax$,
+excluded from fit); open downward triangle: $\omega{=}1.0$
+(anomalously low $\Lmax{=}1$, excluded from fit).
+Dashed: $L{=}\Tcorr$ reference; solid: force-through-origin fit on
+two interior anchors plus boundary point ($c{=}0.85$, inflated by
+censoring); dotted: $c{=}0.30$ through the two interior anchors.}
 \label{fig:scaling}
 \end{figure}
 
@@ -866,8 +895,16 @@ preliminary pattern, not a law: the borderline slow anchor
 ($p{=}0.049$) does not survive uniform Holm correction, and the
 supplementary $\omega{=}2.5$ condition does not conform to the
 $c{=}0.30$ prediction (Section~\ref{sec:lmax-scaling}).
-Additional, non-borderline anchors are needed before the
-scaling constant can be treated as reliable.
+Exploratory runs at $\omega{=}1.0$ ($\Tcorr{=}50$) and
+$\omega{=}2.0$ ($\Tcorr{=}25$) reveal anomalies in both
+directions.  At $\omega{=}1.0$, only $L{=}1$ is significant
+($t{=}2.68$; all $L{\geq}3$ non-significant, $t{<}0.5$),
+giving $c{=}0.02$ — far below $0.30$.  At $\omega{=}2.0$,
+all eight $L$ levels remain significant (min.\ $t{=}1.93$ at
+$L{=}45$), giving $c\geq2.68$ — far above $0.30$.
+The $c{=}0.30$ relationship holds only at the original two interior
+speeds ($\omega{\in}\{1.5,\,5.0\}$); whether it extends to other
+rotation speeds is not established.
 
 % ------------------------------------------------------------
 \section{Conclusion}
@@ -884,11 +921,15 @@ field rotation; the significance-based threshold takes the same
 value at one additional interior speed.
 The significance-based threshold is consistent with
 $\Lmax \approx c\,\Tcorr$, where $c$ ranges from $0.15$
-(Holm-corrected) to $0.30$ (uncorrected) across the two interior
-speeds; a boundary-censored very\_slow point is consistent but
-not conclusive; and a third tested speed did not reproduce a sharp
-crossover.  The constant $c$ is a preliminary point estimate, not
-a settled scaling law.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
+(Holm-corrected) to $0.30$ (uncorrected) at the two clean interior
+speeds ($\omega{\in}\{1.5,\,5.0\}$); a boundary-censored
+very\_slow point is consistent but not conclusive.
+Exploratory runs at two further speeds do not conform: $\omega{=}1.0$
+gives $\Lmax{=}1$ ($c{=}0.02$, anomalously low), and $\omega{=}2.0$
+keeps all $L$ levels significant through the full episode ($c{\geq}2.68$,
+anomalously high), as does $\omega{=}2.5$.
+The constant $c$ is a preliminary two-speed observation, not a
+universal scaling law.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
 a different functional form from the observed pattern,
 and the crossover occurs at lower $L$ than the theory predicts
 because the relevant threshold is not directional MSE parity but

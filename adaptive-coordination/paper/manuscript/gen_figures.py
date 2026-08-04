@@ -194,13 +194,24 @@ ax2.scatter([67], [67], color="#999999", marker="s", s=40,
 ax2.scatter([33, 10], [10, 3], color="#1A6FBF", marker="o", s=44,
             zorder=5, label="slow, mid (interior anchors)")
 
-# ω=2.5: shown as open triangle — no reliable L_max, excluded from fit
-# Shown at T_corr=20 with an arrow indicating "ambiguous ↑" direction
+# ω=2.5: open upward triangle — anomalously high L_max, excluded from fit
 ax2.scatter([20], [45], color="#888888", marker="^", s=36,
             facecolors="white", edgecolors="#888888", lw=1.0,
-            zorder=5, label=r"$\omega{=}2.5$ (no reliable $L_{\max}$)")
+            zorder=5, label=r"$\omega{=}2.5,\,2.0$ (anomalously high $L_{\max}$)")
 ax2.annotate("", xy=(20, 50), xytext=(20, 46),
              arrowprops=dict(arrowstyle="->", color="#888888", lw=0.8))
+
+# ω=2.0: open upward triangle — L_max ≥ 67 (all L significant), excluded from fit
+ax2.scatter([25], [67], color="#888888", marker="^", s=36,
+            facecolors="white", edgecolors="#888888", lw=1.0,
+            zorder=5)
+ax2.annotate("", xy=(25, 73), xytext=(25, 68),
+             arrowprops=dict(arrowstyle="->", color="#888888", lw=0.8))
+
+# ω=1.0: open downward triangle — anomalously low L_max=1, excluded from fit
+ax2.scatter([50], [1], color="#C45E00", marker="v", s=36,
+            facecolors="white", edgecolors="#C45E00", lw=1.0,
+            zorder=5, label=r"$\omega{=}1.0$ (anomalously low $L_{\max}{=}1$)")
 
 # Labels on data points
 for tx, ly, lbl in zip(t_corr_pts, lmax_pts,
@@ -212,6 +223,10 @@ for tx, ly, lbl in zip(t_corr_pts, lmax_pts,
                  fontsize=6.5, color="#333333", ha="center")
 ax2.annotate(r"$\omega{=}2.5$", (20, 45),
              xytext=(22, 43), fontsize=6.5, color="#888888", ha="left")
+ax2.annotate(r"$\omega{=}2.0$", (25, 67),
+             xytext=(27, 65), fontsize=6.5, color="#888888", ha="left")
+ax2.annotate(r"$\omega{=}1.0$", (50, 1),
+             xytext=(52, -1), fontsize=6.5, color="#C45E00", ha="left")
 
 # 0.30 annotation — label the interior-anchor dotted line
 ax2.text(60, c_interior * 60 + 2, r"$c{=}0.30$",
@@ -220,8 +235,8 @@ ax2.text(60, c_interior * 60 + 2, r"$c{=}0.30$",
 ax2.set_xlabel(r"$T_{\rm corr} = 1/(\omega\cdot dt)$, one-radian decorr.\ timescale (steps)")
 ax2.set_ylabel(r"$L_{\max}$ (steps)")
 ax2.set_xlim(-2, 75)
-ax2.set_ylim(-3, 75)
-ax2.set_xticks([0, 10, 20, 33, 45, 67])
+ax2.set_ylim(-5, 75)
+ax2.set_xticks([0, 10, 20, 33, 50, 67])
 ax2.set_yticks([0, 10, 20, 33, 45, 67])
 ax2.yaxis.grid(True)
 ax2.set_axisbelow(True)
