@@ -645,6 +645,58 @@ this condition does not yield a genuine crossover and cannot serve
 as an anchor.
 
 \medskip
+\noindent\textbf{Episode-rotation regime and sinc attenuation.}
+A unified account of the anomalous conditions emerges from the
+sinc-attenuation factor derived in Appendix~\ref{app:theory}:
+at each $L$, the shared arm's direction estimate is amplitude-scaled
+by $\mathrm{sinc}(\omega L\,dt/2)$.
+At the two clean interior anchors, $\Lmax$ coincides with
+$\omega\Lmax dt/2 = 0.15\;\text{rad}$, giving
+$\mathrm{sinc} \approx 0.996$ — negligible attenuation,
+so the ``confident-wrong-direction'' mechanism operates at
+essentially full signal strength at the crossover.
+
+For $\omega{\in}\{2.0, 2.5\}$ the picture is different.
+At $L{=}45$ the sinc factor is $0.87$ ($\omega{=}2.0$)
+and $0.80$ ($\omega{=}2.5$); at $L{=}67$ it falls to
+$0.73$ and $0.59$ respectively.
+This amplitude attenuation weakens the mechanism throughout
+the upper $L$ range: both the beneficial noise-reduction effect
+and the harmful stale-direction effect are scaled down together,
+so the net coordination benefit degrades gradually rather than
+collapsing sharply.
+We hypothesise that this sinc-regime effect suppresses the sharp
+crossover, explaining the anomalously high $\Lmax$ for these conditions.
+The episode total-rotation figures — $\omega H\,dt = 2.68$ and
+$3.35\;\text{rad}$ — place both conditions in an intermediate regime
+where sinc attenuation is substantial across the entire tested $L$ range.
+
+The $\omega{=}1.0$ anomaly does not fit the sinc story:
+$\mathrm{sinc} \approx 0.999$ at $L{=}3$ (where benefit collapses),
+and $0.927$ at $L{=}H$ — both mild.
+The elevated per-seed SD at $\omega{=}1.0$
+(${\approx}3.8$ particles vs.\ $3.2$ at slow) and the
+positive-but-underpowered benefit at $L{\geq}3$ ($\Dbar{=}{+}0.28$,
+$n{=}32$) are consistent with high seed-to-seed variability driven by
+the episode spanning $\omega H\,dt{=}1.34\;\text{rad}$: enough
+rotation that the episode-level outcome depends strongly on the
+initial field angle $\theta(0)$.  Whether $\Lmax{=}1$ is a genuine
+mechanistic threshold or a power artefact is not resolved at $n{=}32$.
+
+These observations suggest that $\omega H\,dt$ — the total field
+rotation per episode — is a meaningful regime variable for the
+clean-crossover condition.
+Both confirmed clean anchors (slow: $\omega H\,dt{=}2.01\;\text{rad}$;
+mid: $6.70\;\text{rad}$) have their $\Lmax$ in the
+sinc-negligible regime ($\omega\Lmax dt/2 = 0.15\;\text{rad}$).
+The anomalous conditions are those where sinc attenuation pervades
+the tested $L$ range or where episode-level variance is inflated.
+Varying $H$ at fixed $\omega$ would directly test whether a
+sharp crossover re-emerges when the grid can access
+$\omega\Lmax dt \approx 0.30\;\text{rad}$
+without encountering substantial sinc attenuation.
+
+\medskip
 \noindent\textbf{Crossover condition.}  Both clean interior anchors satisfy
 \[
   \omega \cdot \Lmax \cdot dt = 0.30\;\text{rad}.
@@ -868,6 +920,33 @@ consistent constant. The pre-registered criterion
 $c \approx 0.30$ claim; this sensitivity should be viewed as
 motivation for validation at additional rotation speeds with
 non-borderline $\Lmax$ values rather than adding seeds post-hoc.
+Concretely: at $n{=}32$ and the observed effect ($\Dbar{=}{+}0.94$,
+SD~3.20, $d{\approx}0.29$), post-hoc power for the one-sided
+$t$-test is $\approx 50\%$ — below the 80\% design target, which
+assumed $|\Dbar| \geq 0.90$ with SD~2.5.  The one-sided 95\% lower
+confidence bound is $\Dbar - t_{0.05,31}\cdot\mathrm{SE}
+\approx 0.94 - 1.70{\times}0.57 \approx {-}0.03$ particles:
+consistent with zero.  This does not invalidate the pre-registered
+result, but it means the anchor identifies a \emph{direction} of
+effect at this $L$, not a precise effect magnitude.
+
+\paragraph{The anomaly cluster as a second open problem.}
+The three non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5\}$) are not
+random scatter: their $c$ values span from $0.02$ (anomalously low) to
+$\geq 2.68$ (anomalously high), flanking the two clean anchors at $c{=}0.30$.
+Section~\ref{sec:lmax-scaling} proposes a sinc-regime account for
+$\omega{\in}\{2.0, 2.5\}$: these conditions have significant amplitude
+attenuation ($\mathrm{sinc} \in [0.59, 0.87]$) across all tested $L$,
+which weakens the ``confident-wrong-direction'' mechanism and suppresses
+the sharp crossover.
+If the total episode rotation $\omega H\,dt$ is the relevant regime variable,
+then the clean $\Lmax \propto \Tcorr$ scaling may hold only within a
+specific range of $\omega H\,dt$, and the apparent universality of
+$c \approx 0.30$ across two interior speeds may reflect that both happen
+to lie in this range.  This reframes the anomalies from a weakness of the
+two-anchor result into the paper's central open question:
+\emph{what determines whether a given $(\omega, H)$ pair
+produces a sharp coordination crossover?}
 
 \paragraph{Generality and functional dependence of $c$.}
 The $c \approx 0.30$ constant is specific to
@@ -904,19 +983,20 @@ arguments for the scaling are given in Section~\ref{sec:discussion}
 but require a systematic parameter sweep to validate.
 (vi)~The two-anchor result ($\Tcorr \in \{33,10\}$) is a
 preliminary pattern, not a law: the borderline slow anchor
-($p{=}0.049$) does not survive uniform Holm correction, and the
-supplementary $\omega{=}2.5$ condition does not conform to the
-$c{=}0.30$ prediction (Section~\ref{sec:lmax-scaling}).
-Exploratory runs at $\omega{=}1.0$ ($\Tcorr{=}50$) and
-$\omega{=}2.0$ ($\Tcorr{=}25$) reveal anomalies in both
-directions.  At $\omega{=}1.0$, only $L{=}1$ is significant
-($t{=}2.68$; all $L{\geq}3$ non-significant, $t{<}0.5$),
-giving $c{=}0.02$ — far below $0.30$.  At $\omega{=}2.0$,
-all eight $L$ levels remain significant (min.\ $t{=}1.93$ at
-$L{=}45$), giving $c\geq2.68$ — far above $0.30$.
-The $c{=}0.30$ relationship holds only at the original two interior
-speeds ($\omega{\in}\{1.5,\,5.0\}$); whether it extends to other
-rotation speeds is not established.
+($p{=}0.049$) does not survive uniform Holm correction, and three
+exploratory speeds do not conform to $c{=}0.30$
+(Section~\ref{sec:lmax-scaling}).
+A sinc-regime hypothesis for $\omega{\in}\{2.0, 2.5\}$ is developed
+in Sec.~\ref{sec:lmax-scaling}: amplitude attenuation
+($\mathrm{sinc} \in [0.59, 0.87]$ at large $L$) may suppress the
+sharp crossover, making these conditions structurally different from
+the clean interior anchors rather than contradicting them.
+The $\omega{=}1.0$ anomaly is not explained by sinc attenuation and
+may reflect a power limitation ($n{=}32$ is underpowered for the
+observed effect size at $L{\geq}3$) or a different episode-level
+interaction.  Whether $c{=}0.30$ holds at additional clean interior
+speeds is the central open question (see also the anomaly-cluster
+discussion in Sec.~\ref{sec:discussion}).
 
 % ------------------------------------------------------------
 \section{Conclusion}
@@ -936,12 +1016,18 @@ $\Lmax \approx c\,\Tcorr$, where $c$ ranges from $0.15$
 (Holm-corrected) to $0.30$ (uncorrected) at the two clean interior
 speeds ($\omega{\in}\{1.5,\,5.0\}$); a boundary-censored
 very\_slow point is consistent but not conclusive.
-Exploratory runs at two further speeds do not conform: $\omega{=}1.0$
-gives $\Lmax{=}1$ ($c{=}0.02$, anomalously low), and $\omega{=}2.0$
-keeps all $L$ levels significant through the full episode ($c{\geq}2.68$,
-anomalously high), as does $\omega{=}2.5$.
-The constant $c$ is a preliminary two-speed observation, not a
-universal scaling law.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
+Exploratory runs at three further speeds do not conform.
+For $\omega{\in}\{2.0, 2.5\}$ (anomalously high $\Lmax$), a sinc-regime
+hypothesis offers a partial account: amplitude attenuation
+($\mathrm{sinc}{\in}[0.59, 0.87]$ at large $L$) weakens the
+``confident-wrong-direction'' mechanism throughout the tested $L$ grid,
+suppressing the sharp crossover.
+For $\omega{=}1.0$ ($\Lmax{=}1$, anomalously low),
+the cause is not resolved but may involve power
+limitations or episode-level variance inflation.
+The constant $c$ is a preliminary two-speed observation;
+the anomaly cluster raises the question of what determines whether
+a given $(\omega, H)$ pair produces a sharp crossover at all.  The bias/noise-parity theory predicts $L^* \propto (\omega\,dt)^{-2/3}$,
 a different functional form from the observed pattern,
 and the crossover occurs at lower $L$ than the theory predicts
 because the relevant threshold is not directional MSE parity but
