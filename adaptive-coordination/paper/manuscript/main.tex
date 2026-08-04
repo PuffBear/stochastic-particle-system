@@ -753,6 +753,14 @@ heavily), but the smooth weighting also concentrates signal near
 the present.  The two effects partially offset each other in a
 $L$-dependent and $\omega$-dependent way that resists a simple
 scaling prediction.
+Importantly, the stale-coordination failure mechanism is not
+specific to the window controller: for slow, the decay controller's
+$\Dbar$ also turns negative beyond $\Lmax$
+($\Dbar \in [-0.19, -0.34]$ at $L \in \{20, 30, 45\}$, $n{=}32$),
+confirming that shared confidence in a stale direction eliminates
+coverage diversity under exponential weighting as well.
+The irregular $\Lmax/\Tcorr$ ratio reflects an unpredictable
+\emph{threshold}, not an absent mechanism.
 
 \textbf{Practical observation:} At the two interior speeds studied,
 the sliding-window controller gives a $\Lmax \propto \Tcorr$
@@ -835,8 +843,12 @@ the decay controller shows no consistent $\Lmax/\Tcorr$ ratio.
 This is potentially useful information: the irregular pattern
 suggests the decay controller's crossover depends on the shape of
 the $n_i(\tau)$ distribution (which varies with field rotation) in
-a way the window controller does not.  A detailed analysis of this
-interaction is left for future work.
+a way the window controller does not.
+The irregular ratio does not undermine the mechanism's generality:
+the benefit reversal occurs in both controllers
+(Sec.~\ref{sec:window-vs-decay}); what the decay controller lacks
+is a predictable failure threshold.
+A detailed analysis of this interaction is left for future work.
 
 \paragraph{Anchor robustness.}
 The slow anchor ($\Dbar{=}{+}0.94$, $p{=}0.049$) is borderline:
