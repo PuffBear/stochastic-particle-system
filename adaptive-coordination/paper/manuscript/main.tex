@@ -84,7 +84,7 @@ collectors confidently toward a systematically wrong direction,
 eliminating the coverage diversity that makes coordination
 beneficial.  The coordination benefit landscape under rotation is
 \emph{regime-dependent}: a linear-rotation regime
-($\omega\Lmax dt \approx 0.30\;\mathrm{rad}$, sinc attenuation
+($\Lmax/\Tcorr \approx 0.30$, sinc attenuation
 negligible) exhibits a clean significance-based crossover at
 $\Lmax \approx 0.30\,\Tcorr$ at two interior speeds; a
 sinc-attenuation regime ($\omega{\in}\{2.0,\,2.5,\,3.0\}$) dampens
@@ -161,8 +161,10 @@ the pre-registered significance-based threshold satisfies
   \Tcorr = \frac{1}{\omdt},
 \]
 where $\Tcorr$ is the one-radian decorrelation timescale.
-At these two speeds the window spans $\approx 0.30\;\mathrm{rad}$
-of total field rotation at the threshold — the
+At these two speeds the empirical ratio $\Lmax/\Tcorr = 0.30$
+holds exactly; the window spans $0.27\;\text{rad}$ (slow) and
+$0.20\;\text{rad}$ (mid) of total field rotation at the threshold
+under the corrected $(L{-}1)$ lag formula — the
 \emph{linear-rotation regime} where sinc attenuation is negligible
 and the midpoint-lag approximation holds.
 Other tested speeds fall into qualitatively different regimes
@@ -177,7 +179,7 @@ at $L{=}20$ for $\omega{=}1.5\;\text{rad/step}$).
 \medskip\noindent\textbf{Why memory eventually hurts.}
 The mechanism is not a degradation of each agent's individual
 directional accuracy. Both arms accumulate the same angular lag
-($\omega \cdot L \cdot dt/2$ radians at window midpoint); the
+($\omega \cdot (L{-}1) \cdot dt/2$ radians at window midpoint); the
 shared arm merely reduces angular \emph{noise} while leaving
 the bias unchanged. Once the window spans enough rotation, the
 shared arm drives all $M$ collectors confidently toward the
@@ -338,9 +340,9 @@ in SNR, coordination would help at every $L$ — yet $\Dbar$ goes
 negative at large $L$.  The model misses a crucial asymmetry:
 \emph{sharing reduces angular noise but not angular bias}.
 
-Define the angular bias (midpoint lag of the window),
+Define the angular bias (lag to the window midpoint),
 \[
-  \angbias(L,\omega) = \frac{\omega \cdot L \cdot dt}{2}
+  \angbias(L,\omega) = \frac{\omega \cdot (L-1) \cdot dt}{2}
     \quad \text{(radians)},
 \]
 and the angular noise of the shared arm,
@@ -380,12 +382,12 @@ at lower $L$ than the directional-MSE model predicts.}
 \setlength\tabcolsep{5pt}
 \begin{tabular}{lrrrr}
 \toprule
-$\omega\;(\Tcorr)$ & $L$ & $\omega L\,dt$ & $\angbias$ & $\angbias/\sigma_{\theta,\mathrm{shared}}$\\
+$\omega\;(\Tcorr)$ & $L$ & $\omega(L{-}1)dt$ & $\angbias$ & $\angbias/\sigma_{\theta,\mathrm{shared}}$\\
 \midrule
-$1.5\;(33)$ & 10 (=$\Lmax$) & 0.30 rad & 0.15 rad & 0.38 \\
-$1.5\;(33)$ & 20            & 0.60 rad & 0.30 rad & 1.07 \\
-$5.0\;(10)$ &  3 (=$\Lmax$) & 0.30 rad & 0.15 rad & 0.21 \\
-$5.0\;(10)$ & 10            & 1.00 rad & 0.50 rad & 1.26 \\
+$1.5\;(33)$ & 10 (=$\Lmax$) & 0.27 rad & 0.135 rad & 0.34 \\
+$1.5\;(33)$ & 20            & 0.57 rad & 0.285 rad & 1.02 \\
+$5.0\;(10)$ &  3 (=$\Lmax$) & 0.20 rad & 0.100 rad & 0.14 \\
+$5.0\;(10)$ & 10            & 0.90 rad & 0.450 rad & 1.14 \\
 \bottomrule
 \end{tabular}
 {\small ($\alpha{=}0.06,\;\sigma{=}0.06,\;M{=}4,\;\bar{K}{\approx}8,\;dt{=}0.02$)}
@@ -393,7 +395,7 @@ $5.0\;(10)$ & 10            & 1.00 rad & 0.50 rad & 1.26 \\
 
 \medskip
 \noindent\textbf{Regime structure of the window estimate.}
-The midpoint-lag formula $\hat\theta = \theta(t) - \omega L\,dt/2$
+The midpoint-lag formula $\hat\theta = \theta(t) - \omega(L{-}1)\,dt/2$
 (and the bias/noise analysis above) is valid only when
 $\omega L\,dt \ll 1$, i.e.\ when the window spans a small total
 rotation.  Beyond this linear-rotation regime, the window estimate
@@ -611,9 +613,21 @@ window method) per rotation speed and the ratio $\Lmax/\Tcorr$.
 An alternative operationalisation is the zero-crossing $L^*$
 where $\Dbar$ first turns negative: for slow, $L^* \in (10, 20)$
 (sign change between adjacent grid values); for mid, $L^* \in (30, 45)$.
-The significance-based $\Lmax$ and the zero-crossing $L^*$
-bracket the true crossover from different directions; we use $\Lmax$
-throughout as the pre-registered quantity.
+At slow, $\Lmax$ and $L^*$ approximately agree (both locate the crossover
+near $L{=}10$--$20$): the significance threshold and the zero-crossing
+are close, consistent with a genuine coordination-collapse boundary
+in that range.
+At mid, however, $\Lmax{=}3$ while $L^*{\in}(30, 45)$ —
+a tenfold gap.  $\Dbar$ remains positive at $+0.22$ through $L{=}30$
+and only turns negative at $L{=}45$; $\Lmax{=}3$ therefore marks
+\emph{loss of statistical detectability} rather than a coordination-collapse
+boundary.  Under the zero-crossing operationalisation, mid gives
+$c^* \in (3.0, 4.5)$ — an order of magnitude above the significance-based
+$c{=}0.30$.  The $c{=}0.30$ result is therefore primarily anchored on
+the slow condition where the two operationalisations agree; mid corroborates
+the $1/\Tcorr$ scaling pattern for $\Lmax$ but measures a different
+crossover quantity at the same $\Lmax$ value.  The significance-based
+$\Lmax$ is used throughout as the pre-registered quantity.
 
 \begin{table}[b]
 \centering
@@ -813,11 +827,17 @@ without encountering substantial sinc attenuation.
 \medskip
 \noindent\textbf{Crossover condition.}  Both clean interior anchors satisfy
 \[
-  \omega \cdot \Lmax \cdot dt = 0.30\;\text{rad}.
+  \Lmax / \Tcorr = 0.30 \quad (\text{equivalently, } \omega \cdot \Lmax \cdot dt = 0.30\;\text{rad}).
 \]
-The memory window that preserves coordination benefit spans
-approximately $17^\circ$ of total field rotation.  The
-$\omega{=}2.0$ and $\omega{=}2.5$ conditions do not yield
+Under the corrected angular-lag formula $\angbias = \omega(L{-}1)dt/2$, the
+direction lag at $\Lmax$ is $0.135\;\text{rad}$ (slow) and $0.100\;\text{rad}$
+(mid) — approximately but not identically consistent.
+The total angular span of the window ($\omega(\Lmax{-}1)dt$) is
+$0.27\;\text{rad}$ (slow) and $0.20\;\text{rad}$ (mid): the previously
+reported ``$17^\circ$'' was an artefact of using $\omega\Lmax dt$ rather
+than $\omega(\Lmax{-}1)dt$ for the window span.
+The $\Lmax/\Tcorr{=}0.30$ ratio remains the correct empirical summary.
+The $\omega{=}2.0$ and $\omega{=}2.5$ conditions do not yield
 reliable $\Lmax$ estimates and are excluded from this calculation.
 
 Figure~\ref{fig:scaling} plots $\Lmax$ versus $\Tcorr$, including
@@ -852,10 +872,21 @@ Figure~\ref{fig:crossover} shows $\Dbar$ versus $L$ for slow
 and mid with 95\% confidence intervals.  For slow, the transition
 from $\Dbar = +0.94$ at $L{=}10$ ($p{=}0.049$) to $-0.38$ at
 $L{=}20$ ($p{=}0.79$) is sharp: doubling the window destroys
-$>1.3$ particles of coordination benefit.  For mid, the drop is
-softer: $\Dbar$ falls from $+0.91$ ($L{=}3$) to $+0.22$ at
-$L{=}5$ (NS) and does not turn strongly negative until $L{=}45$
-($\Dbar{=}{-}0.25$).
+$>1.3$ particles of coordination benefit.  The significance-based
+$\Lmax{=}10$ and the zero-crossing $L^*{\in}(10, 20)$ both locate
+the crossover in the same L-interval, making slow a genuine
+coordination-collapse boundary.
+
+For mid, the character is qualitatively different.  $\Dbar$ falls
+from $+0.91$ ($L{=}3$, the last significant cell) to $+0.22$ at
+$L{=}5$ (NS), but it remains positive through $L{=}30$
+($\Dbar{=}{+}0.22$) and does not turn negative until $L{\in}(30, 45)$.
+$\Lmax{=}3$ therefore identifies where the signal becomes undetectable
+at $n{=}32$, not where the underlying benefit reverses.
+The coordination benefit shrinks gradually (rather than collapsing) as
+$L$ grows, consistent with a low-SNR regime where $n{=}32$ is insufficient
+to resolve the crossover: post-hoc power for the $L{=}5$ cell
+($\Dbar{=}{+}0.22$, SD${\approx}2.5$, $d{\approx}0.09$) is below 15\%.
 
 \begin{figure}[t]
 \centering
@@ -874,32 +905,38 @@ $-0.38$ at $L{=}20$, a swing of ${>}1.3$ particles.}
 \subsection{Pooled coordination benefit across $L$ levels}
 
 Table~\ref{tab:pooled} reports $\Dbar$ pooled across all $L$
-levels per $(\omega, \text{method})$.  The window method shows
-significant pooled benefit at all $\omega \leq \text{mid}$
-($p \leq 0.013$) and marginal benefit at fast ($p{=}0.099$).
-The Q3 hypothesis (monotone decrease with $\omega$) is not
+levels per $\omega$ (window method, seed-level aggregation: for each
+seed, $\Dbar_s$ is the mean $\Delta$ across all $L$ levels; the
+$t$-test runs on 32 seed means).  The prior version of this table
+treated seed-$L$ pairs as independent (inflating $n$ to 256--512);
+the corrected $n{=}32$ uses clustered SEs.  Only the stationary
+condition achieves $p{<}0.05$; the non-stationary conditions are
+directionally consistent but individually underpowered at the pooled
+level.  The Q3 hypothesis (monotone decrease with $\omega$) is not
 supported: pooled $\Dbar$ is non-monotone ($0.74, 0.45, 0.50,
-0.34, 0.22$ for stationary through fast).  The team benefit does
-not degrade monotonically because the pooled estimate averages
-short-$L$ cells (where benefit is robust) with long-$L$ cells
-(where it degrades); the degradation is $L$-conditional, not
-pooled.
+0.34, 0.22$ for stationary through fast).  This is expected because
+pooling over all $L$ averages short-$L$ cells (where benefit is
+robust) with long-$L$ cells (where it degrades); the degradation
+is $L$-conditional, not pooled.
 
 \begin{table}[t]
 \centering
 \caption{Pooled $\Dbar$ across all $L$ levels, window method.
-         $p$-values are one-sided; $n$ is total seed-$L$ pairs.}
+         $n{=}32$ seeds per $\omega$; $\Dbar$ is the mean over
+         per-seed $L$-averages; $p$-values are one-sided.
+         Earlier version used $n{=}$seed-$L$ pairs (256--512),
+         inflating precision; corrected here.}
 \label{tab:pooled}
 \setlength\tabcolsep{4pt}
 \begin{tabular}{lrrrr}
 \toprule
 $\omega\;(\Tcorr)$ & $n$ & $\Dbar$ & SE & $p$ \\
 \midrule
-$0\;(\infty)$   & 512 & $+0.742$ & 0.117 & $<0.001$ \\
-$0.75\;(67)$    & 256 & $+0.453$ & 0.175 & $0.005$ \\
-$1.5\;(33)$     & 256 & $+0.500$ & 0.191 & $0.005$ \\
-$5.0\;(10)$     & 256 & $+0.344$ & 0.155 & $0.013$ \\
-$17.0\;(3)$     & 256 & $+0.215$ & 0.167 & $0.099$ \\
+$0\;(\infty)$   & 32 & $+0.742$ & 0.325 & $0.015$ \\
+$0.75\;(67)$    & 32 & $+0.453$ & 0.352 & $0.104$ \\
+$1.5\;(33)$     & 32 & $+0.500$ & 0.353 & $0.084$ \\
+$5.0\;(10)$     & 32 & $+0.344$ & 0.277 & $0.112$ \\
+$17.0\;(3)$     & 32 & $+0.215$ & 0.296 & $0.237$ \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1082,7 +1119,7 @@ the angular noise of the shared arm scales as
 $\sigma_{\theta,\mathrm{shared}} \propto \sigma/(\alpha\sqrt{M\bar{K}L\,dt})$,
 so larger $\alpha/\sigma$ or larger $M$ reduces noise and allows
 the shared arm to remain beneficial to a longer lag before
-coverage loss dominates.  This implies $c$ is a decreasing
+coverage loss dominates.  This implies $c$ is an increasing
 function of $\alpha/\sigma$ and (weakly) of $M$ — larger or
 stronger teams tolerate more staleness.  We hypothesise that the scaling
 $\Lmax \propto \Tcorr$ extends to other memory-based cooperative
@@ -1108,9 +1145,15 @@ these parameters is not established here; back-of-envelope
 arguments for the scaling are given in Section~\ref{sec:discussion}
 but require a systematic parameter sweep to validate.
 (vi)~The $c \approx 0.30$ result holds within the linear-rotation
-regime ($\omega\Lmax dt \approx 0.30\;\text{rad}$) and is
-confirmed at two interior speeds; the borderline slow anchor
-($p{=}0.049$) does not survive uniform Holm correction.
+regime ($\Lmax/\Tcorr \approx 0.30$) and is the significance-based
+threshold at two interior speeds.  The slow anchor ($p{=}0.049$)
+does not survive uniform Holm correction, and the $n{=}64$
+sensitivity analysis confirms the anchor after effect shrinkage.
+The slow condition exhibits a genuine sign reversal ($\Lmax \approx L^*$);
+the mid condition's $\Lmax{=}3$ marks statistical detectability rather
+than coordination collapse ($L^*{\in}(30, 45)$).
+The quantitative constant $c{\approx}0.30$ is primarily anchored on
+the slow condition, where the two operationalisations agree.
 Four tested speeds fall into three other regimes (sinc-attenuation,
 rapid-rotation, long-episode; see Sec.~\ref{sec:lmax-scaling}), each
 with its own account of why a sharp crossover does not appear.
@@ -1254,14 +1297,18 @@ length irrelevant; it is \emph{not} the gate cell.
 \label{app:theory}
 
 At step $t$, the window estimate $\hat{v}(t, L)$
-(Equation~\ref{eq:window}) has expected direction
-$\hat{\theta} = \theta(t) - \omega L\,dt/2$ (lag of window
-midpoint) and sinc-attenuated magnitude
-$\alpha\,\mathrm{sinc}(\omega L\,dt/2)$.
-The direction formula $\hat{\theta} = \theta(t) - \omega L\,dt/2$
-and the sinc-attenuation approximation are valid only while the sinc
-factor is positive, i.e.\ $\omega L\,dt/2 < \pi$ (equivalently
-$L < \pi/(\omega\,dt)$).
+(Equation~\ref{eq:window}) is the mean of $L$ observations at steps
+$t, t{-}1, \ldots, t{-}L{+}1$.  Its expected direction is
+$\hat{\theta} = \theta(t) - \omega(L{-}1)\,dt/2$ (lag to the window
+midpoint) and its sinc-attenuated magnitude is
+$\alpha\,\mathrm{sinc}(\omega L\,dt/2)$ (the geometric-sum amplitude).
+Note that the direction lag uses $(L{-}1)$ (the span from the oldest
+to the newest observation) while the sinc argument uses $L$
+(both $\sin(L\omega dt/2)$ and the denominator $L$ arise from the
+geometric sum, not the midpoint approximation).
+The direction formula and the sinc-attenuation approximation are valid
+only while the sinc factor is positive, i.e.\ $\omega L\,dt/2 < \pi$
+(equivalently $L < \pi/(\omega\,dt)$).
 In the crossover region (cells at or below $\Lmax$,
 where $\omega L\,dt \leq 0.30\;\text{rad}$) the
 argument is at most $0.15\;\text{rad}$, giving
@@ -1277,7 +1324,7 @@ here about the large-$L$ regime; it is outside the scope of this
 analysis, and those cells are empirically in the degraded region
 ($\Dbar \leq 0$).
 The dominant factor in the crossover region is the angular lag
-$\angbias = \omega L\,dt/2$.
+$\angbias = \omega(L{-}1)\,dt/2$.
 
 The SNR of the direction estimate for $M$ agents is approximately
 \[
