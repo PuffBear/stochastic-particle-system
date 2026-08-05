@@ -88,15 +88,17 @@ runs show the mechanism's predicted directional signatures: an observed
 minimum in shared-arm angular error at $\Lmax$ (adjacent-comparison
 $t{=}3.76$ at both speeds), and inter-agent angular dispersion
 structurally zero in the shared arm and non-zero in the independent arm.  The coordination benefit landscape under rotation is
-\emph{regime-dependent}: a linear-rotation regime
+\emph{regime-dependent}: qualitatively different outcomes arise at
+different rotation speeds.  Four regimes emerge from this study.
+A \emph{linear-rotation regime}
 ($\Lmax/\Tcorr \approx 0.30$, sinc attenuation
 negligible) exhibits a clean significance-based crossover at
 $\Lmax \approx 0.30\,\Tcorr$ at two interior speeds; a
-sinc-attenuation regime ($\omega{\in}\{2.0,\,2.5,\,3.0\}$) dampens
+\emph{sinc-attenuation regime} ($\omega{\in}\{2.0,\,2.5,\,3.0\}$) dampens
 the estimate amplitude across the tested $L$ range, suppressing the
-sharp crossover; a rapid-rotation regime ($\omega{=}10.0$)
+sharp crossover; a \emph{rapid-rotation regime} ($\omega{=}10.0$)
 drives the predicted $\Lmax$ below integer resolution; and a
-long-episode regime ($\omega{=}1.0$, $\Tcorr{\approx}H$) exhibits
+\emph{long-episode regime} ($\omega{=}1.0$, $\Tcorr{\approx}H$) exhibits
 an unexplained mechanism — raising the question of what governs
 which regime a given $(\omega, H)$ pair falls into.
 \end{abstract}
@@ -165,7 +167,10 @@ the pre-registered significance-based threshold satisfies
   \Lmax(\omega) / \Tcorr \approx 0.30, \quad
   \Tcorr = \frac{1}{\omdt},
 \]
-where $\Tcorr$ is the one-radian decorrelation timescale.
+where $\Tcorr$ is the one-radian decorrelation timescale,
+and $\Lmax$ is the significance-based threshold
+(Section~\ref{sec:threshold-defs}; two related thresholds, $L^*$
+and the coordination-collapse boundary, are defined there).
 At these two speeds the empirical ratio $\Lmax/\Tcorr = 0.30$
 holds exactly; the window spans $0.27\;\text{rad}$ (slow) and
 $0.20\;\text{rad}$ (mid) of total field rotation at the threshold
@@ -298,9 +303,19 @@ The estimand is
 the seed-level difference in unique captures between the
 \emph{shared} arm (all agents receive the team mean-velocity
 summary) and the \emph{independent} arm (agents use only their
-own local observations).  Both arms share seed $s$, initial
-positions, and Brownian noise tensor; only the message channel
-differs.
+own local observations).
+
+\paragraph{Matched counterfactual coupling.}
+Both arms run from the \emph{identical} pre-generated noise tensor
+$W_s \in \mathbb{R}^{H \times N \times 2}$, initial particle
+positions $X_s^0$, initial collector positions $C_s^0$, and
+deterministic field sequence $\theta_s(t)$; only the message
+channel differs.  This event-keyed coupling~\citep{buffalo2026ekhash}
+ensures that $\Delta_s$ is a within-seed contrast: the stochastic
+environment is held constant while communication alone varies.
+Equation~\eqref{eq:window} is evaluated over the shared team
+history (shared arm) or each agent's own history (independent arm);
+all other aspects of the simulation are identical.
 
 \subsection{Rotating-field model}
 
@@ -320,6 +335,26 @@ first drops to $\cos(1) \approx 0.54$—is a natural staleness timescale:
 Note the $dt$ factor: it is the \emph{per-step} rotation
 $\omdt$, not the rate $\omega$ itself, that determines how
 quickly observations become stale.
+
+\paragraph{Threshold definitions.}
+\label{sec:threshold-defs}
+Three distinct $L$-based thresholds appear in the results;
+they coincide only under specific conditions:
+\begin{itemize}[noitemsep,topsep=2pt]
+  \item \emph{Significance threshold} ($\Lmax$): the largest $L$
+        at which the pre-registered one-sided $t$-test gives $p{<}0.05$.
+        This is a statistical-detectability threshold,
+        not a behavioural reversal.
+  \item \emph{Zero-crossing threshold} ($L^*$): the value of $L$ at
+        which $\mathbb{E}[\Delta]$ changes sign, estimated by
+        interpolation between adjacent grid points.
+  \item \emph{Coordination-collapse boundary}: the $L$ at which the
+        expected captures under the shared arm fall below the
+        independent arm — equivalent to the zero-crossing.  We use
+        this phrase only when $\Lmax \approx L^*$, i.e.\ when the
+        significance threshold and the sign reversal are in the same
+        $L$-interval.
+\end{itemize}
 
 \subsection{Memory controllers}
 
@@ -342,21 +377,22 @@ At $L{=}H$ this reduces to the full-episode SPS-C03 controller.
 The estimated velocity $\hat{v}$ is converted to a movement
 command by the capacity-matching blend:
 \begin{equation}
-  a_m = \mathrm{unit}\!\bigl(\beta_t\,\hat{f} + (1-\beta_t)\,\hat{d}_m\bigr),
+  a_m = \mathrm{unit}\!\bigl(w_t\,\hat{f} + (1-w_t)\,\hat{d}_m\bigr),
   \qquad
   \hat{f} = -\mathrm{unit}(\hat{v}),
   \label{eq:action}
 \end{equation}
 where $\hat{d}_m = \mathrm{unit}(\bar{p}_m)$ is the unit vector toward
 agent $m$'s local particle centroid, $\bar{p}_m$ is the mean relative
-position of visible particles, and the blend weight
-$\beta_t = \min(0.7,\,2\,\bar{n}_t/N_{\max})$ rises with the current
-mean per-agent particle count $\bar{n}_t$.
+position of visible particles, $N_{\max}$ is the per-agent sensing
+capacity (particles per step at full-disc occupancy), and the blend
+weight $w_t = \min(0.7,\,2\,\bar{n}_t/N_{\max})$ rises with the current
+mean per-agent particle count $\bar{n}_t$ (instantaneous, at step $t$).
 When $\hat{v}{=}0$ (no observations in the window), agents fall back
 to the density term alone.
 All agents in the shared arm receive the same $\hat{v}$ and hence
 the same $\hat{f}$; they differ only in $\hat{d}_m$.  The policy
-nonlinearity arises here: a high blend weight $\beta_t$ causes all
+nonlinearity arises here: a high blend weight $w_t$ causes all
 collectors to commit strongly to $\hat{f}$, so a stale $\hat{v}$
 drives the entire team toward a single wrong direction, eliminating
 the diversity in $\hat{d}_m$ that would otherwise provide spatial
@@ -368,11 +404,12 @@ $\lambda^{t - \tau}$, $\lambda{=}\exp(-1/L)$. The effective
 memory length equals $L$ in expectation, but older observations
 are downweighted smoothly rather than discarded at a hard cutoff.
 
-\subsection{Why the simple SNR argument fails}
+\subsection{Signal-to-noise analysis and its limits}
 \label{sec:theory-fail}
 
-Pooling $M$ agents' observations multiplies the effective sample
-size by $M$, yielding a signal-to-noise ratio ratio
+A natural first hypothesis is that sharing $M$ agents' observations
+improves the effective sample size by $M$, giving a
+signal-to-noise ratio
 $\mathrm{SNR}_{\mathrm{shared}}/\mathrm{SNR}_{\mathrm{indep}} = \sqrt{M}$
 independent of $L$ and $\omega$.  If field performance were linear
 in SNR, coordination would help at every $L$ — yet $\Dbar$ goes
@@ -389,7 +426,10 @@ and the angular noise of the shared arm,
   \sigma_{\theta,\mathrm{shared}}(L) =
   \frac{\sigma}{\alpha\sqrt{M\bar{K} L\, dt}},
 \]
-where $\bar{K}$ is the mean per-agent particle count per step.
+where $\bar{K} = \mathbb{E}_t[\bar{n}_t]$ is the mean per-agent particle
+count averaged over steps (the episode mean of the instantaneous
+count $\bar{n}_t$ used in the action rule; $\bar{K}{\approx}8$ at
+the studied parameters).
 Both arms carry the same bias $\angbias$; sharing only reduces
 $\sigma_\theta$ by $\sqrt{M}$.  As $L$ grows, the shared arm's
 direction estimate becomes increasingly \emph{precise around the
@@ -429,7 +469,9 @@ $5.0\;(10)$ &  3 (=$\Lmax$) & 0.20 rad & 0.100 rad & 0.14 \\
 $5.0\;(10)$ & 10            & 0.90 rad & 0.450 rad & 1.14 \\
 \bottomrule
 \end{tabular}
-{\small ($\alpha{=}0.06,\;\sigma{=}0.06,\;M{=}4,\;\bar{K}{\approx}8,\;dt{=}0.02$)}
+{\small ($\alpha{=}0.06,\;\sigma{=}0.06,\;M{=}4,\;dt{=}0.02$;
+$\bar{K}{\approx}8$ is the episode-mean per-agent particle count
+defined in Section~\ref{sec:theory-fail})}
 \end{table}
 
 \medskip
@@ -496,10 +538,14 @@ $\omega \times 5$ primary $L \times 2$ methods), plus 24
 intermediate-$L$ cells for slow and mid, plus stationary-$\omega$
 cells, and 16 supplementary cells for the $\omega{=}2.5$ anchor
 (8 $L$ levels $\times$ 1 method — window only).
-Intermediate $L$ values were concentrated at the interior rotation
-speeds (slow, mid, $\omega{=}2.5$) by design: very\_slow has
-$\Lmax{=}67$ (boundary, unresolvable within the grid) and fast has
-predicted $\Lmax{<}1$ step (below grid resolution).
+We call slow and mid the \emph{interior} rotation speeds: they are
+the two conditions where $\Lmax$ falls strictly within the grid
+range $(1, H)$ and the linear-rotation regime ($\omega\Lmax dt
+\lesssim 0.30\;\text{rad}$) applies.  Intermediate $L$ values were
+concentrated at these interior speeds (slow, mid, $\omega{=}2.5$) by
+design: very\_slow has $\Lmax{=}67$ (boundary, unresolvable within
+the grid) and fast has predicted $\Lmax{<}1$ step (below grid
+resolution).
 Post-hoc exploratory runs at $\omega{=}1.0$ ($\Tcorr{=}50$) and
 $\omega{=}2.0$ ($\Tcorr{=}25$), each 8 $L$ levels $\times$ 32 seeds
 (window method), are reported in Sec.~\ref{sec:lmax-scaling}.
@@ -547,24 +593,13 @@ rotation speeds with defined $\Lmax$.
 \label{sec:results}
 % ------------------------------------------------------------
 
-\noindent\textbf{Terminology.}  Three distinct $L$-based thresholds appear
-in this section; they coincide only under specific conditions:
-\begin{itemize}[noitemsep,topsep=2pt]
-  \item \emph{Significance threshold} ($\Lmax$): the largest $L$ with
-        $p{<}0.05$ in the pre-registered one-sided $t$-test.  This is
-        a statistical-detectability threshold, not a behavioural reversal.
-  \item \emph{Zero-crossing threshold} ($L^*$): the value of $L$ at which
-        $\mathbb{E}[\Delta]$ changes sign, estimated by interpolation between
-        adjacent grid points.
-  \item \emph{Coordination-collapse boundary}: the $L$ at which the expected
-        number of captures under the shared arm falls below the independent
-        arm — equivalent to the zero-crossing.  We use this phrase only when
-        the evidence supports a genuine sign reversal, i.e.\ when
-        $\Lmax \approx L^*$.
-\end{itemize}
-For the slow condition ($\omega{=}1.5$), $\Lmax{=}10$ and
-$L^*{\in}(10,20)$ are in the same interval:
-$\Lmax$ is an approximate coordination-collapse boundary.
+\noindent Recall the three threshold types defined in
+Section~\ref{sec:threshold-defs}: significance threshold ($\Lmax$),
+zero-crossing ($L^*$), and coordination-collapse boundary.
+Applied to the current data:
+for the slow condition ($\omega{=}1.5$), $\Lmax{=}10$ and
+$L^*{\in}(10,20)$ are in the same interval, making $\Lmax$ an
+approximate coordination-collapse boundary.
 For the mid condition ($\omega{=}5.0$), $\Lmax{=}3$ but
 $L^*{\in}(30,45)$: $\Lmax$ marks only statistical detectability;
 mid does not exhibit a coordination-collapse boundary within the
@@ -635,7 +670,11 @@ this condition is discussed in Section~\ref{sec:lmax-scaling}.
          stationary cell coincidentally yields the same value;
          field stationarity removes temporal bias, reducing but not
          eliminating the effect of window length on estimator variance.
-         $\omega{=}2.5$: supplementary condition; see Sec.~\ref{sec:lmax-scaling}.}
+         $\omega{=}2.5$: supplementary condition; see Sec.~\ref{sec:lmax-scaling}.
+         Exploratory conditions $\omega{\in}\{1.0,\,2.0,\,3.0,\,10.0\}$
+         are not included here; their $\Lmax$ values appear in
+         Table~\ref{tab:lmax} and their $t$-profiles are
+         discussed in Sec.~\ref{sec:lmax-scaling}.}
 \label{tab:main}
 \setlength\tabcolsep{5pt}
 \begin{tabular}{lrrrrrrrr}
@@ -650,12 +689,12 @@ $0\;(\infty)$
 $0.75\;(67)$
   & $+0.53$ & $+0.47$ & $+0.06$ & $+0.22$
   & $+0.50$ & $+0.41$ & $+0.66$ & $+0.78^*$ \\
-$2.5\;(20)$
-  & $+1.72^*$ & $+1.47^*$ & $+1.19^*$ & $+0.78^*$
-  & $+1.06^*$ & $+0.88^*$ & $+0.88^*$ & $+0.69$ \\
 $1.5\;(33)$
   & $+1.47^*$ & $+1.50^*$ & $+1.66^*$ & $+0.94^*$
   & $-0.38$ & $-0.28$ & $-0.47$ & $-0.44$ \\
+$2.5\;(20)$
+  & $+1.72^*$ & $+1.47^*$ & $+1.19^*$ & $+0.78^*$
+  & $+1.06^*$ & $+0.88^*$ & $+0.88^*$ & $+0.69$ \\
 $5.0\;(10)$
   & $+0.88^*$ & $+0.91^*$ & $+0.22$ & $+0.25$
   & $+0.56$ & $+0.16$ & $-0.25$ & $+0.03$ \\
