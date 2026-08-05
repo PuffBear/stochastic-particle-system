@@ -1307,6 +1307,47 @@ controllers with a fixed-direction prior, but this has not been
 tested here; quantifying $c(\alpha/\sigma, M)$
 requires a parameter sweep outside the scope of this paper.
 
+To probe whether $\Gamma = \omdt \cdot \Lmax$ is conserved across
+$\omega$ at fixed $(\alpha,\sigma,M)$, we ran an exploratory
+$\omega \times L$ sweep (7 $\omega$ values $\times$ 10 $L$ levels
+$\times$ 16 seeds, shared arm only) and identified $\Lmax^*(\omega)$
+as the $L$ achieving maximum shared-arm reward.
+Figure~\ref{fig:gamma_sweep} shows the result.  In the three
+conditions classified as linear-regime
+($\omega \in \{0.5, 1.5, 5.0\}$, $\Tcorr \in \{100, 33, 10\}$
+steps), $\Lmax^*$ lies on the line $L = 0.29\,\Tcorr$ (Panel~B),
+and $\Gamma \in \{0.30, 0.21, 0.30\}$ (Panel~C) — consistent with
+the 0.30 from the pre-registered significance-based analysis.
+Non-linear-regime conditions deviate upward as expected: the
+long-episode anomaly ($\omega{=}1.0$) gives $\Gamma{=}0.9$; the
+sinc-attenuation condition ($\omega{=}2.5$) gives $\Gamma{=}1.0$;
+and the rapid-rotation condition ($\omega{=}8.0$) gives a
+noise-dominated value.  These results are exploratory (16 seeds,
+reward-based rather than significance-based peak identification),
+but they corroborate $\Gamma \approx 0.30$ as the within-regime
+constant at the studied parameter point.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{fig_gamma_sweep}
+\Description{Three-panel figure. Left: shared-arm reward vs L for seven omega values, coloured by regime (blues for linear, other colours for anomalous). Centre: L-max-star vs T-corr scatter with a linear fit through origin (slope 0.29) through the three linear-regime points. Right: Gamma(omega) scatter showing the three linear-regime points near 0.30 and the anomalous conditions above.}
+\caption{$\Gamma$-conservation sweep ($n{=}16$ seeds, shared arm,
+exploratory).
+\textbf{Left:} Shared-arm reward vs.\ $L$ for $\omega \in
+\{0.5,0.75,1.0,1.5,2.5,5.0,8.0\}$.  Linear-regime curves (solid
+blue) peak at $L$ values consistent with $\Gamma{=}0.30$; anomalous
+conditions (dashed, other colours) are flat or rise to the grid
+boundary.
+\textbf{Centre:} $\Lmax^*(\omega)$ vs.\ $\Tcorr = 1/(\omdt)$.
+Filled circles: three linear-regime points; dashed line:
+force-through-origin fit, slope ${\hat\Gamma}{=}0.29$.
+Open markers: anomalous-regime points excluded from fit.
+\textbf{Right:} $\Gamma(\omega) = \omdt \cdot \Lmax^*$ vs.\
+$\omega$.  Linear-regime points cluster near $0.30$ (dashed band:
+${\pm}20\%$); anomalous conditions lie above.}
+\label{fig:gamma_sweep}
+\end{figure}
+
 \paragraph{Limitations.}
 (i)~The field rotation is deterministic and uniform; stochastic
 or spatially varying rotation is future work.
