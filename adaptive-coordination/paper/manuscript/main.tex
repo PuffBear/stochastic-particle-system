@@ -136,13 +136,10 @@ which regime a given $(\omega, H)$ pair falls into.
 \label{sec:intro}
 % ------------------------------------------------------------
 
-Communication protocols for multi-agent systems are typically
-designed and evaluated against a fixed environment. In deployment,
-environments drift.  A team that coordinates on a shared velocity
-summary learned under a stationary transport field will
-eventually coordinate on a stale estimate as the field rotates,
-potentially performing \emph{worse} than if the agents had acted
-independently on their own local observations.
+Communication protocols designed for a stationary environment fail
+when the field drifts: a team converging on a shared but stale estimate
+may perform \emph{worse} than independent agents acting on their own
+local observations.
 
 This paper asks a precise question: how long must an observation
 memory window be to maintain a positive coordination benefit
@@ -349,9 +346,7 @@ they coincide only under specific conditions:
   \item \emph{Coordination-collapse boundary}: the $L$ at which the
         expected captures under the shared arm fall below the
         independent arm — equivalent to the zero-crossing.  We use
-        this phrase only when $\Lmax \approx L^*$, i.e.\ when the
-        significance threshold and the sign reversal are in the same
-        $L$-interval.
+        this phrase only when $\Lmax \approx L^*$.
 \end{itemize}
 
 \subsection{Memory controllers}
@@ -635,12 +630,9 @@ by the pre-registered per-cell criterion), applying Holm's
 step-down procedure across the 24 fast cells yields an adjusted
 $p_{\mathrm{adj}} = 0.023 \times 24 = 0.55$ for the minimum
 raw $p$, confirming no fast cell survives even relaxed correction.
-Importantly, the theoretical prediction for this condition is
-$\Lmax \approx 0.30 \times 3 = 0.9$ steps, which falls \emph{below}
-the minimum grid value of $L{=}1$.  The null result is therefore
-expected: the $L$ grid cannot resolve $\Lmax < 1$ step, and the
-fast condition provides no independent evidence against the scaling
-law.
+The theoretical prediction ($\Lmax \approx 0.30 \times 3 = 0.9$ steps)
+falls below grid resolution; the null result is expected and provides
+no independent evidence against the scaling law.
 
 A supplementary condition $\omega{=}2.5$ ($\Tcorr{=}20$ steps,
 between slow and mid) was run with 32~seeds across all 8~$L$~levels
@@ -1212,16 +1204,14 @@ cooperative analogue $L \propto 1/(\omdt)$ with $c \approx 0.30$
 in the studied setting.
 The constant is smaller than the single-agent SW-UCB optimum
 because multi-agent sharing amplifies the consequence of directional
-bias; whether this analogy holds under other coordination protocols
-or reward structures is an open question.
+bias.
 
 \paragraph{The exponential-decay controller.}
 Despite its theoretical appeal (smooth weighting, no hard cutoff),
 the decay controller shows no consistent $\Lmax/\Tcorr$ ratio.
-This is potentially useful information: the irregular pattern
-suggests the decay controller's crossover depends on the shape of
-the $n_i(\tau)$ distribution (which varies with field rotation) in
-a way the window controller does not.
+The irregular pattern suggests the decay controller's crossover
+depends on the shape of the $n_i(\tau)$ distribution (which varies
+with field rotation) in a way the window controller does not.
 The irregular ratio does not undermine the mechanism's generality:
 the benefit reversal occurs in both controllers
 (Sec.~\ref{sec:window-vs-decay}); what the decay controller lacks
@@ -1266,9 +1256,8 @@ The four-regime taxonomy was constructed from the data, not pre-specified:
 the non-conforming speeds were observed first, then classified.
 A sceptical reader may therefore read the taxonomy as an explanation
 built around counterexamples rather than an independently tested prediction.
-We accept that framing; the taxonomy's value is not as a prior but as
-a compact description of the observed diversity of outcomes, each with
-a mechanistic account.
+We accept that framing; the taxonomy offers a compact, mechanistically
+grounded description of the observed diversity of outcomes.
 The non-conforming conditions ($\omega{\in}\{1.0, 2.0, 2.5, 10.0\}$)
 are not random scatter — they have distinct, characterisable structure.
 The sinc-attenuation regime
@@ -1305,9 +1294,9 @@ coverage loss dominates.  This implies $c$ is an increasing
 function of $\alpha/\sigma$ and (weakly) of $M$ — larger or
 stronger teams tolerate more staleness.  We hypothesise that the scaling
 $\Lmax \propto \Tcorr$ extends to other memory-based cooperative
-controllers with a fixed-direction prior, but this has not been
-tested here; quantifying $c(\alpha/\sigma, M)$
-requires a parameter sweep outside the scope of this paper.
+controllers with a fixed-direction prior, but quantifying
+$c(\alpha/\sigma, M)$ requires a parameter sweep beyond this
+paper's scope.
 
 To probe whether the dimensionless scale $\Gamma = \omdt \cdot L$
 is preserved at the \emph{reward-optimal} window across $\omega$,
@@ -1377,17 +1366,14 @@ $|\Dbar| \approx 0.9$; smaller effects at the boundary may require
 more seeds.
 (v)~The constant $c \approx 0.30$ is measured at a single
 parameter point ($\alpha{=}0.06$, $\sigma{=}0.06$, $M{=}4$,
-$\bar{K}{\approx}8$, $dt{=}0.02$). Its functional dependence on
-these parameters is not established here; back-of-envelope
-arguments for the scaling are given in Section~\ref{sec:discussion}
-but require a systematic parameter sweep to validate.
+$\bar{K}{\approx}8$, $dt{=}0.02$); back-of-envelope arguments for
+the scaling are given in Section~\ref{sec:discussion} but require
+a systematic parameter sweep to validate.
 (vi)~The $c \approx 0.30$ result holds within the linear-rotation
 regime and is the significance-based threshold at two interior speeds.
 The slow condition exhibits a genuine sign reversal ($\Lmax \approx L^*$);
 the mid condition's $\Lmax{=}3$ marks statistical detectability rather
 than coordination collapse ($L^*{\in}(30,45)$).
-The quantitative constant $c{\approx}0.30$ is primarily anchored on the
-slow condition, where the two operationalisations agree.
 (vii)~The directional diagnostics (Figure~\ref{fig:dispersion})
 directly measure shared-arm angular bias and inter-agent dispersion at
 both interior speeds.  They do not measure spatial trajectory overlap,
