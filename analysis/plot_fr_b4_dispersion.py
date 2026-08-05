@@ -117,7 +117,7 @@ def main() -> None:
     ax2.set_ylim(bottom=0)
 
     fig.suptitle(
-        rf"$\omega={omega}$ ($T_{{\rm corr}}={t_corr:.0f}$ steps), {data['seeds'][0]}–{data['seeds'][-1]+1} seeds",
+        rf"$\omega={omega}$ ($T_{{\rm corr}}={t_corr:.0f}$ steps), seeds {data['seeds'][0]}–{data['seeds'][-1]}, $n={len(data['seeds'])}$",
         fontsize=9,
     )
 
