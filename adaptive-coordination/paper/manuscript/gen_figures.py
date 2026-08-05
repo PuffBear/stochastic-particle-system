@@ -160,88 +160,68 @@ plt.close(fig)
 # ════════════════════════════════════════════════════════════════════════════
 # Figure 2: L_max vs T_corr scaling
 # ════════════════════════════════════════════════════════════════════════════
-# Data points: (T_corr, L_max) — reliable points for the fit
-# fast excluded (no reliable L_max); ω=2.5 shown but excluded from fit
-t_corr_pts = np.array([67, 33, 10])
-lmax_pts   = np.array([67, 10,  3])
+# Palette:
+#   Anchors (slow, mid): #2a78d6 — slot-1 blue, filled circle
+#   Boundary (very_slow): #999999 — gray open square (censored, not in fit)
+#   Excluded (ω=1.0, 2.0, 2.5): #aaaaaa — light gray open circle
+# Secondary encoding: filled vs. open separates anchors from all others.
+# The c=0.85 3-point fit is dropped — it is inflated by boundary censoring
+# and competes visually with the c=0.30 claim line.
 
-# Force-through-origin fit (3 pts including boundary very_slow)
-c_fit = np.sum(t_corr_pts * lmax_pts) / np.sum(t_corr_pts**2)
-t_line = np.linspace(0, 75, 200)
-lmax_line = c_fit * t_line
+COL_ANCHOR   = "#2a78d6"   # blue — two interior anchors
+COL_BOUNDARY = "#999999"   # mid-gray — boundary (open square)
+COL_EXCL     = "#aaaaaa"   # light gray — anomalous/excluded (open circle)
+COL_REF      = "#dddddd"   # hairline reference line L=T_corr
 
-# Prediction line (c=1.0)
-pred_line = 1.0 * t_line
-
-fig2, ax2 = plt.subplots(figsize=(3.00, 2.35))
-
-# Prediction band (c=1.0, dashed gray)
-ax2.plot(t_line, pred_line, color="#999999", lw=1.0, ls="--",
-         label=r"$L{=}T_{\rm corr}$ reference")
-
-# Interior-anchor-only line (c=0.30, thin blue dotted)
 c_interior = 0.30
-ax2.plot(t_line, c_interior * t_line, color="#1A6FBF", lw=1.0, ls=":",
-         label=r"interior anchors only: $c{=}0.30$", zorder=1)
+t_line = np.linspace(0, 75, 200)
 
-# Fitted line (c≈0.85, 3-point fit including boundary)
-ax2.plot(t_line, lmax_line, color="#333333", lw=1.4, ls="-",
-         label=f"3-point fit (incl. boundary): $c={c_fit:.2f}$")
+fig2, ax2 = plt.subplots(figsize=(3.33, 2.55))
 
-# Data points — very_slow open (boundary), slow+mid filled (clean anchors)
-ax2.scatter([67], [67], color="#999999", marker="s", s=40,
-            zorder=5, label=r"very\_slow (boundary)")
-ax2.scatter([33, 10], [10, 3], color="#1A6FBF", marker="o", s=44,
-            zorder=5, label="slow, mid (interior anchors)")
+# Reference line L = T_corr (c=1.0) — recessive hairline
+ax2.plot(t_line, t_line, color=COL_REF, lw=0.8, ls="-", zorder=0)
+ax2.text(68, 68, r"$c{=}1$", fontsize=6, color=COL_REF,
+         ha="left", va="bottom")
 
-# ω=2.5: open upward triangle — anomalously high L_max, excluded from fit
-ax2.scatter([20], [45], color="#888888", marker="^", s=36,
-            facecolors="white", edgecolors="#888888", lw=1.0,
-            zorder=5, label=r"$\omega{=}2.5,\,2.0$ (anomalously high $L_{\max}$)")
-ax2.annotate("", xy=(20, 50), xytext=(20, 46),
-             arrowprops=dict(arrowstyle="->", color="#888888", lw=0.8))
+# Claim line c=0.30 — solid, prominent, same blue as anchors
+ax2.plot(t_line, c_interior * t_line, color=COL_ANCHOR, lw=1.5, ls="-",
+         zorder=1, label=r"$L_{\max}{=}0.30\,T_{\rm corr}$")
+ax2.text(68, c_interior * 68 + 1.5, r"$c{=}0.30$",
+         fontsize=7, color=COL_ANCHOR, ha="left", va="bottom")
 
-# ω=2.0: open upward triangle — L_max ≥ 67 (all L significant), excluded from fit
-ax2.scatter([25], [67], color="#888888", marker="^", s=36,
-            facecolors="white", edgecolors="#888888", lw=1.0,
-            zorder=5)
-ax2.annotate("", xy=(25, 73), xytext=(25, 68),
-             arrowprops=dict(arrowstyle="->", color="#888888", lw=0.8))
+# Excluded points (anomalous regimes) — light gray open circles, plotted first
+ax2.scatter([20, 25, 50], [45, 67, 1],
+            facecolors="white", edgecolors=COL_EXCL, lw=1.0,
+            marker="o", s=38, zorder=3,
+            label=r"excluded ($\omega{\in}\{1.0,\,2.0,\,2.5\}$)")
 
-# ω=1.0: open downward triangle — anomalously low L_max=1, excluded from fit
-ax2.scatter([50], [1], color="#C45E00", marker="v", s=36,
-            facecolors="white", edgecolors="#C45E00", lw=1.0,
-            zorder=5, label=r"$\omega{=}1.0$ (anomalously low $L_{\max}{=}1$)")
+# Boundary point very_slow — gray open square
+ax2.scatter([67], [67],
+            facecolors="white", edgecolors=COL_BOUNDARY, lw=1.0,
+            marker="s", s=38, zorder=4,
+            label=r"very\_slow (boundary, censored)")
 
-# Labels on data points
-for tx, ly, lbl in zip(t_corr_pts, lmax_pts,
-                        ["very\\_slow", "slow", "mid"]):
-    offset_x = -5 if tx == 67 else 2
-    offset_y = 2  if tx == 67 else -4
-    ax2.annotate(lbl, (tx, ly),
-                 xytext=(tx + offset_x, ly + offset_y),
-                 fontsize=6.5, color="#333333", ha="center")
-ax2.annotate(r"$\omega{=}2.5$", (20, 45),
-             xytext=(22, 43), fontsize=6.5, color="#888888", ha="left")
-ax2.annotate(r"$\omega{=}2.0$", (25, 67),
-             xytext=(27, 65), fontsize=6.5, color="#888888", ha="left")
-ax2.annotate(r"$\omega{=}1.0$", (50, 1),
-             xytext=(52, -1), fontsize=6.5, color="#C45E00", ha="left")
+# Interior anchor points — filled blue circles
+ax2.scatter([33, 10], [10, 3],
+            color=COL_ANCHOR, marker="o", s=44, zorder=5,
+            label="interior anchors (slow, mid)")
 
-# 0.30 annotation — label the interior-anchor dotted line
-ax2.text(60, c_interior * 60 + 2, r"$c{=}0.30$",
-         fontsize=7, color="#1A6FBF", ha="left", va="bottom")
+# Direct labels on anchors only
+ax2.annotate("slow", (33, 10), xytext=(35, 8.5),
+             fontsize=6.5, color="#444444", ha="left", va="top")
+ax2.annotate("mid",  (10,  3), xytext=(12,  2),
+             fontsize=6.5, color="#444444", ha="left", va="top")
 
-ax2.set_xlabel(r"$T_{\rm corr} = 1/(\omega\cdot dt)$, one-radian decorr.\ timescale (steps)")
-ax2.set_ylabel(r"$L_{\max}$ (steps)")
-ax2.set_xlim(-2, 75)
-ax2.set_ylim(-5, 75)
-ax2.set_xticks([0, 10, 20, 33, 50, 67])
-ax2.set_yticks([0, 10, 20, 33, 45, 67])
-ax2.yaxis.grid(True)
+ax2.set_xlabel(r"$T_{\rm corr} = 1/(\omega\cdot dt)$ (steps)", fontsize=8)
+ax2.set_ylabel(r"$L_{\max}$ (steps)", fontsize=8)
+ax2.set_xlim(-2, 78)
+ax2.set_ylim(-4, 78)
+ax2.set_xticks([0, 10, 20, 30, 40, 50, 60, 70])
+ax2.set_yticks([0, 10, 20, 30, 40, 50, 60, 70])
+ax2.yaxis.grid(True, linewidth=0.4, color="#e0e0e0")
 ax2.set_axisbelow(True)
 ax2.legend(loc="upper left", frameon=False, fontsize=6.5,
-           handlelength=1.2, handletextpad=0.4, borderpad=0)
+           handlelength=1.4, handletextpad=0.4, borderpad=0)
 
 fig2.tight_layout()
 out2 = os.path.join(OUTDIR, "fig_scaling.pdf")
