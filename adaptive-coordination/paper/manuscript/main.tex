@@ -85,10 +85,11 @@ bias unchanged, so beyond a critical window length it drives all
 collectors confidently toward a systematically wrong direction,
 reducing the inter-agent angular diversity that makes coordination
 beneficial.  At both interior speeds ($\omega{\in}\{1.5,5.0\}$), instrumented
-runs show the mechanism's predicted directional signatures: an observed
-minimum in shared-arm angular error at $\Lmax$ (adjacent paired
-$t$-tests: $t(31){\geq}3.40$, $p{<}0.001$ at both speeds), and inter-agent angular dispersion
-structurally zero in the shared arm and non-zero in the independent arm.  The coordination benefit landscape under rotation is
+runs show the mechanism's predicted directional signatures: a
+U-shaped error profile at slow and increasing error beyond $\Lmax$
+at mid (adjacent paired $t$-tests: $t(31){\geq}3.40$, $p{<}0.001$
+at both speeds), and inter-agent angular dispersion structurally zero
+in the shared arm and non-zero in the independent arm.  The coordination benefit landscape under rotation is
 \emph{regime-dependent}: qualitatively different outcomes arise at
 different rotation speeds.  Four regimes emerge from this study.
 A \emph{linear-rotation regime}
@@ -205,18 +206,18 @@ confident-but-wrong directions into globally poor coverage.
 \medskip\noindent\textbf{Contributions.}
 \begin{enumerate}
   \item We provide direct measurement evidence for a stale-coordination
-  failure mechanism: instrumented runs simultaneously show a U-shaped
-  shared-arm angular error (minimum at exactly $\Lmax$) and inter-agent
+  failure mechanism: instrumented runs simultaneously show condition-specific
+  shared-arm angular error profiles and inter-agent
   directional dispersion collapsing to zero in the shared arm while the
   independent arm retains diversity (Figure~\ref{fig:dispersion}).
+  At slow ($\omega{=}1.5$), shared-arm angular error is U-shaped with
+  an observed minimum at $\Lmax$.
+  At mid ($\omega{=}5.0$), the lowest error among the instrumented
+  windows occurs at $\Lmax{=}3$, after which error increases.
   These two directional signatures are consistent with the proposed
   mechanism.  We do not measure spatial trajectory overlap, spatial
   coverage directly, or provide a formal mediation analysis connecting
   angular dispersion to captures; those remain open.
-  Directional diagnostics are performed at both interior speeds
-  (slow $\omega{=}1.5$ and mid $\omega{=}5.0$); both show an observed
-  minimum in shared-arm angular error at $\Lmax$ and non-zero
-  independent-arm dispersion throughout (Figure~\ref{fig:dispersion}).
   \item We identify a four-regime taxonomy of the coordination
   benefit landscape under rotation: (i)~a linear-rotation regime
   ($\omega\Lmax dt \approx 0.30\;\mathrm{rad}$) with a clean
@@ -1023,23 +1024,24 @@ Figure~\ref{fig:dispersion} shows both conditions.  The same two
 signatures appear at each speed:
 
 \begin{enumerate}
-  \item \textbf{Shared arm error is U-shaped with observed minimum
-  at $\Lmax$.}
-  \emph{Slow:} mean angular error falls from 0.768~rad at $L{=}1$
-  to 0.286~rad at $L{=}10$, then rises to 0.575~rad at $L{=}67$.
+  \item \textbf{Shared-arm angular error is lowest at $\Lmax$ in both conditions.}
+  \emph{Slow ($\omega{=}1.5$, U-shaped):} mean angular error falls from
+  0.768~rad at $L{=}1$ to 0.286~rad at $L{=}10$ ($\Lmax$), then rises
+  to 0.575~rad at $L{=}67$.
   Adjacent paired comparisons (same 32 seeds across $L$ levels,
   $r{\approx}0.80$ within-seed) confirm the minimum:
   $E(5){>}E(10)$: paired $t(31){=}8.40$, $p{<}0.001$,
   bootstrap 95\% CI $[{+}0.053,{+}0.085]$~rad;
   $E(20){>}E(10)$: paired $t(31){=}3.40$, $p{=}0.0009$,
   95\% CI $[{+}0.016,{+}0.058]$~rad.
-  \emph{Mid:} error falls from 0.471~rad at $L{=}3$ ($\Lmax$) to a
-  steep rise — 0.538 at $L{=}10$, 1.215 at $L{=}30$ — as sinc
-  attenuation dominates beyond the linear-rotation regime.
+  \emph{Mid ($\omega{=}5.0$):} the instrumented windows are
+  $L{\in}\{3,10,30,45\}$; $L{=}3{=}\Lmax$ is the left boundary, so the
+  data show only that error increases after $\Lmax$.  Error rises from
+  0.471~rad at $L{=}3$ to 0.538 at $L{=}10$ and 1.215 at $L{=}30$ as
+  sinc attenuation dominates beyond the linear-rotation regime.
   Paired comparison ($r{\approx}0.51$):
   $E(10){>}E(3)$: paired $t(31){=}5.30$, $p{<}0.001$,
   95\% CI $[{+}0.041,{+}0.090]$~rad.
-  In both conditions the observed minimum aligns with $\Lmax$.
   The independent arm has no corresponding minimum at either speed.
 
   \item \textbf{Shared arm inter-agent dispersion is structurally zero.}
@@ -1060,17 +1062,20 @@ direction, rather than zero diversity compounded by an accurate one.
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_dispersion}
-\Description{Four-panel figure arranged in two rows. Top row: slow condition (omega=1.5). Bottom row: mid condition (omega=5.0). Left column: mean angular error vs L for shared (blue circles) and independent (red squares) arms with SE bands and predicted lag dotted line. Right column: inter-agent dispersion vs L. In both rows the shared arm shows a U-shaped error with minimum at Lmax; shared arm dispersion is zero throughout; independent arm dispersion is non-zero and decreases with L.}
+\Description{Four-panel figure arranged in two rows. Top row: slow condition (omega=1.5). Bottom row: mid condition (omega=5.0). Left column: mean angular error vs L for shared (blue circles) and independent (red squares) arms with SE bands and predicted lag dotted line. Right column: inter-agent dispersion vs L. Top row (slow): shared arm shows a U-shaped error with minimum at Lmax=10; bottom row (mid): error is lowest at Lmax=3 and rises thereafter (left boundary, U-shape not established from data). Shared arm dispersion is zero throughout both conditions; independent arm dispersion is non-zero and decreases with L.}
 \caption{Directional diagnostics at slow ($\omega{=}1.5$, top) and
 mid ($\omega{=}5.0$, bottom); $n{=}32$ seeds (9001--9032) each.
 Shaded bands: $\pm$1~SE.
 \textbf{Left panels:} mean angular error $|\hat\theta-\theta_{\rm true}|$.
-Shared arm (blue) shows an observed minimum at $\Lmax$ in both conditions
-($L{=}10$ at slow, $L{=}3$ at mid), confirmed by adjacent paired
-$t$-tests (slow: $t(31){\in}\{8.40,\,3.40\}$, both $p{<}0.001$;
-mid: $t(31){=}5.30$, $p{<}0.001$; $B{=}10{,}000$ bootstrap CIs all
-exclude zero).  Beyond $\Lmax$ the shared
-arm rises due to angular lag (slow, linear-rotation regime) or sinc
+Shared arm (blue): at slow ($\omega{=}1.5$) error is U-shaped with
+observed minimum at $\Lmax{=}10$, confirmed by adjacent paired $t$-tests
+($t(31){\in}\{8.40,\,3.40\}$, both $p{<}0.001$; $B{=}10{,}000$ bootstrap
+CIs exclude zero).
+At mid ($\omega{=}5.0$) the lowest error among instrumented windows
+occurs at $\Lmax{=}3$, after which error rises steeply; $L{=}3$ is the
+left boundary so a full U-shape is not established from these data
+($t(31){=}5.30$, $p{<}0.001$ for $E(10){>}E(3)$).
+Beyond $\Lmax$ the shared arm rises due to angular lag (slow) or sinc
 attenuation (mid, $\omega L\,dt$ large).
 \textbf{Right panels:} inter-agent directional dispersion.
 Shared arm is zero by construction for all $L$; independent arm
