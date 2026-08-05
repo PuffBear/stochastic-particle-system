@@ -206,14 +206,11 @@ confident-but-wrong directions into globally poor coverage.
 \medskip\noindent\textbf{Contributions.}
 \begin{enumerate}
   \item We provide direct measurement evidence for a stale-coordination
-  failure mechanism: instrumented runs simultaneously show U-shaped
-  shared-arm angular error with an observed minimum at $\Lmax$ and
-  inter-agent directional dispersion collapsing to zero in the shared arm
-  while the independent arm retains diversity
-  (Figure~\ref{fig:dispersion}).
-  Both interior speeds exhibit U-shaped shared-arm angular error profiles
-  with observed minima at their respective $\Lmax$; the independent arm
-  shows no corresponding minimum at either speed.
+  failure mechanism: at both interior speeds, instrumented runs show
+  U-shaped shared-arm angular error with observed minima at their
+  respective $\Lmax$, and inter-agent directional dispersion that is
+  structurally zero in the shared arm while the independent arm retains
+  diversity (Figure~\ref{fig:dispersion}).
   These directional signatures are consistent with the proposed mechanism.
   We do not measure spatial trajectory overlap, spatial coverage directly,
   or provide a formal mediation analysis connecting angular dispersion to
@@ -870,7 +867,7 @@ $L$ & $\Dbar$ & SE & $t$ & \\
 \end{table}
 
 \medskip
-\noindent\textbf{Episode-rotation regime and sinc attenuation.}
+\noindent\textbf{Sinc-attenuation and long-episode regimes.}
 A unified account of the anomalous conditions emerges from the
 sinc-attenuation factor derived in Appendix~\ref{app:theory}:
 at each $L$, the shared arm's direction estimate is amplitude-scaled
@@ -947,10 +944,10 @@ Figure~\ref{fig:scaling} plots $\Lmax$ versus $\Tcorr$, including
 the two clean interior anchors, the boundary very\_slow point, and
 the three exploratory conditions ($\omega{\in}\{1.0,\,2.0,\,2.5\}$,
 all excluded from the fit; see caption).
-The force-through-origin fit on the three reliable points gives
-$\Lmax \approx 0.85\,\Tcorr$ ($R^2{=}0.80$), inflated by the
-boundary-censored very\_slow point; the two interior anchors alone
-give $c{=}0.30$ exactly.
+The force-through-origin fit on the two interior anchors plus the
+boundary-censored very\_slow point gives
+$\Lmax \approx 0.85\,\Tcorr$ ($R^2{=}0.80$), inflated by censoring;
+the two interior anchors alone give $c{=}0.30$ exactly.
 
 \begin{figure}[t]
 \centering
@@ -1441,13 +1438,14 @@ the bias/noise-parity theory predicts $L^* \propto (\omdt)^{-2/3}$
 (a different functional form), with the empirical crossover earlier
 because the relevant threshold is policy nonlinearity, not directional
 MSE parity.
-\emph{Sinc-attenuation regime} ($\omega{\in}\{2.0, 2.5\}$):
-amplitude attenuation ($\mathrm{sinc}{\in}[0.59, 0.87]$ at large $L$)
+\emph{Sinc-attenuation regime} ($\omega{\in}\{2.0,\,2.5,\,3.0\}$):
+amplitude attenuation ($\mathrm{sinc}{\in}[0.45, 0.87]$ at large $L$)
 weakens the mechanism across the entire tested $L$ range,
 suppressing the sharp crossover and producing broad benefit instead.
-\emph{Rapid-rotation regime} ($\omega{=}10.0$): predicted $\Lmax$
-falls below integer resolution; the only nominally significant cell
-($L{=}30$, $t{=}2.04$) is a false positive at 4.7\% estimate amplitude;
+\emph{Rapid-rotation regime} ($\omega{\in}\{10.0,\,17.0\}$): predicted
+$\Lmax$ falls below integer resolution; for $\omega{=}10.0$ the only
+nominally significant cell ($L{=}30$, $t{=}2.04$) is a false positive
+at 4.7\% estimate amplitude; $\omega{=}17.0$ yields no significant cells;
 the mechanism is present but undetectable at $n{=}32$.
 \emph{Long-episode regime} ($\omega{=}1.0$, $\Tcorr{\approx}H$):
 only $L{=}1$ significant; mechanism unresolved.
