@@ -62,7 +62,7 @@ def _angle_diff(a: float, b: float) -> float:
     return float((d + np.pi) % (2 * np.pi) - np.pi)
 
 
-def run_episode_instrumented(seed: int, L: int) -> dict:
+def run_episode_instrumented(seed: int, L: int, *, omega: float = OMEGA) -> dict:
     """Run one episode and return per-step direction-estimate data."""
     config = ParticleEnvConfig(
         horizon=STEPS,
@@ -73,7 +73,7 @@ def run_episode_instrumented(seed: int, L: int) -> dict:
         collector_count=COLLECTOR_COUNT,
         collector_max_speed=COLLECTOR_MAX_SPEED,
         sensing_radius=SENSING_RADIUS,
-        omega=OMEGA,
+        omega=omega,
     )
     env = ParticleCollectorEnv(config)
     observations, _ = env.reset(seed=seed)
@@ -198,26 +198,37 @@ def summarise_L(episodes: list[dict]) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="FR-B4 dispersion analysis: angular bias & dispersion vs. L at slow"
+        description="FR-B4 dispersion analysis: angular bias & dispersion vs. L"
     )
     parser.add_argument("--seeds", type=str, default="9001:9033")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--omega", type=float, default=OMEGA,
+                        help="Field rotation rate (rad/step); default %(default)s")
+    parser.add_argument("--l-levels", type=str, default=None,
+                        help="Comma-separated L values, e.g. 3,10,30,45; default uses module constant")
     args = parser.parse_args()
 
     if args.output.exists():
         raise FileExistsError(f"output already exists: {args.output}")
 
+    omega = args.omega
+    l_levels = (
+        [int(x) for x in args.l_levels.split(",")]
+        if args.l_levels is not None
+        else L_LEVELS
+    )
+
     start_s, stop_s = args.seeds.split(":")
     seeds = list(range(int(start_s), int(stop_s)))
 
-    print(f"omega={OMEGA}  T_corr={1/(OMEGA*DT):.1f}  n_seeds={len(seeds)}", file=sys.stderr)
+    print(f"omega={omega}  T_corr={1/(omega*DT):.1f}  n_seeds={len(seeds)}", file=sys.stderr)
 
     started = time.perf_counter()
     summaries = []
 
-    for L in L_LEVELS:
+    for L in l_levels:
         print(f"  L={L:2d} ...", end="", flush=True, file=sys.stderr)
-        episodes = [run_episode_instrumented(seed, L) for seed in seeds]
+        episodes = [run_episode_instrumented(seed, L, omega=omega) for seed in seeds]
         summ = summarise_L(episodes)
         summaries.append(summ)
         print(
@@ -229,8 +240,8 @@ def main() -> None:
 
     elapsed = time.perf_counter() - started
     out = {
-        "omega": OMEGA,
-        "t_corr": 1.0 / (OMEGA * DT),
+        "omega": omega,
+        "t_corr": 1.0 / (omega * DT),
         "seeds": seeds,
         "elapsed_s": elapsed,
         "summaries": summaries,
