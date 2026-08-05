@@ -968,25 +968,16 @@ censoring); dotted: $c{=}0.30$ through the two interior anchors.}
 
 \subsection{Crossover is sharp at $\omega = \text{slow}$}
 
-Figure~\ref{fig:crossover} shows $\Dbar$ versus $L$ for slow
-and mid with 95\% confidence intervals.  For slow, the transition
-from $\Dbar = +0.94$ at $L{=}10$ ($p{=}0.049$) to $-0.38$ at
-$L{=}20$ ($p{=}0.79$) is sharp: doubling the window destroys
-$>1.3$ particles of coordination benefit.  The significance-based
-$\Lmax{=}10$ and the zero-crossing $L^*{\in}(10, 20)$ both locate
-the crossover in the same L-interval, making slow a genuine
-coordination-collapse boundary.
-
-For mid, the character is qualitatively different.  $\Dbar$ falls
-from $+0.91$ ($L{=}3$, the last significant cell) to $+0.22$ at
-$L{=}5$ (NS), but it remains positive through $L{=}30$
-($\Dbar{=}{+}0.22$) and does not turn negative until $L{\in}(30, 45)$.
-$\Lmax{=}3$ therefore identifies where the signal becomes undetectable
-at $n{=}32$, not where the underlying benefit reverses.
-The coordination benefit shrinks gradually (rather than collapsing) as
-$L$ grows, consistent with a low-SNR regime where $n{=}32$ is insufficient
-to resolve the crossover: post-hoc power for the $L{=}5$ cell
-($\Dbar{=}{+}0.22$, SD${\approx}2.5$, $d{\approx}0.09$) is below 15\%.
+Figure~\ref{fig:crossover} shows $\Dbar$ versus $L$ for slow and mid
+with 95\% confidence intervals.
+At slow, $\Lmax{=}10$ and $L^*{\in}(10, 20)$ co-locate the crossover
+in the same $L$-interval, confirming slow as a genuine
+coordination-collapse boundary (Section~\ref{sec:threshold-defs}).
+At mid the sharp-crossover character is absent: $\Dbar$ shrinks
+gradually rather than collapsing, and post-hoc power for the $L{=}5$
+cell ($\Dbar{=}{+}0.22$, $d{\approx}0.09$) is below 15\% — consistent
+with the detectability interpretation of $\Lmax{=}3$ established in
+Section~\ref{sec:lmax-scaling}.
 
 \begin{figure}[t]
 \centering
@@ -1051,11 +1042,10 @@ signatures appear at each speed:
 
 The directional ingredients predicted by the mechanism are directly
 measured at both interior speeds; their causal mediation of capture
-performance is not isolated.  Zero shared-arm dispersion is a
-structural property of shared estimation, present at every $L$
-including $L{=}1$ where coordination is beneficial.  What changes at
-$\Lmax$ is the interaction: zero diversity compounded by a stale field
-direction, rather than zero diversity compounded by an accurate one.
+performance is not isolated.  What changes at $\Lmax$ is not a
+collapse of shared-arm dispersion — that is structural at every $L$
+— but the interaction: zero diversity compounded by a stale field
+direction rather than an accurate one.
 
 \begin{figure}[t]
 \centering
@@ -1432,21 +1422,16 @@ is as important as the within-regime scaling constant.
 
 Four regimes emerge from this study.
 \emph{Linear-rotation regime} ($\omega\Lmax dt \approx 0.30\;\text{rad}$):
-two interior speeds ($\omega{\in}\{1.5, 5.0\}$) show a clean
-significance-based crossover at $\Lmax/\Tcorr \approx 0.30$;
-the bias/noise-parity theory predicts $L^* \propto (\omdt)^{-2/3}$
-(a different functional form), with the empirical crossover earlier
-because the relevant threshold is policy nonlinearity, not directional
-MSE parity.
+a clean crossover at $\Lmax/\Tcorr \approx 0.30$; empirical threshold
+earlier than the $L^* \propto (\omdt)^{-2/3}$ bias/noise prediction
+because the capacity-matching policy collapses coordination before
+directional parity is reached.
 \emph{Sinc-attenuation regime} ($\omega{\in}\{2.0,\,2.5,\,3.0\}$):
-amplitude attenuation ($\mathrm{sinc}{\in}[0.45, 0.87]$ at large $L$)
-weakens the mechanism across the entire tested $L$ range,
-suppressing the sharp crossover and producing broad benefit instead.
-\emph{Rapid-rotation regime} ($\omega{\in}\{10.0,\,17.0\}$): predicted
-$\Lmax$ falls below integer resolution; for $\omega{=}10.0$ the only
-nominally significant cell ($L{=}30$, $t{=}2.04$) is a false positive
-at 4.7\% estimate amplitude; $\omega{=}17.0$ yields no significant cells;
-the mechanism is present but undetectable at $n{=}32$.
+amplitude damping scales down both the noise-reduction benefit and the
+stale-direction cost together, suppressing the sharp crossover.
+\emph{Rapid-rotation regime} ($\omega{\in}\{10.0,\,17.0\}$):
+$\Lmax$ falls below integer resolution; mechanism present but
+undetectable at $n{=}32$.
 \emph{Long-episode regime} ($\omega{=}1.0$, $\Tcorr{\approx}H$):
 only $L{=}1$ significant; mechanism unresolved.
 
