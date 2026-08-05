@@ -21,3 +21,4 @@ tensorboard/
 *.key
 *.pem
 .DS_Store
+texput.log
