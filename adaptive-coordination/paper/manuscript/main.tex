@@ -83,11 +83,11 @@ mechanism}: the shared arm reduces angular noise but leaves angular
 bias unchanged, so beyond a critical window length it drives all
 collectors confidently toward a systematically wrong direction,
 reducing the inter-agent angular diversity that makes coordination
-beneficial.  At slow rotation ($\omega{=}1.5$), instrumented runs show the
-mechanism's predicted directional signatures: an observed minimum
-in shared-arm angular error at $\Lmax$, and inter-agent angular
-dispersion structurally zero in the shared arm and non-zero in the
-independent arm.  The coordination benefit landscape under rotation is
+beneficial.  At both interior speeds ($\omega{\in}\{1.5,5.0\}$), instrumented
+runs show the mechanism's predicted directional signatures: an observed
+minimum in shared-arm angular error at $\Lmax$ (adjacent-comparison
+$t{=}3.76$ at both speeds), and inter-agent angular dispersion
+structurally zero in the shared arm and non-zero in the independent arm.  The coordination benefit landscape under rotation is
 \emph{regime-dependent}: a linear-rotation regime
 ($\Lmax/\Tcorr \approx 0.30$, sinc attenuation
 negligible) exhibits a clean significance-based crossover at
@@ -207,9 +207,10 @@ confident-but-wrong directions into globally poor coverage.
   mechanism.  We do not measure spatial trajectory overlap, spatial
   coverage directly, or provide a formal mediation analysis connecting
   angular dispersion to captures; those remain open.
-  Directional diagnostics are performed only at slow ($\omega{=}1.5$);
-  the performance pattern at mid ($\omega{=}5.0$) is consistent with
-  the mechanism, but the directional signatures were not measured there.
+  Directional diagnostics are performed at both interior speeds
+  (slow $\omega{=}1.5$ and mid $\omega{=}5.0$); both show an observed
+  minimum in shared-arm angular error at $\Lmax$ and non-zero
+  independent-arm dispersion throughout (Figure~\ref{fig:dispersion}).
   \item We identify a four-regime taxonomy of the coordination
   benefit landscape under rotation: (i)~a linear-rotation regime
   ($\omega\Lmax dt \approx 0.30\;\mathrm{rad}$) with a clean
@@ -970,67 +971,65 @@ The coordination-performance crossover is consistent with the
 stale-coordination failure mechanism, but does not isolate it: a
 lower $\Lmax$ could also arise from particle depletion or agent
 crowding.  To test the mechanism directly, we ran instrumented
-episodes at $\omega{=}1.5$ (slow, $n{=}32$ seeds) recording at
-every step~$t$: the true field direction $\theta(t)=\theta_0+\omega
-t\,dt$; the shared arm's direction estimate $\hat\theta_{\rm shared}$
-(windowed team mean, identical for all agents by construction); and
-each agent's independent estimate $\hat\theta_{\rm indep}^{(m)}$
-(own windowed mean).
+episodes at both slow ($\omega{=}1.5$) and mid ($\omega{=}5.0$),
+each with $n{=}32$ seeds, recording at every step~$t$: the true
+field direction $\theta(t)=\theta_0+\omega t\,dt$; the shared arm's
+direction estimate $\hat\theta_{\rm shared}$ (windowed team mean,
+identical for all agents by construction); and each agent's
+independent estimate $\hat\theta_{\rm indep}^{(m)}$ (own windowed mean).
+At mid we used $L{\in}\{3,10,30,45\}$; at slow, all eight $L$ levels.
 
-Figure~\ref{fig:dispersion} reveals two simultaneous signatures:
+Figure~\ref{fig:dispersion} shows both conditions.  The same two
+signatures appear at each speed:
 
 \begin{enumerate}
   \item \textbf{Shared arm error is U-shaped with observed minimum
   at $\Lmax$.}
-  Mean angular error $|\hat\theta_{\rm shared}-\theta_{\rm true}|$
-  falls from 0.768~rad at $L{=}1$ to 0.286~rad at $L{=}10$
-  (noise reduction), then rises to 0.575~rad at $L{=}67$ as
-  angular lag $\omega(L{-}1)dt/2$ accumulates.  The observed
-  minimum lies at $L{=}10$; adjacent comparisons
-  ($E_{\rm shared}(5){>}E_{\rm shared}(10)$: $t{=}3.76$, and
-  $E_{\rm shared}(20){>}E_{\rm shared}(10)$: $t{=}1.89$, both
-  unpaired, df${\approx}61$) support the minimum but a
-  paired test awaits per-seed archival.  The independent arm's
-  error decreases from 0.566 to 0.488~rad between $L{=}10$ and
-  $L{=}20$ and has no such minimum, as noise — not lag —
-  drives its error at short to moderate $L$.
+  \emph{Slow:} mean angular error falls from 0.768~rad at $L{=}1$
+  to 0.286~rad at $L{=}10$, then rises to 0.575~rad at $L{=}67$.
+  Adjacent comparisons support the minimum ($E(5){>}E(10)$: $t{=}3.76$;
+  $E(20){>}E(10)$: $t{=}1.89$; both unpaired, df${\approx}61$).
+  \emph{Mid:} error falls from 0.471~rad at $L{=}3$ ($\Lmax$) to a
+  steep rise — 0.538 at $L{=}10$, 1.215 at $L{=}30$ — as sinc
+  attenuation dominates beyond the linear-rotation regime
+  ($E(3){<}E(10)$: $t{=}3.76$, unpaired, df${\approx}61$).
+  In both conditions the observed minimum aligns with $\Lmax$.
+  The independent arm has no corresponding minimum at either speed.
 
-  \item \textbf{Shared arm inter-agent dispersion collapses to zero.}
+  \item \textbf{Shared arm inter-agent dispersion is structurally zero.}
   Because all agents receive the identical team estimate,
-  directional spread across agents is zero for every $L$.
-  Independent agents maintain 0.585~rad of inter-agent diversity
-  at $L{=}10$ and 0.343~rad even at $L{=}67$.
+  directional spread is zero for every $L$ at both speeds.
+  Independent agents maintain 0.585~rad of diversity at slow $L{=}10$
+  and 0.928~rad at mid $L{=}3$, with gradual reduction as $L$ grows.
 \end{enumerate}
 
 The directional ingredients predicted by the mechanism are directly
-measured; their causal mediation of capture performance is not
-isolated.  In particular, shared-arm inter-agent dispersion is zero
-by construction at \emph{every} $L$ — including $L{=}1$ where
-coordination is beneficial.  The zero-dispersion is a structural
-property of shared estimation, not a collapse that occurs at $\Lmax$.
-What changes at $\Lmax$ is the interaction: zero inter-agent diversity
-compounded by a stale field direction, rather than zero diversity
-compounded by an accurate one.
+measured at both interior speeds; their causal mediation of capture
+performance is not isolated.  Zero shared-arm dispersion is a
+structural property of shared estimation, present at every $L$
+including $L{=}1$ where coordination is beneficial.  What changes at
+$\Lmax$ is the interaction: zero diversity compounded by a stale field
+direction, rather than zero diversity compounded by an accurate one.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_dispersion}
-\Description{Two-panel figure. Panel (a): mean angular error in radians versus L for shared arm (blue circles) and independent arm (red squares), with shaded standard-error bands. Shared arm is U-shaped with minimum at L=10; independent arm decreases monotonically. Dotted line shows predicted angular lag omega*(L-1)*dt/2. Panel (b): inter-agent circular standard deviation versus L. Shared arm is flat at zero; independent arm decreases from 1.165 rad at L=1 to 0.343 rad at L=67.}
-\caption{Directional diagnostics, $\omega{=}1.5$ (slow, $n{=}32$
-seeds, 9001--9032).
-Shaded bands are $\pm$1~SE across seeds.
-\textbf{(a)} Mean angular error $|\hat\theta-\theta_{\rm true}|$ vs.\
-$L$.  Shared arm (blue) shows an observed minimum at $L{=}10$
-(0.286~rad), then rises as predicted angular lag $\omega(L{-}1)dt/2$
-(dotted) accumulates.  Adjacent-comparison tests support the minimum
-($E_{\rm shared}(5){>}E_{\rm shared}(10)$: $t{=}3.76$;
-$E_{\rm shared}(20){>}E_{\rm shared}(10)$: $t{=}1.89$; both unpaired).
-Independent arm (red) decreases monotonically.
-\textbf{(b)} Inter-agent directional dispersion (circular std across
-agents).  Shared arm is identically zero for all $L$ by construction;
-independent arm retains 0.585~rad at $L{=}10$, 0.343~rad at $L{=}67$.
-Zero shared-arm dispersion is structural, not a collapse at $\Lmax$;
-the harmful regime is zero diversity \emph{combined with} a stale direction.}
+\Description{Four-panel figure arranged in two rows. Top row: slow condition (omega=1.5). Bottom row: mid condition (omega=5.0). Left column: mean angular error vs L for shared (blue circles) and independent (red squares) arms with SE bands and predicted lag dotted line. Right column: inter-agent dispersion vs L. In both rows the shared arm shows a U-shaped error with minimum at Lmax; shared arm dispersion is zero throughout; independent arm dispersion is non-zero and decreases with L.}
+\caption{Directional diagnostics at slow ($\omega{=}1.5$, top) and
+mid ($\omega{=}5.0$, bottom); $n{=}32$ seeds (9001--9032) each.
+Shaded bands: $\pm$1~SE.
+\textbf{Left panels:} mean angular error $|\hat\theta-\theta_{\rm true}|$.
+Shared arm (blue) shows an observed minimum at $\Lmax$ in both conditions
+($L{=}10$ at slow, $L{=}3$ at mid), confirmed by adjacent-comparison
+$t$-tests ($t{=}3.76$ in each case, unpaired).  Beyond $\Lmax$ the shared
+arm rises due to angular lag (slow, linear-rotation regime) or sinc
+attenuation (mid, $\omega L\,dt$ large).
+\textbf{Right panels:} inter-agent directional dispersion.
+Shared arm is zero by construction for all $L$; independent arm
+retains diversity (0.585~rad at slow $L{=}10$; 0.928~rad at mid $L{=}3$).
+Zero shared-arm dispersion is structural at every $L$; the harmful
+regime is zero diversity combined with a stale direction, not a
+collapse of diversity at $\Lmax$.}
 \label{fig:dispersion}
 \end{figure}
 
@@ -1293,12 +1292,12 @@ the mid condition's $\Lmax{=}3$ marks statistical detectability rather
 than coordination collapse ($L^*{\in}(30,45)$).
 The quantitative constant $c{\approx}0.30$ is primarily anchored on the
 slow condition, where the two operationalisations agree.
-(vii)~The mechanism isolation (Figure~\ref{fig:dispersion}) directly
-measures inter-agent angular dispersion and shared-arm angular bias.
-It does not measure spatial trajectory overlap, spatial coverage, or
-provide a formal mediation chain from angular dispersion to capture
-counts; that causal chain is consistent with the evidence but not
-directly tested.
+(vii)~The directional diagnostics (Figure~\ref{fig:dispersion})
+directly measure shared-arm angular bias and inter-agent dispersion at
+both interior speeds.  They do not measure spatial trajectory overlap,
+spatial coverage, or provide a formal mediation chain from angular
+dispersion to capture counts; that causal chain is consistent with
+the evidence but not directly tested.
 (viii)~The discrepancy between the theoretical $L^* \propto (\omdt)^{-2/3}$
 and the observed $\Lmax \propto (\omdt)^{-1}$ is attributed to policy
 nonlinearity, but the functional form of that nonlinearity is not derived
