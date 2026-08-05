@@ -22,3 +22,4 @@ tensorboard/
 *.pem
 .DS_Store
 texput.log
+main.log
