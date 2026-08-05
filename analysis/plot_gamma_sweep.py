@@ -88,7 +88,7 @@ def main() -> None:
         regime = REGIME.get(omega, "unknown")
         results.append(dict(omega=omega, t_corr=t_corr, L_star=L_star,
                             gamma=gamma, regime=regime))
-        print(f"  ω={omega:.2f}  T_corr={t_corr:.1f}  L_max*={L_star:.1f}"
+        print(f"  ω={omega:.2f}  T_corr={t_corr:.1f}  L_opt={L_star:.1f}"
               f"  Γ={gamma:.3f}  [{regime}]", file=sys.stderr)
 
     # Fit only on confirmed linear-regime points (not boundary-censored)
@@ -124,26 +124,26 @@ def main() -> None:
     ax_curves.tick_params(labelsize=8)
     ax_curves.xaxis.set_major_formatter(mticker.FormatStrFormatter("%g"))
 
-    # Panel B: L_max* vs. T_corr — fit line on linear regime only
+    # Panel B: L_opt vs. T_corr — fit line on linear regime only
     t_fine = np.linspace(0, max(r["t_corr"] for r in results) * 1.05, 200)
     ax_lmax.plot(t_fine, gamma_fit * t_fine, "k--", lw=1.2, zorder=0,
-                 label=rf"$L^* = {gamma_fit:.2f}\,T_{{\rm corr}}$ (linear only)")
+                 label=rf"$L_{{\rm opt}} = {gamma_fit:.2f}\,T_{{\rm corr}}$ (linear only)")
     for r in results:
         ax_lmax.scatter([r["t_corr"]], [r["L_star"]],
                         color=COLOR[r["regime"]], marker=MARKER[r["regime"]],
                         zorder=3, s=55,
                         label=rf"$\omega={r['omega']}$ [{r['regime']}]")
     ax_lmax.set_xlabel(r"$T_{\rm corr}$ (steps)", fontsize=9)
-    ax_lmax.set_ylabel(r"$L^*_{\max}$ (steps)", fontsize=9)
-    ax_lmax.set_title(r"$L^*_{\max}$ vs.\ $T_{\rm corr}$", fontsize=9)
+    ax_lmax.set_ylabel(r"$L_{\rm opt}(\omega)$  (steps)", fontsize=9)
+    ax_lmax.set_title(r"$L_{\rm opt}$ vs.\ $T_{\rm corr}$", fontsize=9)
     ax_lmax.legend(fontsize=5.8, loc="upper left", ncol=1)
     ax_lmax.set_xlim(left=0)
     ax_lmax.set_ylim(bottom=0)
     ax_lmax.tick_params(labelsize=8)
 
-    # Panel C: Γ(ω) — horizontal band at gamma_fit for linear regime
+    # Panel C: omega*dt*L_opt vs. omega
     ax_gamma.axhline(gamma_fit, color="#1f77b4", lw=1.2, ls="--",
-                     label=rf"linear-regime fit $\Gamma={gamma_fit:.2f}$")
+                     label=rf"linear-regime fit $= {gamma_fit:.2f}$")
     ax_gamma.axhspan(gamma_fit * 0.8, gamma_fit * 1.2, color="#1f77b4",
                      alpha=0.08, label=r"$\pm20\%$ band")
     for r in results:
@@ -151,8 +151,8 @@ def main() -> None:
                          color=COLOR[r["regime"]], marker=MARKER[r["regime"]],
                          zorder=3, s=55)
     ax_gamma.set_xlabel(r"$\omega$ (rad/step)", fontsize=9)
-    ax_gamma.set_ylabel(r"$\Gamma = \omega\,dt\cdot L^*_{\max}$", fontsize=9)
-    ax_gamma.set_title(r"Dimensionless group $\Gamma(\omega)$", fontsize=9)
+    ax_gamma.set_ylabel(r"$\omega\,dt \cdot L_{\rm opt}$", fontsize=9)
+    ax_gamma.set_title(r"$\omega\,dt \cdot L_{\rm opt}(\omega)$", fontsize=9)
     omegas = [r["omega"] for r in results]
     ax_gamma.set_xlim(min(omegas) * 0.7, max(omegas) * 1.15)
     ax_gamma.set_ylim(bottom=0)
@@ -162,11 +162,11 @@ def main() -> None:
     n_seeds = len(data["seeds"])
     s0, s1  = data["seeds"][0], data["seeds"][-1]
     fig.suptitle(
-        rf"$\Gamma$-conservation sweep: $\alpha={data['alpha']}$, "
-        rf"$\sigma={data['diffusion_sigma']}$, $M={data['collector_count']}$; "
-        rf"seeds {s0}–{s1} ($n={n_seeds}$).  "
-        rf"Linear-regime fit: $\Gamma={gamma_fit:.2f}$.  "
-        r"Non-linear points excluded from fit (labelled by regime).",
+        rf"Reward-optimal window sweep ($L_{{\rm opt}}$, not $L_{{\rm max}}$): "
+        rf"$\alpha={data['alpha']}$, $\sigma={data['diffusion_sigma']}$, "
+        rf"$M={data['collector_count']}$; seeds {s0}–{s1} ($n={n_seeds}$).  "
+        rf"Linear-regime fit: $\omega\,dt\cdot L_{{\rm opt}}={gamma_fit:.2f}$.  "
+        r"Non-linear points excluded from fit.",
         fontsize=7.5,
     )
 
