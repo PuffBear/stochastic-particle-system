@@ -3,8 +3,8 @@
 
 Three-panel figure:
   Left:   Shared-arm reward curves y(L) for each ω (reward vs. L).
-  Centre: L_max*(ω) vs. T_corr = 1/(ω·dt), with linear fit → slope = Γ.
-  Right:  Γ(ω) = ω·dt·L_max*(ω) vs. ω — should be flat in linear regime.
+  Centre: L_opt(ω) vs. T_corr = 1/(ω·dt), with linear fit → slope = Γ.
+  Right:  Γ(ω) = ω·dt·L_opt(ω) vs. ω — with bootstrap 95% CIs.
 """
 from __future__ import annotations
 
@@ -23,14 +23,16 @@ DATA    = REPO / "results" / "FR-B4" / "fr_b4_gamma_sweep.json"
 FIG_DIR = REPO / "figures"
 FIG_DIR.mkdir(exist_ok=True)
 
-DT = 0.02
+DT          = 0.02
+N_BOOTSTRAP = 4000
+RNG_SEED    = 42
 
 # Regime classification based on the main experiment findings.
-# linear: L_max* falls cleanly in (1, H) with negligible sinc attenuation.
+# linear: L_opt falls cleanly in (1, H) with negligible sinc attenuation.
 # anomalous: long-episode, sinc-attenuation, or rapid-rotation regime.
 REGIME = {
     0.50: "linear",
-    0.75: "linear-bdy",  # boundary-censored (L_max* may exceed grid)
+    0.75: "linear-bdy",  # boundary-censored (L_opt may exceed grid)
     1.00: "long-ep",     # anomalous: only L=1 significant in main exp
     1.50: "linear",      # confirmed interior anchor
     2.50: "sinc-att",    # anomalous: sinc-attenuation
@@ -53,9 +55,40 @@ MARKER = {
 
 
 def argmax_L(Ls: np.ndarray, means: np.ndarray) -> float:
-    """Return L at the maximum reward; interpolate between ties."""
+    """Return L at the maximum reward."""
     idx = int(np.argmax(means))
     return float(Ls[idx])
+
+
+def bootstrap_gamma_ci(
+    captures_by_L: dict[int, list[int]],
+    l_grid: list[int],
+    omega: float,
+    n_boot: int,
+    rng: np.random.Generator,
+) -> tuple[float, float, float]:
+    """Bootstrap 95% CI for Γ = ω·dt·L_opt via seed resampling.
+
+    Returns (gamma_point, ci_lo, ci_hi).
+    """
+    Ls = np.array(l_grid, dtype=float)
+    # Stack captures into (n_seeds, n_L) array
+    n_seeds = len(next(iter(captures_by_L.values())))
+    cap_mat = np.array([captures_by_L[L] for L in l_grid], dtype=float).T  # (n_seeds, n_L)
+
+    point_means = cap_mat.mean(axis=0)
+    gamma_point = omega * DT * argmax_L(Ls, point_means)
+
+    boot_gammas = np.empty(n_boot)
+    idx_all = np.arange(n_seeds)
+    for b in range(n_boot):
+        idx = rng.choice(idx_all, size=n_seeds, replace=True)
+        boot_means = cap_mat[idx].mean(axis=0)
+        boot_gammas[b] = omega * DT * argmax_L(Ls, boot_means)
+
+    ci_lo = float(np.percentile(boot_gammas, 2.5))
+    ci_hi = float(np.percentile(boot_gammas, 97.5))
+    return gamma_point, ci_lo, ci_hi
 
 
 def main() -> None:
@@ -65,31 +98,41 @@ def main() -> None:
     l_grid     = data["l_grid"]
     cells      = data["cells"]
 
-    # Restructure: rewards[omega][L] = mean, se
-    rewards: dict[float, dict[int, float]] = {}
-    ses:     dict[float, dict[int, float]] = {}
+    # Restructure: rewards[omega][L] = mean, se; captures_raw[omega][L] = list
+    rewards:      dict[float, dict[int, float]]      = {}
+    ses:          dict[float, dict[int, float]]      = {}
+    captures_raw: dict[float, dict[int, list[int]]]  = {}
     for cell in cells:
         omega = cell["omega"]
         L     = cell["L"]
         if omega not in rewards:
-            rewards[omega] = {}
-            ses[omega] = {}
-        rewards[omega][L] = cell["mean"]
-        ses[omega][L]     = cell["se"]
+            rewards[omega]      = {}
+            ses[omega]          = {}
+            captures_raw[omega] = {}
+        rewards[omega][L]      = cell["mean"]
+        ses[omega][L]          = cell["se"]
+        captures_raw[omega][L] = cell["captures"]
 
-    # Identify L_max* per ω using argmax
+    rng = np.random.default_rng(RNG_SEED)
+
+    # Identify L_opt per ω and bootstrap Γ CIs
     results = []
     for omega in omega_grid:
         t_corr = 1.0 / (omega * DT)
         Ls     = np.array(l_grid, dtype=float)
         means  = np.array([rewards[omega][L] for L in l_grid])
         L_star = argmax_L(Ls, means)
-        gamma  = omega * DT * L_star
+        gamma, ci_lo, ci_hi = bootstrap_gamma_ci(
+            captures_raw[omega], l_grid, omega, N_BOOTSTRAP, rng
+        )
         regime = REGIME.get(omega, "unknown")
-        results.append(dict(omega=omega, t_corr=t_corr, L_star=L_star,
-                            gamma=gamma, regime=regime))
+        results.append(dict(
+            omega=omega, t_corr=t_corr, L_star=L_star,
+            gamma=gamma, ci_lo=ci_lo, ci_hi=ci_hi, regime=regime,
+        ))
         print(f"  ω={omega:.2f}  T_corr={t_corr:.1f}  L_opt={L_star:.1f}"
-              f"  Γ={gamma:.3f}  [{regime}]", file=sys.stderr)
+              f"  Γ={gamma:.3f}  95% CI=[{ci_lo:.3f}, {ci_hi:.3f}]  [{regime}]",
+              file=sys.stderr)
 
     # Fit only on confirmed linear-regime points (not boundary-censored)
     linear = [r for r in results if r["regime"] == "linear"]
@@ -99,6 +142,9 @@ def main() -> None:
     gamma_lin_mean = float(np.mean([r["gamma"] for r in linear]))
     print(f"\nΓ (linear-regime fit through origin) = {gamma_fit:.3f}", file=sys.stderr)
     print(f"Γ (linear-regime pointwise mean)     = {gamma_lin_mean:.3f}", file=sys.stderr)
+    for r in linear:
+        print(f"  ω={r['omega']:.2f}  Γ={r['gamma']:.3f}  "
+              f"95% CI=[{r['ci_lo']:.3f}, {r['ci_hi']:.3f}]", file=sys.stderr)
 
     # ── Figure ────────────────────────────────────────────────────────────────
     fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.6), constrained_layout=True)
@@ -119,7 +165,7 @@ def main() -> None:
                                color=color, alpha=0.10)
     ax_curves.set_xlabel("Window length $L$", fontsize=9)
     ax_curves.set_ylabel("Shared-arm captures", fontsize=9)
-    ax_curves.set_title("Shared-arm reward vs.\ $L$", fontsize=9)
+    ax_curves.set_title(r"Shared-arm reward vs.\ $L$", fontsize=9)
     ax_curves.legend(fontsize=5.8, loc="lower left", ncol=1)
     ax_curves.tick_params(labelsize=8)
     ax_curves.xaxis.set_major_formatter(mticker.FormatStrFormatter("%g"))
@@ -141,22 +187,33 @@ def main() -> None:
     ax_lmax.set_ylim(bottom=0)
     ax_lmax.tick_params(labelsize=8)
 
-    # Panel C: omega*dt*L_opt vs. omega
+    # Panel C: omega*dt*L_opt vs. omega, with bootstrap 95% CI error bars
     ax_gamma.axhline(gamma_fit, color="#1f77b4", lw=1.2, ls="--",
                      label=rf"linear-regime fit $= {gamma_fit:.2f}$")
     ax_gamma.axhspan(gamma_fit * 0.8, gamma_fit * 1.2, color="#1f77b4",
                      alpha=0.08, label=r"$\pm20\%$ band")
     for r in results:
-        ax_gamma.scatter([r["omega"]], [r["gamma"]],
-                         color=COLOR[r["regime"]], marker=MARKER[r["regime"]],
-                         zorder=3, s=55)
+        yerr_lo = r["gamma"] - r["ci_lo"]
+        yerr_hi = r["ci_hi"] - r["gamma"]
+        ax_gamma.errorbar(
+            [r["omega"]], [r["gamma"]],
+            yerr=[[yerr_lo], [yerr_hi]],
+            fmt=MARKER[r["regime"]],
+            color=COLOR[r["regime"]],
+            ecolor=COLOR[r["regime"]], elinewidth=1.0, capsize=3,
+            zorder=3, ms=6,
+        )
+    # Add 95% CI legend entry (one dummy line)
+    ax_gamma.errorbar([], [], yerr=[[]], fmt="none",
+                      ecolor="gray", elinewidth=1.0, capsize=3,
+                      label="bootstrap 95% CI ($n{=}16$, $B{=}4000$)")
     ax_gamma.set_xlabel(r"$\omega$ (rad/step)", fontsize=9)
-    ax_gamma.set_ylabel(r"$\omega\,dt \cdot L_{\rm opt}$", fontsize=9)
-    ax_gamma.set_title(r"$\omega\,dt \cdot L_{\rm opt}(\omega)$", fontsize=9)
+    ax_gamma.set_ylabel(r"$\Gamma = \omega\,dt \cdot L_{\rm opt}$", fontsize=9)
+    ax_gamma.set_title(r"$\Gamma(\omega) = \omega\,dt \cdot L_{\rm opt}(\omega)$", fontsize=9)
     omegas = [r["omega"] for r in results]
     ax_gamma.set_xlim(min(omegas) * 0.7, max(omegas) * 1.15)
     ax_gamma.set_ylim(bottom=0)
-    ax_gamma.legend(fontsize=7.5, loc="upper left")
+    ax_gamma.legend(fontsize=7.0, loc="upper left")
     ax_gamma.tick_params(labelsize=8)
 
     n_seeds = len(data["seeds"])
@@ -165,8 +222,8 @@ def main() -> None:
         rf"Reward-optimal window sweep ($L_{{\rm opt}}$, not $L_{{\rm max}}$): "
         rf"$\alpha={data['alpha']}$, $\sigma={data['diffusion_sigma']}$, "
         rf"$M={data['collector_count']}$; seeds {s0}–{s1} ($n={n_seeds}$).  "
-        rf"Linear-regime fit: $\omega\,dt\cdot L_{{\rm opt}}={gamma_fit:.2f}$.  "
-        r"Non-linear points excluded from fit.",
+        rf"Linear-regime fit: $\Gamma={gamma_fit:.2f}$.  "
+        r"Error bars: bootstrap 95\% CI.  Non-linear points excluded from fit.",
         fontsize=7.5,
     )
 
